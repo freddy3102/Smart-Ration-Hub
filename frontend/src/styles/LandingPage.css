@@ -1,0 +1,103 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.landing-container{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0f4c81,#2e8bc0,#b1d4e0);
+    padding:20px;
+}
+
+.landing-card{
+
+    width:450px;
+    background:white;
+    border-radius:20px;
+    padding:50px 40px;
+    text-align:center;
+
+    box-shadow:0 20px 45px rgba(0,0,0,.2);
+
+}
+
+.logo{
+
+    font-size:70px;
+    margin-bottom:15px;
+
+}
+
+.landing-card h1{
+
+    color:#0f4c81;
+    margin-bottom:10px;
+    font-size:34px;
+
+}
+
+.subtitle{
+
+    color:#666;
+    font-weight:600;
+    margin-bottom:8px;
+
+}
+
+.description{
+
+    color:#888;
+    margin-bottom:40px;
+
+}
+
+.portal-buttons{
+
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+
+}
+
+.portal-buttons button{
+
+    padding:16px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    transition:.3s;
+
+}
+
+.admin-btn{
+
+    background:#0f4c81;
+    color:white;
+
+}
+
+.admin-btn:hover{
+
+    transform:translateY(-3px);
+    background:#08355d;
+
+}
+
+.beneficiary-btn{
+
+    background:#2e8b57;
+    color:white;
+
+}
+
+.beneficiary-btn:hover{
+
+    transform:translateY(-3px);
+    background:#1e6a40;
+
+}

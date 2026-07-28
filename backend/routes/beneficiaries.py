@@ -83,21 +83,23 @@ def get_beneficiaries():
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT
-            beneficiary_id,
-            ration_card_no,
-            full_name,
-            aadhaar_no,
-            phone,
-            address,
-            category_id,
-            family_members,
-            username,
-            status,
-            created_at
-        FROM beneficiaries
-        ORDER BY beneficiary_id
-    """)
+    SELECT
+        b.beneficiary_id,
+        b.ration_card_no,
+        b.full_name,
+        b.aadhaar_no,
+        b.phone,
+        b.address,
+        b.family_members,
+        b.username,
+        b.status,
+        b.created_at,
+        c.category_name
+    FROM beneficiaries b
+    JOIN card_categories c
+        ON b.category_id = c.category_id
+    ORDER BY b.beneficiary_id
+""")
 
     beneficiaries = cursor.fetchall()
 
@@ -161,3 +163,25 @@ def delete_beneficiary(id):
     conn.close()
 
     return jsonify({"message": "Beneficiary deleted successfully"})
+
+# Get All Card Categories
+@beneficiaries_bp.route("/categories", methods=["GET"])
+def get_categories():
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            category_id,
+            category_name
+        FROM card_categories
+        ORDER BY category_name
+    """)
+
+    categories = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(categories)

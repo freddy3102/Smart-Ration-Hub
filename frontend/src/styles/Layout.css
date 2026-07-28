@@ -1,0 +1,40 @@
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background: #1f2937;
+    color: white;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
+.sidebar hr {
+    border: 1px solid #4b5563;
+    margin-bottom: 25px;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 12px 0;
+    font-size: 17px;
+    transition: 0.3s;
+}
+
+.sidebar a:hover {
+    color: #60a5fa;
+    padding-left: 10px;
+}
+
+.main-content {
+    flex: 1;
+    padding: 30px;
+    background: #f3f4f6;
+}

@@ -1,101 +1,96 @@
 import { useState } from "react";
 import axios from "axios";
-function Login({ setLoggedIn })  {
+import { useNavigate } from "react-router-dom";
+import "../styles/Login.css";
+
+function Login({ setLoggedIn }) {
+
     const [username, setUsername] = useState("");
-const [password, setPassword] = useState("");
+    const [password, setPassword] = useState("");
 
-const handleLogin = async () => {
+    const navigate = useNavigate();
 
-    try {
+    const handleLogin = async () => {
 
-        const response = await axios.post(
-            "http://127.0.0.1:5000/login",
-            {
-                username: username,
-                password: password
+        try {
+
+            const response = await axios.post(
+                "http://127.0.0.1:5000/login",
+                {
+                    username,
+                    password
+                }
+            );
+
+            if (response.data.message === "Login successful") {
+
+                if (setLoggedIn) {
+                    setLoggedIn(true);
+                }
+
+                navigate("/dashboard");
+
+            } else {
+
+                alert(response.data.message);
+
             }
-        );
 
-        if (response.data.message === "Login successful") {
-            setLoggedIn(true);
-            } 
-        else {
-            alert(response.data.message);
+        } catch (error) {
+
+            if (error.response) {
+                alert(error.response.data.message);
+            } else {
+                alert("Unable to connect to server");
+            }
+
         }
 
-    } catch (error) {
+    };
 
-        if (error.response) {
-            alert(error.response.data.message);
-        } else {
-            alert("Unable to connect to server");
-        }
+    return (
 
-    }
+        <div className="login-container">
 
-};
+            <div className="login-card">
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        backgroundColor: "#f4f4f4"
-      }}
-    >
-      <div
-        style={{
-          background: "white",
-          padding: "40px",
-          borderRadius: "10px",
-          boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-          width: "350px"
-        }}
-      >
-        <h2 style={{ textAlign: "center" }}>🍚 Smart Ration Hub</h2>
+                <h1>🏛️ Smart Ration Hub</h1>
 
-        <input
-    type="text"
-    placeholder="Username"
-    value={username}
-    onChange={(e) => setUsername(e.target.value)}
-    style={{
-        width: "100%",
-        padding: "10px",
-        marginTop: "20px"
-    }}
-/>
+                <p>Administrator Login</p>
 
-        <input
-    type="password"
-    placeholder="Password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    style={{
-        width: "100%",
-        padding: "10px",
-        marginTop: "15px"
-    }}
-/>
+                <input
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                />
 
-        <button onClick={handleLogin}
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginTop: "20px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            cursor: "pointer"
-          }}
-        >
-          Login
-        </button>
-      </div>
-    </div>
-  );
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+
+                <button
+                    className="login-btn"
+                    onClick={handleLogin}
+                >
+                    Login
+                </button>
+
+                <button
+                    className="back-btn"
+                    onClick={() => navigate("/")}
+                >
+                    ← Back
+                </button>
+
+            </div>
+
+        </div>
+
+    );
 }
 
 export default Login;
