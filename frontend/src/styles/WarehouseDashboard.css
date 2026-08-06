@@ -1,0 +1,91 @@
+.warehouse-dashboard{
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#eef4fb;
+
+}
+
+.warehouse-card{
+
+    width:600px;
+
+    background:white;
+
+    padding:40px;
+
+    border-radius:15px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+
+    text-align:center;
+
+}
+
+.warehouse-card h1{
+
+    color:#0f4c81;
+
+}
+
+.dashboard-box{
+
+    margin-top:30px;
+
+    padding:25px;
+
+    border:1px solid #ddd;
+
+    border-radius:12px;
+
+}
+
+.dashboard-box button{
+
+    margin-top:20px;
+
+    padding:14px 25px;
+
+    background:#f39c12;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+}
+
+.dashboard-box button:hover{
+
+    background:#d68910;
+
+}
+
+.logout-btn{
+
+    margin-top:35px;
+
+    padding:14px 30px;
+
+    background:#dc3545;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+}

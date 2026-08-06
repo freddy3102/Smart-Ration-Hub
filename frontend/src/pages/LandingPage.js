@@ -30,6 +30,14 @@ function LandingPage() {
                     </button>
 
                     <button
+        className="warehouse-btn"
+        onClick={() => navigate("/warehouse-login")}
+    >
+        📦 Warehouse Manager Portal
+    </button>
+                
+
+                    <button
                         className="beneficiary-btn"
                         onClick={() => navigate("/beneficiary-login")}
                     >

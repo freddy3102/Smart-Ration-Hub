@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from db import get_connection
 from business_date import get_business_date
 import calendar
@@ -330,55 +330,3 @@ def close_month():
         print("Database connection closed.")
 
         # =====================================
-# Get Current Business Date
-# =====================================
-
-@monthly_closure_bp.route("/business-date", methods=["GET"])
-def business_date():
-
-    business_date = get_business_date()
-
-    return jsonify({
-        "business_date": business_date.strftime("%Y-%m-%d")
-    })
-
-
-# =====================================
-# Get Distribution Cycle Status
-# =====================================
-
-@monthly_closure_bp.route("/cycle-status", methods=["GET"])
-def cycle_status():
-
-    business_date = get_business_date()
-
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute(
-        """
-        SELECT closure_id
-        FROM monthly_closure
-        WHERE month=%s
-        AND year=%s
-        """,
-        (
-            business_date.month,
-            business_date.year
-        )
-    )
-
-    closed = cursor.fetchone()
-
-    cursor.close()
-    conn.close()
-
-    if closed:
-
-        return jsonify({
-            "status": "CLOSED"
-        })
-
-    return jsonify({
-        "status": "OPEN"
-    })

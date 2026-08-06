@@ -11,6 +11,9 @@ import Distribution from "./pages/Distribution";
 import Audit from "./pages/Audit";
 import DistributionCycle from "./pages/DistributionCycle";
 import Reports from "./pages/Reports";
+import WarehouseLogin from "./pages/WarehouseLogin";
+import WarehouseDashboard from "./pages/WarehouseDashboard";
+import WarehouseVerification from "./pages/WarehouseVerification";
 
 import "./App.css";
 
@@ -96,6 +99,21 @@ function App() {
 
     element={<Reports />}
 
+/>
+
+<Route
+    path="/warehouse-login"
+    element={<WarehouseLogin />}
+/>
+
+<Route
+    path="/warehouse-dashboard"
+    element={<WarehouseDashboard />}
+/>
+
+<Route
+    path="/warehouse-verification"
+    element={<WarehouseVerification />}
 />
 
         </Routes>
