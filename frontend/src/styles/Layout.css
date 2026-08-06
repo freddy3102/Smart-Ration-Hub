@@ -1,40 +1,130 @@
-.layout {
-    display: flex;
-    min-height: 100vh;
+.layout{
+    display:flex;
+    min-height:100vh;
+    background:#f4f7fb;
 }
 
-.sidebar {
-    width: 250px;
-    background: #1f2937;
-    color: white;
-    padding: 20px;
+/* Sidebar */
+
+.sidebar{
+    width:260px;
+    background:linear-gradient(180deg,#1e3a8a,#1f2937);
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:25px 20px;
+    box-shadow:4px 0 12px rgba(0,0,0,.15);
 }
 
-.sidebar h2 {
-    margin-bottom: 20px;
+/* Logo */
+
+.logo-section{
+    text-align:center;
 }
 
-.sidebar hr {
-    border: 1px solid #4b5563;
-    margin-bottom: 25px;
+.logo-section h2{
+    font-size:45px;
+    margin:0;
 }
 
-.sidebar a {
-    display: block;
-    color: white;
-    text-decoration: none;
-    padding: 12px 0;
-    font-size: 17px;
-    transition: 0.3s;
+.logo-section h1{
+    font-size:22px;
+    margin-top:8px;
+    margin-bottom:5px;
 }
 
-.sidebar a:hover {
-    color: #60a5fa;
-    padding-left: 10px;
+.logo-section p{
+    color:#cbd5e1;
+    font-size:14px;
+    margin-bottom:20px;
 }
 
-.main-content {
-    flex: 1;
-    padding: 30px;
-    background: #f3f4f6;
+.sidebar hr{
+    border:none;
+    border-top:1px solid rgba(255,255,255,.15);
+    margin:20px 0;
+}
+
+/* Menu */
+
+.menu{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.menu a{
+    color:white;
+    text-decoration:none;
+    padding:14px 18px;
+    border-radius:10px;
+    font-size:16px;
+    transition:.3s;
+}
+
+.menu a:hover{
+    background:rgba(255,255,255,.12);
+    transform:translateX(6px);
+}
+
+/* Active Menu */
+
+.menu a.active{
+    background:#2563eb;
+    font-weight:600;
+    box-shadow:0 4px 10px rgba(37,99,235,.4);
+}
+
+/* Logout */
+
+.logout-section{
+    margin-top:30px;
+}
+
+.logout-section a{
+    display:block;
+    text-decoration:none;
+    color:white;
+    background:#dc2626;
+    padding:14px;
+    text-align:center;
+    border-radius:10px;
+    transition:.3s;
+    font-weight:600;
+}
+
+.logout-section a:hover{
+    background:#b91c1c;
+}
+
+/* Main Content */
+
+.main-content{
+    flex:1;
+    padding:35px;
+    background:#f8fafc;
+}
+
+/* Responsive */
+
+@media(max-width:900px){
+
+.layout{
+    flex-direction:column;
+}
+
+.sidebar{
+    width:100%;
+}
+
+.menu{
+    flex-direction:row;
+    flex-wrap:wrap;
+}
+
+.logout-section{
+    margin-top:20px;
+}
+
 }

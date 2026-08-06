@@ -1,0 +1,428 @@
+.audit-container{
+
+    width:100%;
+    padding:20px 28px;
+    box-sizing:border-box;
+
+}
+
+.audit-container h1{
+
+    font-size:36px;
+    color:#1e293b;
+    margin-bottom:4px;
+
+}
+
+.audit-subtitle{
+
+    color:#666;
+    font-size:15px;
+    margin-bottom:18px;
+
+}
+
+/* ======================================
+   SUMMARY CARDS
+====================================== */
+
+.summary-cards{
+
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:20px;
+
+}
+
+.card{
+
+    background:#fff;
+    border-radius:14px;
+    padding:16px;
+    text-align:center;
+    box-shadow:0 6px 16px rgba(0,0,0,.08);
+
+}
+
+.card h2{
+
+    font-size:32px;
+    color:#1e293b;
+    margin:0;
+
+}
+
+.card p{
+
+    margin-top:6px;
+    color:#666;
+    font-size:15px;
+
+}
+
+.pending-card h2{
+
+    color:#f59e0b;
+
+}
+
+.returned-card h2{
+
+    color:#16a34a;
+
+}
+
+/* ======================================
+   ANALYTICS
+====================================== */
+
+.analytics-section{
+
+    display:grid;
+    grid-template-columns:280px 1fr;
+    gap:18px;
+    margin-bottom:18px;
+
+}
+
+.chart-card{
+
+    background:#fff;
+    border-radius:12px;
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    box-shadow:0 5px 14px rgba(0,0,0,.08);
+
+}
+
+.chart-card h2{
+
+    font-size:20px;
+    margin-bottom:10px;
+
+}
+
+.chart-wrapper{
+
+    width:190px;
+    height:190px;
+    position:relative;
+
+}
+
+.mini-stats{
+
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+
+}
+
+.mini-card{
+
+    background:#fff;
+    border-radius:12px;
+    padding:18px;
+    text-align:center;
+    box-shadow:0 5px 14px rgba(0,0,0,.08);
+
+}
+
+.mini-card h2{
+
+    color:#2563eb;
+    font-size:28px;
+    margin:0 0 6px;
+
+}
+
+.mini-card p{
+
+    margin:0;
+    color:#666;
+    font-size:14px;
+
+}
+
+/* ======================================
+   AUDIT FILTER
+====================================== */
+
+.audit-filter{
+
+    display:flex;
+    align-items:center;
+    gap:15px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+
+}
+
+.audit-filter select,
+.audit-filter input{
+
+    padding:10px 14px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    background:#fff;
+    font-size:14px;
+    min-width:150px;
+    transition:.2s;
+
+}
+
+.audit-filter input{
+
+    width:110px;
+
+}
+
+.audit-filter select:focus,
+.audit-filter input:focus{
+
+    outline:none;
+    border-color:#2563eb;
+    box-shadow:0 0 0 3px rgba(37,99,235,.12);
+
+}
+
+/* ======================================
+   DISTRIBUTION CYCLE STATUS
+====================================== */
+
+.cycle-status-banner{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+    font-size:16px;
+    font-weight:600;
+
+}
+
+.status-open{
+
+    background:#dcfce7;
+    color:#15803d;
+    padding:6px 14px;
+    border-radius:20px;
+
+}
+
+.status-closed{
+
+    background:#fee2e2;
+    color:#b91c1c;
+    padding:6px 14px;
+    border-radius:20px;
+
+}
+
+/* ======================================
+   SEARCH
+====================================== */
+
+.search-box{
+
+    width:100%;
+    padding:10px 12px;
+    font-size:15px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    margin-bottom:14px;
+
+}
+
+.search-box:focus{
+
+    outline:none;
+    border-color:#2563eb;
+
+}
+
+/* ======================================
+   TABLE
+====================================== */
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 6px 16px rgba(0,0,0,.08);
+
+}
+
+thead{
+
+    background:#1e293b;
+    color:#fff;
+
+}
+
+th{
+
+    padding:10px;
+    text-align:center;
+    font-size:14px;
+
+}
+
+td{
+
+    padding:8px;
+    text-align:center;
+    font-size:13px;
+    border-bottom:1px solid #eee;
+
+}
+
+tbody tr:hover{
+
+    background:#f8fafc;
+
+}
+
+/* ======================================
+   BADGES
+====================================== */
+
+.badge{
+
+    color:#fff;
+    padding:5px 12px;
+    border-radius:18px;
+    font-weight:600;
+    display:inline-block;
+    min-width:80px;
+    font-size:12px;
+
+}
+
+.pending{
+
+    background:#f59e0b;
+
+}
+
+.returned{
+
+    background:#16a34a;
+
+}
+
+/* ======================================
+   RETURN BUTTON
+====================================== */
+
+.return-btn{
+
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    padding:7px 12px;
+    border-radius:7px;
+    cursor:pointer;
+    font-size:12px;
+    transition:.2s;
+
+}
+
+.return-btn:hover{
+
+    background:#1d4ed8;
+    transform:translateY(-1px);
+
+}
+
+.return-btn:disabled{
+
+    background:#9ca3af;
+    cursor:not-allowed;
+    transform:none;
+    opacity:.8;
+
+}
+
+.return-btn:disabled:hover{
+
+    background:#9ca3af;
+    transform:none;
+
+}
+
+/* ======================================
+   RESPONSIVE
+====================================== */
+
+@media(max-width:1200px){
+
+    .summary-cards{
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+    .analytics-section{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .mini-stats{
+
+        grid-template-columns:repeat(3,1fr);
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .audit-container{
+
+        padding:16px;
+
+    }
+
+    .audit-container h1{
+
+        font-size:28px;
+
+    }
+
+    .summary-cards,
+    .mini-stats{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .audit-filter{
+
+        flex-direction:column;
+        align-items:stretch;
+
+    }
+
+    .audit-filter select,
+    .audit-filter input{
+
+        width:100%;
+
+    }
+
+    table{
+
+        display:block;
+        overflow-x:auto;
+
+    }
+
+}

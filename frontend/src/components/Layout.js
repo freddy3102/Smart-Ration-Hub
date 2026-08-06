@@ -1,36 +1,157 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "../styles/Layout.css";
 
 function Layout({ children }) {
+
+    const location = useLocation();
+
     return (
+
         <div className="layout">
 
-            <div className="sidebar">
+            <aside className="sidebar">
 
-                <h2>🍚 Smart Ration Hub</h2>
+                <div className="logo-section">
+
+                    <h2>🍚</h2>
+
+                    <h1>Smart Ration Hub</h1>
+
+                    <p>Admin Panel</p>
+
+                </div>
 
                 <hr />
 
-                <Link to="/dashboard">Dashboard</Link>
+                <nav className="menu">
 
-                <Link to="/beneficiaries">Beneficiaries</Link>
+                    <Link
+                        to="/dashboard"
+                        className={
+                            location.pathname === "/dashboard"
+                                ? "active"
+                                : ""
+                        }
+                    >
+                        📊 Dashboard
+                    </Link>
 
-                <Link to="#">Inventory</Link>
+                    <Link
+                        to="/beneficiaries"
+                        className={
+                            location.pathname === "/beneficiaries"
+                                ? "active"
+                                : ""
+                        }
+                    >
+                        👥 Beneficiaries
+                    </Link>
 
-                <Link to="#">Distribution</Link>
+                    <Link
+                        to="/ration-items"
+                        className={
+                            location.pathname === "/ration-items"
+                                ? "active"
+                                : ""
+                        }
+                    >
+                        🛒 Ration Items
+                    </Link>
 
-                <Link to="#">Reports</Link>
+                    <Link
+                        to="/inventory"
+                        className={
+                            location.pathname === "/inventory"
+                                ? "active"
+                                : ""
+                        }
+                    >
+                        📦 Inventory
+                    </Link>
 
-                <Link to="/">Logout</Link>
+                    <Link
+                        to="/distribution"
+                        className={
+                            location.pathname === "/distribution"
+                                ? "active"
+                                : ""
+                        }
+                    >
+                        🍚 Distribution
+                    </Link>
 
-            </div>
+                    {/* Distribution Cycle */}
 
-            <div className="main-content">
+                    <Link
+                        to="/distribution-cycle"
+                        className={
+                            location.pathname === "/distribution-cycle"
+                                ? "active"
+                                : ""
+                        }
+                    >
+                        📅 Distribution Cycle
+                    </Link>
+
+                    {/* Warehouse Audit */}
+
+                    <Link
+                        to="/audit"
+                        className={
+                            location.pathname === "/audit"
+                                ? "active"
+                                : ""
+                        }
+                    >
+                        📋 Audit
+                    </Link>
+
+                    <Link
+
+    to="/reports"
+
+    className={
+
+        location.pathname === "/reports"
+
+        ?
+
+        "active"
+
+        :
+
+        ""
+
+    }
+
+>
+
+    📈 Reports
+
+</Link>
+
+                </nav>
+
+                <div className="logout-section">
+
+                    <Link to="/">
+                        🚪 Logout
+                    </Link>
+
+                </div>
+
+            </aside>
+
+            <main className="main-content">
+
                 {children}
-            </div>
+
+            </main>
 
         </div>
+
     );
+
 }
 
 export default Layout;

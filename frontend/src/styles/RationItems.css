@@ -1,4 +1,4 @@
-.beneficiaries-page{
+.ration-page{
     width:100%;
 }
 
@@ -54,91 +54,9 @@
     transform:translateY(-2px);
 }
 
-/* Summary Cards */
-
-.summary-cards{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:20px;
-    margin-bottom:25px;
-}
-
-.summary-card{
-    background:#fff;
-    padding:22px;
-    border-radius:12px;
-    box-shadow:0 5px 15px rgba(0,0,0,.08);
-    text-align:center;
-    transition:.3s;
-}
-
-.summary-card:hover{
-    transform:translateY(-4px);
-    box-shadow:0 8px 20px rgba(0,0,0,.15);
-}
-
-.summary-card h3{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:8px;
-    margin-bottom:12px;
-    color:#374151;
-    font-size:17px;
-}
-
-.summary-card h2{
-    font-size:34px;
-    color:#111827;
-}
-
-/* Colored Top Borders */
-
-.aay{
-    border-top:5px solid #facc15;
-}
-
-.phh{
-    border-top:5px solid #ec4899;
-}
-
-.nps{
-    border-top:5px solid #2563eb;
-}
-
-.np{
-    border-top:5px solid #9ca3af;
-}
-
-/* Colored Dots */
-
-.dot{
-    width:16px;
-    height:16px;
-    border-radius:50%;
-    display:inline-block;
-}
-
-.yellow{
-    background:#facc15;
-}
-
-.pink{
-    background:#ec4899;
-}
-
-.blue{
-    background:#2563eb;
-}
-
-.grey{
-    background:#ffffff;
-    border:2px solid #6b7280;
-}
-
 /* Table */
 
-.beneficiary-table{
+.ration-table{
     width:100%;
     border-collapse:collapse;
     background:white;
@@ -147,20 +65,20 @@
     box-shadow:0 5px 15px rgba(0,0,0,.12);
 }
 
-.beneficiary-table th{
+.ration-table th{
     background:#1f2937;
     color:white;
     padding:15px;
     font-weight:600;
 }
 
-.beneficiary-table td{
+.ration-table td{
     padding:14px;
     text-align:center;
     border-bottom:1px solid #ececec;
 }
 
-.beneficiary-table tr:hover{
+.ration-table tr:hover{
     background:#f8fafc;
 }
 
@@ -245,56 +163,18 @@
 
 /* Responsive */
 
-@media(max-width:900px){
-
-.summary-cards{
-    grid-template-columns:repeat(2,1fr);
-}
-
-}
-
 @media(max-width:768px){
 
-.page-header{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:15px;
-}
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
 
-.beneficiary-table{
-    display:block;
-    overflow-x:auto;
-    white-space:nowrap;
-}
+    .ration-table{
+        display:block;
+        overflow-x:auto;
+        white-space:nowrap;
+    }
 
-}
-
-@media(max-width:600px){
-
-.summary-cards{
-    grid-template-columns:1fr;
-}
-
-}
-
-/* Status Badge */
-
-.status-badge{
-    display:inline-block;
-    padding:6px 14px;
-    border-radius:20px;
-    font-size:13px;
-    font-weight:600;
-}
-
-.active{
-    background:#dcfce7;
-    color:#15803d;
-    border:1px solid #86efac;
-}
-
-.inactive{
-    background:#fee2e2;
-    color:#b91c1c;
-    border:1px solid #fca5a5;
 }

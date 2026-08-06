@@ -94,6 +94,7 @@ def get_beneficiaries():
         b.username,
         b.status,
         b.created_at,
+        b.category_id,
         c.category_name
     FROM beneficiaries b
     JOIN card_categories c

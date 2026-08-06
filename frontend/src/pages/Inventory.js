@@ -1,94 +1,89 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
-import BeneficiaryForm from "../components/BeneficiaryForm";
-import "../styles/Beneficiaries.css";
+import InventoryForm from "../components/InventoryForm";
+import "../styles/Inventory.css";
 
-function Beneficiaries() {
+function Inventory() {
 
+    const [inventory, setInventory] = useState([]);
     const [showForm, setShowForm] = useState(false);
-    const [beneficiaries, setBeneficiaries] = useState([]);
     const [editData, setEditData] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
-        fetchBeneficiaries();
+        fetchInventory();
     }, []);
 
-    const fetchBeneficiaries = () => {
+    const fetchInventory = () => {
+
         axios
-            .get("http://127.0.0.1:5000/beneficiaries")
+            .get("http://127.0.0.1:5000/inventory")
             .then((response) => {
-                setBeneficiaries(response.data);
+                setInventory(response.data);
             })
             .catch((error) => {
                 console.log(error);
             });
+
     };
 
-    const deleteBeneficiary = (id) => {
+    const deleteInventory = (id) => {
 
         const confirmDelete = window.confirm(
-            "Are you sure you want to delete this beneficiary?"
+            "Are you sure you want to delete this inventory item?"
         );
 
         if (!confirmDelete) return;
 
         axios
-            .delete(`http://127.0.0.1:5000/beneficiaries/${id}`)
+            .delete(`http://127.0.0.1:5000/inventory/${id}`)
             .then((response) => {
+
                 alert(response.data.message);
-                fetchBeneficiaries();
+
+                fetchInventory();
+
             })
             .catch((error) => {
 
                 if (error.response) {
                     alert(error.response.data.message);
                 } else {
-                    alert("Unable to delete beneficiary.");
+                    alert("Unable to delete inventory.");
                 }
 
             });
 
     };
 
-    const filteredBeneficiaries = beneficiaries.filter((beneficiary) => {
+    const filteredInventory = inventory.filter((item) =>
+        item.item_name
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+    );
 
-        const search = searchTerm.toLowerCase();
-
-        return (
-            beneficiary.full_name.toLowerCase().includes(search) ||
-            beneficiary.aadhaar_no.toLowerCase().includes(search) ||
-            beneficiary.ration_card_no.toLowerCase().includes(search)
-        );
-
-    });
-
-    const aayCount = beneficiaries.filter(
-        (b) => b.category_name === "AAY"
+    const availableCount = inventory.filter(
+        (item) => item.stock_status === "Available"
     ).length;
 
-    const phhCount = beneficiaries.filter(
-        (b) => b.category_name === "PHH"
+    const lowStockCount = inventory.filter(
+        (item) => item.stock_status === "Low Stock"
     ).length;
 
-    const npsCount = beneficiaries.filter(
-        (b) => b.category_name === "NPS"
-    ).length;
-
-    const npCount = beneficiaries.filter(
-        (b) => b.category_name === "NP"
+    const outStockCount = inventory.filter(
+        (item) => item.stock_status === "Out of Stock"
     ).length;
 
     return (
 
         <Layout>
 
-            <div className="beneficiaries-page">
+            <div className="inventory-page">
 
                 <div className="page-header">
 
-                    <h1>Beneficiary Management</h1>
+                    <h1>Inventory Management</h1>
 
                     <button
                         className="add-btn"
@@ -97,7 +92,7 @@ function Beneficiaries() {
                             setShowForm(true);
                         }}
                     >
-                        + Add Beneficiary
+                        + Add Inventory
                     </button>
 
                 </div>
@@ -106,47 +101,53 @@ function Beneficiaries() {
 
                 <div className="summary-cards">
 
-                    <div className="summary-card aay">
-                        <h3>
-                            <span className="dot yellow"></span>
-                            AAY
-                        </h3>
-                        <h2>{aayCount}</h2>
+                    <div className="summary-card total-card">
+
+                        <h3>📦 Total Items</h3>
+
+                        <h2>{inventory.length}</h2>
+
                     </div>
 
-                    <div className="summary-card phh">
-                        <h3>
-                            <span className="dot pink"></span>
-                            PHH
-                        </h3>
-                        <h2>{phhCount}</h2>
+                    <div className="summary-card available-card">
+
+                        <h3>🟢 Available</h3>
+
+                        <h2>{availableCount}</h2>
+
                     </div>
 
-                    <div className="summary-card nps">
-                        <h3>
-                            <span className="dot blue"></span>
-                            NPS
-                        </h3>
-                        <h2>{npsCount}</h2>
+                    <div className="summary-card low-card">
+
+                        <h3>🟠 Low Stock</h3>
+
+                        <h2>{lowStockCount}</h2>
+
                     </div>
 
-                    <div className="summary-card np">
-                        <h3>
-                            <span className="dot grey"></span>
-                            NP
-                        </h3>
-                        <h2>{npCount}</h2>
+                    <div className="summary-card out-card">
+
+                        <h3>🔴 Out of Stock</h3>
+
+                        <h2>{outStockCount}</h2>
+
                     </div>
 
                 </div>
 
+                {/* Search */}
+
                 <input
                     type="text"
                     className="search-box"
-                    placeholder="🔍 Search by Name, Aadhaar or Ration Card..."
+                    placeholder="🔍 Search Item..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) =>
+                        setSearchTerm(e.target.value)
+                    }
                 />
+
+                {/* Modal */}
 
                 {showForm && (
 
@@ -160,7 +161,9 @@ function Beneficiaries() {
 
                         <div
                             className="modal"
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) =>
+                                e.stopPropagation()
+                            }
                         >
 
                             <button
@@ -173,10 +176,10 @@ function Beneficiaries() {
                                 ✖
                             </button>
 
-                            <BeneficiaryForm
+                            <InventoryForm
                                 editData={editData}
                                 onSuccess={() => {
-                                    fetchBeneficiaries();
+                                    fetchInventory();
                                     setShowForm(false);
                                     setEditData(null);
                                 }}
@@ -188,51 +191,62 @@ function Beneficiaries() {
 
                 )}
 
-                <table className="beneficiary-table">
+                {/* Inventory Table */}
+
+                <table className="inventory-table">
 
                     <thead>
 
                         <tr>
+
                             <th>ID</th>
-                            <th>Ration Card No</th>
-                            <th>Name</th>
-                            <th>Aadhaar</th>
-                            <th>Phone</th>
-                            <th>Card Type</th>
+
+                            <th>Item Name</th>
+
+                            <th>Unit</th>
+
+                            <th>Subsidy Price</th>
+
+                            <th>Available Qty</th>
+
+                            <th>Minimum Stock</th>
+
                             <th>Status</th>
+
                             <th>Actions</th>
+
                         </tr>
 
                     </thead>
 
                     <tbody>
 
-                        {filteredBeneficiaries.map((beneficiary) => (
+                        {filteredInventory.map((item) => (
 
-                            <tr key={beneficiary.beneficiary_id}>
+                            <tr key={item.inventory_id}>
 
-                                <td>{beneficiary.beneficiary_id}</td>
+                                <td>{item.inventory_id}</td>
 
-                                <td>{beneficiary.ration_card_no}</td>
+                                <td>{item.item_name}</td>
 
-                                <td>{beneficiary.full_name}</td>
+                                <td>{item.unit}</td>
 
-                                <td>{beneficiary.aadhaar_no}</td>
+                                <td>₹ {item.subsidy_price}</td>
 
-                                <td>{beneficiary.phone}</td>
+                                <td>{item.available_quantity}</td>
 
-                                <td>{beneficiary.category_name}</td>
+                                <td>{item.minimum_stock}</td>
 
                                 <td>
+
                                     <span
-                                        className={
-                                            beneficiary.status === "Active"
-                                                ? "status-badge active"
-                                                : "status-badge inactive"
-                                        }
+                                        className={`status ${item.stock_status
+                                            .replace(/\s/g, "")
+                                            .toLowerCase()}`}
                                     >
-                                        {beneficiary.status}
+                                        {item.stock_status}
                                     </span>
+
                                 </td>
 
                                 <td>
@@ -240,7 +254,7 @@ function Beneficiaries() {
                                     <button
                                         className="edit-btn"
                                         onClick={() => {
-                                            setEditData(beneficiary);
+                                            setEditData(item);
                                             setShowForm(true);
                                         }}
                                     >
@@ -250,8 +264,8 @@ function Beneficiaries() {
                                     <button
                                         className="delete-btn"
                                         onClick={() =>
-                                            deleteBeneficiary(
-                                                beneficiary.beneficiary_id
+                                            deleteInventory(
+                                                item.inventory_id
                                             )
                                         }
                                     >
@@ -276,4 +290,4 @@ function Beneficiaries() {
 
 }
 
-export default Beneficiaries;
+export default Inventory;

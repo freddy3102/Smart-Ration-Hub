@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/Form.css";
 
-function BeneficiaryForm({ onSuccess }) {
+function BeneficiaryForm({ onSuccess, editData }) {
 
     const [formData, setFormData] = useState({
         ration_card_no: "",
@@ -13,7 +13,8 @@ function BeneficiaryForm({ onSuccess }) {
         category_id: "",
         family_members: "",
         username: "",
-        password: ""
+        password: "",
+        status: "Active"
     });
 
     const [categories, setCategories] = useState([]);
@@ -29,6 +30,27 @@ function BeneficiaryForm({ onSuccess }) {
             });
     }, []);
 
+    useEffect(() => {
+
+        if (editData) {
+
+            setFormData({
+                ration_card_no: editData.ration_card_no,
+                full_name: editData.full_name,
+                aadhaar_no: editData.aadhaar_no,
+                phone: editData.phone,
+                address: editData.address,
+                category_id: editData.category_id,
+                family_members: editData.family_members,
+                username: editData.username,
+                password: "",
+                status: editData.status
+            });
+
+        }
+
+    }, [editData]);
+
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -37,14 +59,28 @@ function BeneficiaryForm({ onSuccess }) {
     };
 
     const handleSubmit = async (e) => {
+
         e.preventDefault();
 
         try {
 
-            const response = await axios.post(
-                "http://127.0.0.1:5000/beneficiaries",
-                formData
-            );
+            let response;
+
+            if (editData) {
+
+                response = await axios.put(
+                    `http://127.0.0.1:5000/beneficiaries/${editData.beneficiary_id}`,
+                    formData
+                );
+
+            } else {
+
+                response = await axios.post(
+                    "http://127.0.0.1:5000/beneficiaries",
+                    formData
+                );
+
+            }
 
             alert(response.data.message);
 
@@ -57,7 +93,8 @@ function BeneficiaryForm({ onSuccess }) {
                 category_id: "",
                 family_members: "",
                 username: "",
-                password: ""
+                password: "",
+                status: "Active"
             });
 
             if (onSuccess) {
@@ -73,12 +110,16 @@ function BeneficiaryForm({ onSuccess }) {
             }
 
         }
+
     };
 
     return (
+
         <form onSubmit={handleSubmit}>
 
-            <h2>Add Beneficiary</h2>
+            <h2>
+                {editData ? "Update Beneficiary" : "Add Beneficiary"}
+            </h2>
 
             <input
                 type="text"
@@ -87,6 +128,7 @@ function BeneficiaryForm({ onSuccess }) {
                 value={formData.ration_card_no}
                 onChange={handleChange}
                 required
+                disabled={editData}
             />
 
             <input
@@ -105,6 +147,7 @@ function BeneficiaryForm({ onSuccess }) {
                 value={formData.aadhaar_no}
                 onChange={handleChange}
                 required
+                disabled={editData}
             />
 
             <input
@@ -160,22 +203,37 @@ function BeneficiaryForm({ onSuccess }) {
                 value={formData.username}
                 onChange={handleChange}
                 required
+                disabled={editData}
             />
 
-            <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-            />
+            {!editData && (
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                />
+            )}
+
+            {editData && (
+                <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            )}
 
             <button type="submit">
-                Save Beneficiary
+                {editData ? "Update Beneficiary" : "Save Beneficiary"}
             </button>
 
         </form>
+
     );
 }
 

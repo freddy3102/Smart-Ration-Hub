@@ -1,4 +1,4 @@
-.beneficiaries-page{
+.inventory-page{
     width:100%;
 }
 
@@ -64,7 +64,7 @@
 }
 
 .summary-card{
-    background:#fff;
+    background:#ffffff;
     padding:22px;
     border-radius:12px;
     box-shadow:0 5px 15px rgba(0,0,0,.08);
@@ -78,67 +78,37 @@
 }
 
 .summary-card h3{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:8px;
-    margin-bottom:12px;
     color:#374151;
+    margin-bottom:12px;
     font-size:17px;
 }
 
 .summary-card h2{
-    font-size:34px;
     color:#111827;
+    font-size:34px;
 }
 
-/* Colored Top Borders */
+/* Summary Card Colors */
 
-.aay{
-    border-top:5px solid #facc15;
+.total-card{
+    border-top:5px solid #6366f1;
 }
 
-.phh{
-    border-top:5px solid #ec4899;
+.available-card{
+    border-top:5px solid #22c55e;
 }
 
-.nps{
-    border-top:5px solid #2563eb;
+.low-card{
+    border-top:5px solid #f59e0b;
 }
 
-.np{
-    border-top:5px solid #9ca3af;
+.out-card{
+    border-top:5px solid #ef4444;
 }
 
-/* Colored Dots */
+/* Inventory Table */
 
-.dot{
-    width:16px;
-    height:16px;
-    border-radius:50%;
-    display:inline-block;
-}
-
-.yellow{
-    background:#facc15;
-}
-
-.pink{
-    background:#ec4899;
-}
-
-.blue{
-    background:#2563eb;
-}
-
-.grey{
-    background:#ffffff;
-    border:2px solid #6b7280;
-}
-
-/* Table */
-
-.beneficiary-table{
+.inventory-table{
     width:100%;
     border-collapse:collapse;
     background:white;
@@ -147,24 +117,24 @@
     box-shadow:0 5px 15px rgba(0,0,0,.12);
 }
 
-.beneficiary-table th{
+.inventory-table th{
     background:#1f2937;
     color:white;
     padding:15px;
     font-weight:600;
 }
 
-.beneficiary-table td{
+.inventory-table td{
     padding:14px;
     text-align:center;
     border-bottom:1px solid #ececec;
 }
 
-.beneficiary-table tr:hover{
+.inventory-table tr:hover{
     background:#f8fafc;
 }
 
-/* Buttons */
+/* Action Buttons */
 
 .edit-btn{
     background:#f59e0b;
@@ -193,6 +163,34 @@
 
 .delete-btn:hover{
     background:#dc2626;
+}
+
+/* Status Badges */
+
+.status{
+    display:inline-block;
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:600;
+}
+
+.status.available{
+    background:#dcfce7;
+    color:#15803d;
+    border:1px solid #86efac;
+}
+
+.status.lowstock{
+    background:#fef3c7;
+    color:#b45309;
+    border:1px solid #fcd34d;
+}
+
+.status.outofstock{
+    background:#fee2e2;
+    color:#b91c1c;
+    border:1px solid #fca5a5;
 }
 
 /* Modal */
@@ -247,54 +245,32 @@
 
 @media(max-width:900px){
 
-.summary-cards{
-    grid-template-columns:repeat(2,1fr);
-}
+    .summary-cards{
+        grid-template-columns:repeat(2,1fr);
+    }
 
 }
 
 @media(max-width:768px){
 
-.page-header{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:15px;
-}
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
 
-.beneficiary-table{
-    display:block;
-    overflow-x:auto;
-    white-space:nowrap;
-}
+    .inventory-table{
+        display:block;
+        overflow-x:auto;
+        white-space:nowrap;
+    }
 
 }
 
 @media(max-width:600px){
 
-.summary-cards{
-    grid-template-columns:1fr;
-}
+    .summary-cards{
+        grid-template-columns:1fr;
+    }
 
-}
-
-/* Status Badge */
-
-.status-badge{
-    display:inline-block;
-    padding:6px 14px;
-    border-radius:20px;
-    font-size:13px;
-    font-weight:600;
-}
-
-.active{
-    background:#dcfce7;
-    color:#15803d;
-    border:1px solid #86efac;
-}
-
-.inactive{
-    background:#fee2e2;
-    color:#b91c1c;
-    border:1px solid #fca5a5;
 }
