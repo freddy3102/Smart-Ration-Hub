@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "./../styles/WarehouseVerification.css";
+import "../styles/WarehouseVerification.css";
 
 function WarehouseVerification() {
-
-    const currentYear = new Date().getFullYear();
 
     const months = [
         { value: 1, name: "January" },
@@ -21,10 +19,91 @@ function WarehouseVerification() {
         { value: 12, name: "December" }
     ];
 
-    const [month, setMonth] = useState(new Date().getMonth() + 1);
-    const [year, setYear] = useState(currentYear);
+    const [businessDate, setBusinessDate] =
+        useState("");
 
-    const [summary, setSummary] = useState(null);
+    const [month, setMonth] =
+        useState(null);
+
+    const [year, setYear] =
+        useState(null);
+
+    const [summary, setSummary] =
+        useState(null);
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [verifying, setVerifying] =
+        useState(false);
+
+    // ---------------------------------
+    // Load Business Date
+    // ---------------------------------
+
+    useEffect(() => {
+
+        loadBusinessDate();
+
+    }, []);
+
+    const loadBusinessDate = async () => {
+
+        try {
+
+            const res = await axios.get(
+                "http://127.0.0.1:5000/business-date"
+            );
+
+            const savedDate =
+                res.data.business_date;
+
+            setBusinessDate(savedDate);
+
+            const date = new Date(
+                `${savedDate}T00:00:00`
+            );
+
+            setMonth(
+                date.getMonth() + 1
+            );
+
+            setYear(
+                date.getFullYear()
+            );
+
+        } catch (err) {
+
+            console.log(err);
+
+            alert(
+                "Unable to load business date."
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+    // ---------------------------------
+    // Load Verification Summary
+    // ---------------------------------
+
+    useEffect(() => {
+
+        if (
+            month === null ||
+            year === null
+        ) {
+            return;
+        }
+
+        loadSummary();
+
+    }, [month, year]);
 
     const loadSummary = async () => {
 
@@ -46,45 +125,122 @@ function WarehouseVerification() {
 
             console.log(err);
 
-            alert("Unable to load verification data.");
-
-        }
-
-    };
-
-    useEffect(() => {
-
-        loadSummary();
-
-    }, [month, year]);
-
-    const verifyMonth = async () => {
-
-        try {
-
-            await axios.post(
-                "http://127.0.0.1:5000/warehouse-verification",
-                {
-                    month,
-                    year,
-                    manager_id: 1
-                }
-            );
-
-            alert("Month Verified Successfully");
-
-            loadSummary();
-
-        } catch (err) {
+            setSummary(null);
 
             alert(
                 err.response?.data?.message ||
-                "Verification Failed"
+                "Unable to load verification data."
             );
 
         }
 
     };
+
+    // ---------------------------------
+    // Verify Month
+    // ---------------------------------
+
+    const verifyMonth = async () => {
+
+    if (!summary) {
+        return;
+    }
+
+    if (
+        summary.status !==
+        "READY FOR VERIFICATION"
+    ) {
+
+        alert(
+            "The month is not ready for verification."
+        );
+
+        return;
+
+    }
+
+    const confirmed =
+        window.confirm(
+            `Verify warehouse returns for ${
+                months.find(
+                    m => m.value === month
+                )?.name
+            } ${year}?\n\n` +
+            "Verified returned stock will be added back to inventory."
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+
+        setVerifying(true);
+
+        const res = await axios.post(
+            "http://127.0.0.1:5000/warehouse-verification",
+            {
+                month,
+                year,
+                manager_id: 1
+            }
+        );
+
+        alert(
+            res.data.message ||
+            "Warehouse verification completed successfully."
+        );
+
+        await loadSummary();
+
+    } catch (err) {
+
+        console.log(
+            "WAREHOUSE VERIFICATION ERROR:",
+            err.response?.data
+        );
+
+        alert(
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Verification Failed"
+        );
+
+    } finally {
+
+        setVerifying(false);
+
+    }
+
+};
+
+    // ---------------------------------
+    // Loading
+    // ---------------------------------
+
+    if (loading) {
+
+        return (
+
+            <div className="verification-page">
+
+                <div className="verification-card">
+
+                    <h1>
+                        Warehouse Verification
+                    </h1>
+
+                    <p>
+                        Loading business date...
+                    </p>
+
+                </div>
+
+            </div>
+
+        );
+
+    }
 
     return (
 
@@ -92,33 +248,54 @@ function WarehouseVerification() {
 
             <div className="verification-card">
 
-                <h1>Warehouse Verification</h1>
+                <h1>
+                    Warehouse Verification
+                </h1>
+
+                <p>
+                    Business Date:{" "}
+                    <strong>
+                        {businessDate}
+                    </strong>
+                </p>
 
                 <div className="selectors">
 
                     <div>
 
-                        <label>Month</label>
+                        <label>
+                            Month
+                        </label>
 
                         <select
-                            value={month}
+                            value={month || ""}
                             onChange={(e) =>
-                                setMonth(Number(e.target.value))
+                                setMonth(
+                                    Number(
+                                        e.target.value
+                                    )
+                                )
                             }
                         >
 
-                            {months.map((m) => (
+                            {months.map(
+                                (m) => (
 
-                                <option
-                                    key={m.value}
-                                    value={m.value}
-                                >
+                                    <option
+                                        key={
+                                            m.value
+                                        }
+                                        value={
+                                            m.value
+                                        }
+                                    >
 
-                                    {m.name}
+                                        {m.name}
 
-                                </option>
+                                    </option>
 
-                            ))}
+                                )
+                            )}
 
                         </select>
 
@@ -126,27 +303,41 @@ function WarehouseVerification() {
 
                     <div>
 
-                        <label>Year</label>
+                        <label>
+                            Year
+                        </label>
 
                         <select
-                            value={year}
+                            value={year || ""}
                             onChange={(e) =>
-                                setYear(Number(e.target.value))
+                                setYear(
+                                    Number(
+                                        e.target.value
+                                    )
+                                )
                             }
                         >
 
-                            {[2025, 2026, 2027, 2028].map((y) => (
+                            {Array.from(
+                                {
+                                    length: 9
+                                },
+                                (_, i) =>
+                                    2020 + i
+                            ).map(
+                                (y) => (
 
-                                <option
-                                    key={y}
-                                    value={y}
-                                >
+                                    <option
+                                        key={y}
+                                        value={y}
+                                    >
 
-                                    {y}
+                                        {y}
 
-                                </option>
+                                    </option>
 
-                            ))}
+                                )
+                            )}
 
                         </select>
 
@@ -162,35 +353,70 @@ function WarehouseVerification() {
 
                             <p>
 
-                                <strong>Total Unclaimed :</strong>
+                                <strong>
+                                    Total Unclaimed :
+                                </strong>{" "}
 
-                                {summary.total_unclaimed}
-
-                            </p>
-
-                            <p>
-
-                                <strong>Total Returned :</strong>
-
-                                {summary.total_returned}
+                                {Number(
+                                    summary.total_unclaimed
+                                ).toFixed(2)} kg
 
                             </p>
 
                             <p>
 
-                                <strong>Difference :</strong>
+                                <strong>
+                                    Total Returned :
+                                </strong>{" "}
 
-                                {summary.difference}
+                                {Number(
+                                    summary.total_returned
+                                ).toFixed(2)} kg
 
                             </p>
 
                             <p>
 
-                                <strong>Status :</strong>
+                                <strong>
+                                    Difference :
+                                </strong>{" "}
 
-                                <span className="status">
+                                {Number(
+                                    summary.difference
+                                ).toFixed(2)} kg
 
-                                    {summary.status}
+                            </p>
+
+                            <p>
+
+                                <strong>
+                                    Status :
+                                </strong>{" "}
+
+                                <span
+                                    className={
+                                        summary.status ===
+                                        "VERIFIED"
+                                            ?
+                                            "status verified"
+                                            :
+                                            summary.status ===
+                                            "READY FOR VERIFICATION"
+                                                ?
+                                                "status ready"
+                                                :
+                                                summary.status ===
+                                                "MISMATCH"
+                                                    ?
+                                                    "status mismatch"
+                                                    :
+                                                    "status"
+                                    }
+                                >
+
+                                    {
+                                        summary.status
+                                    }
 
                                 </span>
 
@@ -199,19 +425,23 @@ function WarehouseVerification() {
                         </div>
 
                         <button
-
                             className="verify-btn"
-
                             disabled={
                                 summary.status !==
-                                "READY FOR VERIFICATION"
+                                "READY FOR VERIFICATION" ||
+                                verifying
                             }
-
-                            onClick={verifyMonth}
-
+                            onClick={
+                                verifyMonth
+                            }
                         >
 
-                            Verify Month
+                            {verifying
+                                ?
+                                "Verifying..."
+                                :
+                                "Verify Month"
+                            }
 
                         </button>
 

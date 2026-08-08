@@ -12,11 +12,13 @@ import {
     Legend
 } from "chart.js";
 
+
 ChartJS.register(
     ArcElement,
     Tooltip,
     Legend
 );
+
 
 function Audit() {
 
@@ -34,12 +36,18 @@ function Audit() {
         today.getFullYear()
     );
 
+
+    // ---------------------------------
+    // Load Data
+    // ---------------------------------
+
     useEffect(() => {
 
         loadAudit();
         loadCycleStatus();
 
     }, [selectedMonth, selectedYear]);
+
 
     // ---------------------------------
     // Load Audit Records
@@ -48,26 +56,54 @@ function Audit() {
     const loadAudit = () => {
 
         axios
-
             .get(
-
                 `http://127.0.0.1:5000/audit?month=${selectedMonth}&year=${selectedYear}`
-
             )
-
             .then((res) => {
 
-                setRecords(res.data);
+                /*
+                 * Only Rice and Wheat with
+                 * actual unclaimed stock are
+                 * displayed on the Audit page.
+                 *
+                 * This prevents records with
+                 * zero unclaimed quantity from
+                 * appearing as Pending Returns.
+                 */
+
+                const filteredData = res.data.filter((row) => {
+
+                    const itemName =
+                        String(row.item_name || "")
+                            .trim()
+                            .toLowerCase();
+
+                    const unclaimed =
+                        Number(row.unclaimed_quantity || 0);
+
+                    return (
+                        (
+                            itemName === "rice" ||
+                            itemName === "wheat"
+                        ) &&
+                        unclaimed > 0
+                    );
+
+                });
+
+                setRecords(filteredData);
 
             })
-
             .catch((err) => {
 
                 console.log(err);
 
+                setRecords([]);
+
             });
 
     };
+
 
     // ---------------------------------
     // Load Distribution Cycle Status
@@ -75,44 +111,44 @@ function Audit() {
 
     const loadCycleStatus = () => {
 
-    axios
+        axios
+            .get(
+                `http://127.0.0.1:5000/cycle-status?month=${selectedMonth}&year=${selectedYear}`
+            )
+            .then((res) => {
 
-        .get(
+                setCycleStatus(
+                    res.data.status
+                );
 
-            `http://127.0.0.1:5000/cycle-status?month=${selectedMonth}&year=${selectedYear}`
+            })
+            .catch((err) => {
 
-        )
+                console.log(err);
 
-        .then((res) => {
+                setCycleStatus("");
 
-            setCycleStatus(
+            });
 
-                res.data.status
+    };
 
-            );
 
-        })
-
-        .catch((err) => {
-
-            console.log(err);
-
-        });
-
-};
     // ---------------------------------
     // Return Stock
     // ---------------------------------
 
-    const returnStock = async (auditId, qty) => {
+    const returnStock = async (
+        auditId,
+        qty
+    ) => {
 
         const confirmReturn = window.confirm(
-
             "Return this unclaimed stock to warehouse?"
-
         );
 
-        if (!confirmReturn) return;
+        if (!confirmReturn) {
+            return;
+        }
 
         try {
 
@@ -121,16 +157,15 @@ function Audit() {
                 `http://127.0.0.1:5000/warehouse-return/${auditId}`,
 
                 {
-
                     returned_quantity: qty,
-
                     processed_by: 1
-
                 }
 
             );
 
-            alert("Stock returned successfully.");
+            alert(
+                "Stock returned successfully."
+            );
 
             loadAudit();
 
@@ -150,65 +185,86 @@ function Audit() {
 
     };
 
+
     // ---------------------------------
     // Search Filter
     // ---------------------------------
 
-    const filtered = records.filter((r) =>
+    const filtered = records.filter((r) => {
 
-        r.full_name
-            .toLowerCase()
-            .includes(search.toLowerCase())
+        const beneficiary =
+            String(r.full_name || "")
+                .toLowerCase();
 
-        ||
+        const item =
+            String(r.item_name || "")
+                .toLowerCase();
 
-        r.item_name
-            .toLowerCase()
-            .includes(search.toLowerCase())
+        const searchText =
+            search.toLowerCase();
 
-    );
+        return (
+
+            beneficiary.includes(searchText) ||
+
+            item.includes(searchText)
+
+        );
+
+    });
+
 
     // ---------------------------------
     // Summary Cards
     // ---------------------------------
 
-    const totalRecords = records.length;
+    const totalRecords =
+        records.length;
 
-    const pending = records.filter(
 
-        r => r.audit_status === "Pending"
+    const pending =
+        records.filter(
+            (r) =>
+                r.audit_status === "Pending"
+        ).length;
 
-    ).length;
 
-    const returned = records.filter(
+    const returned =
+        records.filter(
+            (r) =>
+                r.audit_status === "Returned"
+        ).length;
 
-        r => r.audit_status === "Returned"
 
-    ).length;
+    const totalQty =
+        records.reduce(
 
-    const totalQty = records.reduce(
+            (sum, r) =>
 
-        (sum, r) =>
+                sum +
+                Number(
+                    r.unclaimed_quantity || 0
+                ),
 
-            sum + Number(r.unclaimed_quantity),
+            0
 
-        0
+        );
 
-    );
 
-    const returnedQty = records.reduce(
+    const returnedQty =
+        records.reduce(
 
-        (sum, r) =>
+            (sum, r) =>
 
-            sum + Number(
+                sum +
+                Number(
+                    r.warehouse_returned_quantity || 0
+                ),
 
-                r.warehouse_returned_quantity
+            0
 
-            ),
+        );
 
-        0
-
-    );
 
     // ---------------------------------
     // Pie Chart
@@ -217,11 +273,8 @@ function Audit() {
     const chartData = {
 
         labels: [
-
             "Returned",
-
             "Pending"
-
         ],
 
         datasets: [
@@ -229,27 +282,18 @@ function Audit() {
             {
 
                 data: [
-
                     returned,
-
                     pending
-
                 ],
 
                 backgroundColor: [
-
                     "#22c55e",
-
                     "#f59e0b"
-
                 ],
 
                 borderColor: [
-
                     "#16a34a",
-
                     "#d97706"
-
                 ],
 
                 borderWidth: 2
@@ -259,6 +303,7 @@ function Audit() {
         ]
 
     };
+
 
     const chartOptions = {
 
@@ -275,9 +320,7 @@ function Audit() {
                 labels: {
 
                     font: {
-
                         size: 13
-
                     }
 
                 }
@@ -288,53 +331,74 @@ function Audit() {
 
     };
 
+
     // ---------------------------------
-// Friendly Audit ID
-// ---------------------------------
+    // Friendly Audit ID
+    // ---------------------------------
 
-const getAuditDisplayId = (row) => {
+    const getAuditDisplayId = (row) => {
 
-    const monthNames = [
-        "JAN",
-        "FEB",
-        "MAR",
-        "APR",
-        "MAY",
-        "JUN",
-        "JUL",
-        "AUG",
-        "SEP",
-        "OCT",
-        "NOV",
-        "DEC"
-    ];
+        const monthNames = [
 
-    const monthCode = monthNames[row.month - 1];
+            "JAN",
+            "FEB",
+            "MAR",
+            "APR",
+            "MAY",
+            "JUN",
+            "JUL",
+            "AUG",
+            "SEP",
+            "OCT",
+            "NOV",
+            "DEC"
 
-    const sameMonthRecords = records
-        .filter(r => r.month === row.month && r.year === row.year)
-        .sort((a, b) => a.audit_id - b.audit_id);
+        ];
 
-    const index =
-        sameMonthRecords.findIndex(
-            r => r.audit_id === row.audit_id
-        ) + 1;
 
-    return `${monthCode}${String(index).padStart(2, "0")}`;
+        const monthCode =
+            monthNames[row.month - 1];
 
-};
+
+        const sameMonthRecords = records
+
+            .filter(
+                (r) =>
+                    r.month === row.month &&
+                    r.year === row.year
+            )
+
+            .sort(
+                (a, b) =>
+                    a.audit_id - b.audit_id
+            );
+
+
+        const index =
+            sameMonthRecords.findIndex(
+                (r) =>
+                    r.audit_id ===
+                    row.audit_id
+            ) + 1;
+
 
         return (
+            `${monthCode}${String(index).padStart(2, "0")}`
+        );
+
+    };
+
+
+    return (
 
         <Layout>
 
             <div className="audit-container">
 
                 <h1>
-
                     Warehouse Return Audit
-
                 </h1>
+
 
                 <p className="audit-subtitle">
 
@@ -344,104 +408,127 @@ const getAuditDisplayId = (row) => {
 
                 </p>
 
-                {/* SUMMARY */}
+
+                {/* ---------------------------------
+                    SUMMARY
+                --------------------------------- */}
 
                 <div className="summary-cards">
 
                     <div className="card">
 
-                        <h2>{totalRecords}</h2>
+                        <h2>
+                            {totalRecords}
+                        </h2>
 
-                        <p>Total Records</p>
+                        <p>
+                            Total Records
+                        </p>
 
                     </div>
+
 
                     <div className="card pending-card">
 
-                        <h2>{pending}</h2>
+                        <h2>
+                            {pending}
+                        </h2>
 
-                        <p>Pending Returns</p>
+                        <p>
+                            Pending Returns
+                        </p>
 
                     </div>
+
 
                     <div className="card returned-card">
 
-                        <h2>{returned}</h2>
+                        <h2>
+                            {returned}
+                        </h2>
 
-                        <p>Returned</p>
+                        <p>
+                            Returned
+                        </p>
 
                     </div>
+
 
                     <div className="card">
 
                         <h2>
-
                             {totalQty.toFixed(2)} kg
-
                         </h2>
 
-                        <p>Total Unclaimed</p>
+                        <p>
+                            Total Unclaimed
+                        </p>
 
                     </div>
 
                 </div>
 
-                {/* ANALYTICS */}
+
+                {/* ---------------------------------
+                    ANALYTICS
+                --------------------------------- */}
 
                 <div className="analytics-section">
 
                     <div className="chart-card">
 
                         <h2>
-
                             Audit Analytics
-
                         </h2>
 
                         <div className="chart-wrapper">
 
                             <Pie
-
                                 data={chartData}
-
                                 options={chartOptions}
-
                             />
 
                         </div>
 
                     </div>
 
+
                     <div className="mini-stats">
 
                         <div className="mini-card">
 
-                            <h2>{returned}</h2>
+                            <h2>
+                                {returned}
+                            </h2>
 
-                            <p>Returned</p>
-
-                        </div>
-
-                        <div className="mini-card">
-
-                            <h2>{pending}</h2>
-
-                            <p>Pending</p>
+                            <p>
+                                Returned
+                            </p>
 
                         </div>
+
 
                         <div className="mini-card">
 
                             <h2>
-
-                                {returnedQty.toFixed(2)} kg
-
+                                {pending}
                             </h2>
 
                             <p>
+                                Pending
+                            </p>
 
+                        </div>
+
+
+                        <div className="mini-card">
+
+                            <h2>
+                                {returnedQty.toFixed(2)} kg
+                            </h2>
+
+                            <p>
                                 Warehouse Returned
-
                             </p>
 
                         </div>
@@ -450,7 +537,10 @@ const getAuditDisplayId = (row) => {
 
                 </div>
 
-                {/* MONTH FILTER */}
+
+                {/* ---------------------------------
+                    MONTH FILTER
+                --------------------------------- */}
 
                 <div className="audit-filter">
 
@@ -458,32 +548,64 @@ const getAuditDisplayId = (row) => {
 
                         value={selectedMonth}
 
-                        onChange={(e)=>
-
+                        onChange={(e) =>
                             setSelectedMonth(
-
                                 Number(e.target.value)
-
                             )
-
                         }
 
                     >
 
-                        <option value={1}>January</option>
-                        <option value={2}>February</option>
-                        <option value={3}>March</option>
-                        <option value={4}>April</option>
-                        <option value={5}>May</option>
-                        <option value={6}>June</option>
-                        <option value={7}>July</option>
-                        <option value={8}>August</option>
-                        <option value={9}>September</option>
-                        <option value={10}>October</option>
-                        <option value={11}>November</option>
-                        <option value={12}>December</option>
+                        <option value={1}>
+                            January
+                        </option>
+
+                        <option value={2}>
+                            February
+                        </option>
+
+                        <option value={3}>
+                            March
+                        </option>
+
+                        <option value={4}>
+                            April
+                        </option>
+
+                        <option value={5}>
+                            May
+                        </option>
+
+                        <option value={6}>
+                            June
+                        </option>
+
+                        <option value={7}>
+                            July
+                        </option>
+
+                        <option value={8}>
+                            August
+                        </option>
+
+                        <option value={9}>
+                            September
+                        </option>
+
+                        <option value={10}>
+                            October
+                        </option>
+
+                        <option value={11}>
+                            November
+                        </option>
+
+                        <option value={12}>
+                            December
+                        </option>
 
                     </select>
+
 
                     <input
 
@@ -491,29 +613,27 @@ const getAuditDisplayId = (row) => {
 
                         value={selectedYear}
 
-                        onChange={(e)=>
-
+                        onChange={(e) =>
                             setSelectedYear(
-
                                 Number(e.target.value)
-
                             )
-
                         }
 
                     />
 
                 </div>
 
-                {/* CYCLE STATUS */}
+
+                {/* ---------------------------------
+                    CYCLE STATUS
+                --------------------------------- */}
 
                 <div className="cycle-status-banner">
 
                     <span>
-
                         Distribution Cycle :
-
                     </span>
+
 
                     <span
 
@@ -535,6 +655,11 @@ const getAuditDisplayId = (row) => {
 
                 </div>
 
+
+                {/* ---------------------------------
+                    SEARCH
+                --------------------------------- */}
+
                 <input
 
                     className="search-box"
@@ -545,121 +670,198 @@ const getAuditDisplayId = (row) => {
 
                     value={search}
 
-                    onChange={(e)=>setSearch(e.target.value)}
+                    onChange={(e) =>
+                        setSearch(e.target.value)
+                    }
 
                 />
 
-                                <table>
+
+                {/* ---------------------------------
+                    TABLE
+                --------------------------------- */}
+
+                <table>
 
                     <thead>
 
                         <tr>
 
                             <th>ID</th>
-                            <th>Beneficiary</th>
-                            <th>Item</th>
-                            <th>Month</th>
-                            <th>Year</th>
-                            <th>Entitled</th>
-                            <th>Claimed</th>
-                            <th>Unclaimed</th>
-                            <th>Returned</th>
-                            <th>Status</th>
-                            <th>Action</th>
+
+                            <th>
+                                Beneficiary
+                            </th>
+
+                            <th>
+                                Item
+                            </th>
+
+                            <th>
+                                Month
+                            </th>
+
+                            <th>
+                                Year
+                            </th>
+
+                            <th>
+                                Entitled
+                            </th>
+
+                            <th>
+                                Claimed
+                            </th>
+
+                            <th>
+                                Unclaimed
+                            </th>
+
+                            <th>
+                                Returned
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
 
                         </tr>
 
                     </thead>
 
+
                     <tbody>
 
-                        {
+                        {filtered.length > 0
 
-                            filtered.length > 0 ?
+                            ?
 
-                                filtered.map((row) => (
+                            filtered.map((row) => (
 
-                                    <tr key={row.audit_id}>
+                                <tr
+                                    key={row.audit_id}
+                                >
 
-                                        <td>{getAuditDisplayId(row)}</td>
+                                    <td>
 
-                                        <td>{row.full_name}</td>
+                                        {getAuditDisplayId(
+                                            row
+                                        )}
 
-                                        <td>{row.item_name}</td>
+                                    </td>
 
-                                        <td>{row.month}</td>
 
-                                        <td>{row.year}</td>
+                                    <td>
+                                        {row.full_name}
+                                    </td>
 
-                                        <td>{row.entitled_quantity}</td>
 
-                                        <td>{row.claimed_quantity}</td>
+                                    <td>
+                                        {row.item_name}
+                                    </td>
 
-                                        <td>{row.unclaimed_quantity}</td>
 
-                                        <td>{row.warehouse_returned_quantity}</td>
+                                    <td>
+                                        {row.month}
+                                    </td>
 
-                                        <td>
+
+                                    <td>
+                                        {row.year}
+                                    </td>
+
+
+                                    <td>
+                                        {row.entitled_quantity}
+                                    </td>
+
+
+                                    <td>
+                                        {row.claimed_quantity}
+                                    </td>
+
+
+                                    <td>
+                                        {row.unclaimed_quantity}
+                                    </td>
+
+
+                                    <td>
+                                        {row.warehouse_returned_quantity}
+                                    </td>
+
+
+                                    <td>
+
+                                        <span
+
+                                            className={
+
+                                                row.audit_status ===
+                                                "Returned"
+
+                                                    ? "badge returned"
+
+                                                    : "badge pending"
+
+                                            }
+
+                                        >
+
+                                            {row.audit_status}
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {row.audit_status ===
+                                        "Returned"
+
+                                            ?
 
                                             <span
 
-                                                className={
+                                                style={{
 
-                                                    row.audit_status === "Returned"
+                                                    color:
+                                                        "#16a34a",
 
-                                                        ? "badge returned"
+                                                    fontWeight:
+                                                        "bold",
 
-                                                        : "badge pending"
+                                                    fontSize:
+                                                        "17px"
 
-                                                }
+                                                }}
 
                                             >
 
-                                                {row.audit_status}
+                                                ✔ Returned
 
                                             </span>
 
-                                        </td>
+                                            :
 
-                                        <td>
+                                            <button
 
-                                            {
+                                                className="return-btn"
 
-                                                row.audit_status === "Returned"
+                                                disabled={
+                                                    cycleStatus !==
+                                                    "CLOSED"
+                                                }
 
-                                                ?
+                                                title={
 
-                                                <span
-
-                                                    style={{
-
-                                                        color:"#16a34a",
-
-                                                        fontWeight:"bold",
-
-                                                        fontSize:"17px"
-
-                                                    }}
-
-                                                >
-
-                                                    ✔ Returned
-
-                                                </span>
-
-                                                :
-
-                                                <button
-
-                                                    className="return-btn"
-
-                                                    disabled={
-                                                        cycleStatus !== "CLOSED"
-                                                    }
-
-                                                    title={
-
-                                                        cycleStatus !== "CLOSED"
+                                                    cycleStatus !==
+                                                    "CLOSED"
 
                                                         ?
 
@@ -669,25 +871,21 @@ const getAuditDisplayId = (row) => {
 
                                                         ""
 
-                                                    }
+                                                }
 
-                                                    onClick={()=>
+                                                onClick={() =>
+                                                    returnStock(
+                                                        row.audit_id,
+                                                        row.unclaimed_quantity
+                                                    )
+                                                }
 
-                                                        returnStock(
+                                            >
 
-                                                            row.audit_id,
+                                                {
 
-                                                            row.unclaimed_quantity
-
-                                                        )
-
-                                                    }
-
-                                                >
-
-                                                    {
-
-                                                        cycleStatus === "CLOSED"
+                                                    cycleStatus ===
+                                                    "CLOSED"
 
                                                         ?
 
@@ -697,43 +895,48 @@ const getAuditDisplayId = (row) => {
 
                                                         "🔒 Cycle Open"
 
-                                                    }
+                                                }
 
-                                                </button>
+                                            </button>
 
-                                            }
-
-                                        </td>
-
-                                    </tr>
-
-                                ))
-
-                            :
-
-                                <tr>
-
-                                    <td
-
-                                        colSpan="11"
-
-                                        style={{
-
-                                            textAlign:"center",
-
-                                            padding:"30px",
-
-                                            color:"#666"
-
-                                        }}
-
-                                    >
-
-                                        No audit records found for the selected month.
+                                        }
 
                                     </td>
 
                                 </tr>
+
+                            ))
+
+                            :
+
+                            <tr>
+
+                                <td
+
+                                    colSpan="11"
+
+                                    style={{
+
+                                        textAlign:
+                                            "center",
+
+                                        padding:
+                                            "30px",
+
+                                        color:
+                                            "#666"
+
+                                    }}
+
+                                >
+
+                                    No unclaimed Rice or Wheat
+                                    stock found for the selected
+                                    month.
+
+                                </td>
+
+                            </tr>
 
                         }
 
@@ -741,12 +944,13 @@ const getAuditDisplayId = (row) => {
 
                 </table>
 
-                            </div>
+            </div>
 
         </Layout>
 
     );
 
 }
+
 
 export default Audit;

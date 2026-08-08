@@ -4,6 +4,7 @@ from business_date import get_business_date
 import calendar
 import traceback
 
+
 monthly_closure_bp = Blueprint("monthly_closure", __name__)
 
 
@@ -44,10 +45,8 @@ def close_month():
         if today.day != last_day:
 
             return jsonify({
-
                 "message":
                 "Cannot close month. Business month has not ended."
-
             }), 400
 
         conn = get_connection()
@@ -60,19 +59,13 @@ def close_month():
         # ---------------------------------
 
         cursor.execute("""
-
             SELECT closure_id
-
             FROM monthly_closure
-
             WHERE month=%s
             AND year=%s
-
         """, (
-
             current_month,
             current_year
-
         ))
 
         if cursor.fetchone():
@@ -80,10 +73,8 @@ def close_month():
             print("Month already closed.")
 
             return jsonify({
-
                 "message":
                 "This month has already been closed."
-
             }), 400
 
         print("Month not closed yet.")
@@ -93,17 +84,16 @@ def close_month():
         # ---------------------------------
 
         cursor.execute("""
-
             SELECT
-
                 b.beneficiary_id,
                 b.full_name,
+                b.family_members,
 
                 r.item_id,
-
                 ri.item_name,
 
-                r.monthly_quantity
+                r.monthly_quantity,
+                r.entitlement_type
 
             FROM beneficiaries b
 
@@ -121,7 +111,10 @@ def close_month():
 
         entitlement_data = cursor.fetchall()
 
-        print(f"Entitlement Records : {len(entitlement_data)}")
+        print(
+            f"Entitlement Records : "
+            f"{len(entitlement_data)}"
+        )
 
         inserted = 0
 
@@ -134,10 +127,12 @@ def close_month():
             print("--------------------------------")
             print(row)
 
+            # ---------------------------------
+            # Already Claimed
+            # ---------------------------------
+
             cursor.execute("""
-
                 SELECT
-
                     IFNULL(
                         SUM(quantity_given),
                         0
@@ -151,41 +146,113 @@ def close_month():
                 AND YEAR(distribution_date)=%s
 
             """, (
-
                 row["beneficiary_id"],
                 row["item_id"],
                 current_month,
                 current_year
-
             ))
 
-            claimed = float(cursor.fetchone()["claimed"])
+            claimed = float(
+                cursor.fetchone()["claimed"]
+            )
 
-            entitled = float(row["monthly_quantity"])
+            # ---------------------------------
+            # Calculate Actual Entitlement
+            # ---------------------------------
+
+            base_quantity = float(
+                row["monthly_quantity"]
+            )
+
+            entitlement_type = row[
+                "entitlement_type"
+            ]
+
+            family_members = int(
+                row["family_members"] or 1
+            )
+
+            if entitlement_type == "PERSON":
+
+                entitled = (
+                    base_quantity *
+                    family_members
+                )
+
+            else:
+
+                # HOUSEHOLD entitlement
+                entitled = base_quantity
+
+            # ---------------------------------
+            # Calculate Unclaimed
+            # ---------------------------------
 
             unclaimed = entitled - claimed
 
-            # Skip fully claimed beneficiaries
+            # Avoid negative value
 
-            if unclaimed <= 0:
-
-                print("No unclaimed stock.")
-
-                continue
+            if unclaimed < 0:
+                unclaimed = 0
 
             print(
-
+                f"Type={entitlement_type}, "
+                f"Base={base_quantity}, "
+                f"Family Members={family_members}, "
                 f"Entitled={entitled}, "
                 f"Claimed={claimed}, "
                 f"Unclaimed={unclaimed}"
-
             )
 
-            cursor.execute("""
+            # ---------------------------------
+            # Skip Fully Claimed Beneficiaries
+            # ---------------------------------
 
+            if unclaimed <= 0:
+
+                print(
+                    "No unclaimed stock."
+                )
+
+                continue
+
+            # ---------------------------------
+            # Prevent Duplicate Audit Records
+            # ---------------------------------
+
+            cursor.execute("""
+                SELECT audit_id
+
+                FROM unclaimed_audit
+
+                WHERE beneficiary_id=%s
+                AND item_id=%s
+                AND month=%s
+                AND year=%s
+
+            """, (
+                row["beneficiary_id"],
+                row["item_id"],
+                current_month,
+                current_year
+            ))
+
+            if cursor.fetchone():
+
+                print(
+                    "Audit record already exists. "
+                    "Skipping..."
+                )
+
+                continue
+
+            # ---------------------------------
+            # Insert Audit Record
+            # ---------------------------------
+
+            cursor.execute("""
                 INSERT INTO unclaimed_audit
                 (
-
                     beneficiary_id,
                     item_id,
 
@@ -197,20 +264,15 @@ def close_month():
                     unclaimed_quantity,
 
                     warehouse_returned_quantity,
-
                     returned_to_warehouse,
 
                     processed_by,
-
                     audit_status,
-
                     remarks
-
                 )
 
                 VALUES
                 (
-
                     %s,
                     %s,
 
@@ -222,19 +284,14 @@ def close_month():
                     %s,
 
                     0,
-
                     FALSE,
 
                     NULL,
-
                     'Pending',
-
                     NULL
-
                 )
 
             """, (
-
                 row["beneficiary_id"],
                 row["item_id"],
 
@@ -244,62 +301,73 @@ def close_month():
                 entitled,
                 claimed,
                 unclaimed
-
             ))
 
             inserted += 1
 
-            print("Audit row inserted.")
+            print(
+                "Audit row inserted."
+            )
 
-        print(f"Inserted {inserted} audit records.")
+        print(
+            f"Inserted {inserted} "
+            f"audit records."
+        )
 
         # ---------------------------------
         # Record Month Closure
         # ---------------------------------
 
         cursor.execute("""
-
             INSERT INTO monthly_closure
             (
-
                 month,
                 year,
                 closed_by
-
             )
 
             VALUES
             (
-
                 %s,
                 %s,
                 %s
-
             )
 
         """, (
-
             current_month,
             current_year,
             1
-
         ))
 
-        print("Monthly closure record inserted.")
+        print(
+            "Monthly closure record inserted."
+        )
+
+        # ---------------------------------
+        # Save Changes
+        # ---------------------------------
 
         conn.commit()
 
         print("COMMIT SUCCESSFUL")
 
+        # ---------------------------------
+        # Response
+        # ---------------------------------
+
         return jsonify({
 
-            "message": "Month closed successfully.",
+            "message":
+            "Month closed successfully.",
 
-            "month": current_month,
+            "month":
+            current_month,
 
-            "year": current_year,
+            "year":
+            current_year,
 
-            "audit_records_created": inserted
+            "audit_records_created":
+            inserted
 
         }), 200
 
@@ -308,14 +376,19 @@ def close_month():
         if conn:
             conn.rollback()
 
-        print("\n******** ERROR OCCURRED ********")
+        print(
+            "\n******** ERROR OCCURRED ********"
+        )
+
         traceback.print_exc()
 
         return jsonify({
 
-            "message": "Month closure failed.",
+            "message":
+            "Month closure failed.",
 
-            "error": str(e)
+            "error":
+            str(e)
 
         }), 500
 
@@ -327,6 +400,6 @@ def close_month():
         if conn:
             conn.close()
 
-        print("Database connection closed.")
-
-        # =====================================
+        print(
+            "Database connection closed."
+        )

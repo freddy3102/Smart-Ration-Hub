@@ -5,9 +5,14 @@ import "../styles/DistributionCycle.css";
 
 function DistributionCycle() {
 
-    const [businessDate, setBusinessDate] = useState("");
-    const [cycleStatus, setCycleStatus] = useState("");
-    const [currentMonth, setCurrentMonth] = useState("");
+    const [businessDate, setBusinessDate] =
+        useState("");
+
+    const [cycleStatus, setCycleStatus] =
+        useState("");
+
+    const [currentMonth, setCurrentMonth] =
+        useState("");
 
     useEffect(() => {
 
@@ -16,184 +21,165 @@ function DistributionCycle() {
 
     }, []);
 
-    // -----------------------------
+    // ---------------------------------
     // Load Business Date
-    // -----------------------------
+    // ---------------------------------
 
-    const loadBusinessDate = () => {
+    const loadBusinessDate = async () => {
 
-        axios
-            .get("http://127.0.0.1:5000/business-date")
-            .then((res) => {
+        try {
 
-                setBusinessDate(
-                    res.data.business_date
-                );
+            const res = await axios.get(
+                "http://127.0.0.1:5000/business-date"
+            );
 
-                const date = new Date(
-                    res.data.business_date
-                );
+            const savedDate =
+                res.data.business_date;
 
-                setCurrentMonth(
+            setBusinessDate(savedDate);
 
-                    date.toLocaleString(
+            const date = new Date(
+                `${savedDate}T00:00:00`
+            );
 
-                        "default",
+            setCurrentMonth(
+                date.toLocaleString(
+                    "default",
+                    {
+                        month: "long",
+                        year: "numeric"
+                    }
+                )
+            );
 
-                        {
+        } catch (err) {
 
-                            month: "long",
+            console.log(err);
 
-                            year: "numeric"
-
-                        }
-
-                    )
-
-                );
-
-            })
-            .catch((err) => {
-
-                console.log(err);
-
-            });
+        }
 
     };
 
-    // -----------------------------
+    // ---------------------------------
     // Load Distribution Cycle Status
-    // -----------------------------
+    // ---------------------------------
 
-    const loadCycleStatus = () => {
+    const loadCycleStatus = async () => {
 
-        axios
-            .get("http://127.0.0.1:5000/cycle-status")
-            .then((res) => {
+        try {
 
-                setCycleStatus(
-                    res.data.status
-                );
+            const res = await axios.get(
+                "http://127.0.0.1:5000/cycle-status"
+            );
 
-            })
-            .catch((err) => {
+            setCycleStatus(
+                res.data.status
+            );
 
-                console.log(err);
+        } catch (err) {
 
-            });
+            console.log(err);
+
+        }
 
     };
 
-    // -----------------------------
+    // ---------------------------------
     // Save Business Date
-    // -----------------------------
+    // ---------------------------------
 
     const saveBusinessDate = async () => {
 
         try {
 
             await axios.put(
-
                 "http://127.0.0.1:5000/business-date",
-
                 {
-
-                    business_date: businessDate
-
+                    business_date:
+                        businessDate
                 }
-
             );
 
             alert(
                 "Business date updated successfully."
             );
 
-            loadBusinessDate();
-            loadCycleStatus();
+            await loadBusinessDate();
+            await loadCycleStatus();
+
+        } catch (err) {
+
+            alert(
+                err.response?.data?.message ||
+                "Unable to update business date."
+            );
+
+            await loadBusinessDate();
+            await loadCycleStatus();
 
         }
 
-        catch (err) {
-
-    alert(
-
-        err.response?.data?.message ||
-
-        "Unable to update business date."
-
-    );
-
-    // Reload the actual saved business date
-    loadBusinessDate();
-
-    // Reload cycle status
-    loadCycleStatus();
-
-}
-
     };
 
-    // -----------------------------
+    // ---------------------------------
     // Close Distribution Cycle
-    // -----------------------------
+    // ---------------------------------
 
     const closeMonth = async () => {
 
-        const confirmClose = window.confirm(
+        const confirmClose =
+            window.confirm(
+                "Close the current distribution cycle?\n\n" +
+                "This action will generate audit records " +
+                "and lock further distributions for this month."
+            );
 
-            "Close the current distribution cycle?\n\nThis action will generate audit records and lock further distributions for this month."
-
-        );
-
-        if (!confirmClose) return;
+        if (!confirmClose) {
+            return;
+        }
 
         try {
 
             const res = await axios.post(
-
                 "http://127.0.0.1:5000/close-month"
-
             );
 
-            alert(res.data.message);
+            alert(
+                res.data.message
+            );
 
-            loadBusinessDate();
-            loadCycleStatus();
+            await loadBusinessDate();
+            await loadCycleStatus();
+
+        } catch (err) {
+
+            alert(
+                err.response?.data?.message ||
+                "Unable to close distribution cycle."
+            );
+
+            await loadBusinessDate();
+            await loadCycleStatus();
 
         }
 
-        catch (err) {
-
-    alert(
-
-        err.response?.data?.message ||
-
-        "Unable to update business date."
-
-    );
-
-    // Reload the saved business date
-    loadBusinessDate();
-
-}
     };
 
-        return (
+    return (
 
         <Layout>
 
             <div className="cycle-container">
 
                 <h1>
-
                     Distribution Cycle
-
                 </h1>
 
                 <p className="cycle-subtitle">
 
-                    Manage the business date and control the monthly
-                    distribution cycle before warehouse auditing.
+                    Manage the business date and
+                    control the monthly distribution
+                    cycle before warehouse auditing.
 
                 </p>
 
@@ -202,35 +188,24 @@ function DistributionCycle() {
                 <div className="cycle-card">
 
                     <h2>
-
                         Business Date
-
                     </h2>
 
                     <input
-
                         type="date"
-
                         value={businessDate}
-
                         onChange={(e) =>
-
                             setBusinessDate(
-
                                 e.target.value
-
                             )
-
                         }
-
                     />
 
                     <button
-
                         className="save-btn"
-
-                        onClick={saveBusinessDate}
-
+                        onClick={
+                            saveBusinessDate
+                        }
                     >
 
                         💾 Save Date
@@ -244,53 +219,38 @@ function DistributionCycle() {
                 <div className="cycle-card">
 
                     <h2>
-
                         Current Distribution Cycle
-
                     </h2>
 
                     <p>
-
                         Current Business Date
-
                     </p>
 
                     <h3>
-
                         {businessDate}
-
                     </h3>
 
                     <p>
-
                         Current Distribution Month
-
                     </p>
 
                     <h3>
-
                         {currentMonth}
-
                     </h3>
 
                     <p className="status-title">
-
                         Cycle Status
-
                     </p>
 
                     <div
-
                         className={
-
-                            cycleStatus === "OPEN"
-
-                                ? "status-open"
-
-                                : "status-closed"
-
+                            cycleStatus ===
+                            "OPEN"
+                                ?
+                                "status-open"
+                                :
+                                "status-closed"
                         }
-
                     >
 
                         {cycleStatus}
@@ -307,8 +267,8 @@ function DistributionCycle() {
                     >
 
                         {
-
-                            cycleStatus === "OPEN"
+                            cycleStatus ===
+                            "OPEN"
 
                                 ?
 
@@ -317,24 +277,24 @@ function DistributionCycle() {
                                 :
 
                                 "Distribution cycle has been closed. Distribution is locked and warehouse return of unclaimed stock is now enabled."
-
                         }
 
                     </p>
 
                     <button
-
                         className="close-btn"
-
-                        onClick={closeMonth}
-
-                        disabled={cycleStatus === "CLOSED"}
-
+                        onClick={
+                            closeMonth
+                        }
+                        disabled={
+                            cycleStatus ===
+                            "CLOSED"
+                        }
                     >
 
                         {
-
-                            cycleStatus === "CLOSED"
+                            cycleStatus ===
+                            "CLOSED"
 
                                 ?
 
@@ -343,7 +303,6 @@ function DistributionCycle() {
                                 :
 
                                 "📦 Close Distribution Cycle"
-
                         }
 
                     </button>

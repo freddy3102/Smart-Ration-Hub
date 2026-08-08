@@ -1,0 +1,30 @@
+.beneficiary-reports-page {
+    padding: 40px;
+}
+
+.beneficiary-reports-page h1 {
+    color: #1e3a5f;
+    margin-bottom: 8px;
+}
+
+.reports-subtitle {
+    color: #64748b;
+    margin-bottom: 30px;
+}
+
+.report-placeholder {
+    background: white;
+    padding: 35px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.report-placeholder h2 {
+    color: #1e3a5f;
+    margin-bottom: 15px;
+}
+
+.report-placeholder p {
+    color: #64748b;
+    line-height: 1.6;
+}

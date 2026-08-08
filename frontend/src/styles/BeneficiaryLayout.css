@@ -1,0 +1,229 @@
+/* =================================
+   MAIN APP
+================================= */
+
+.beneficiary-app {
+
+    min-height: 100vh;
+
+    display: flex;
+
+    background: #f4f7fb;
+
+}
+
+
+/* =================================
+   SIDEBAR
+================================= */
+
+.beneficiary-sidebar {
+
+    width: 270px;
+
+    min-height: 100vh;
+
+    background: #172b5d;
+
+    color: white;
+
+    display: flex;
+
+    flex-direction: column;
+
+    position: fixed;
+
+    left: 0;
+
+    top: 0;
+
+    bottom: 0;
+
+    padding: 28px 18px;
+
+}
+
+
+/* =================================
+   BRAND
+================================= */
+
+.beneficiary-brand {
+
+    text-align: center;
+
+    padding: 8px 5px 30px;
+
+    border-bottom: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.15
+    );
+
+}
+
+
+.beneficiary-brand h2 {
+
+    margin: 0;
+
+    font-size: 25px;
+
+    color: white;
+
+}
+
+
+.beneficiary-brand p {
+
+    margin: 8px 0 0;
+
+    font-size: 15px;
+
+    color: #cbd5e1;
+
+}
+
+
+/* =================================
+   NAVIGATION
+================================= */
+
+.beneficiary-nav {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    margin-top: 30px;
+
+}
+
+
+.beneficiary-nav-link {
+
+    text-decoration: none;
+
+    color: #e2e8f0;
+
+    padding: 15px 18px;
+
+    border-radius: 10px;
+
+    font-size: 16px;
+
+    font-weight: 500;
+
+    transition: 0.2s;
+
+}
+
+
+.beneficiary-nav-link:hover {
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.10
+    );
+
+    color: white;
+
+}
+
+
+.beneficiary-nav-link.active {
+
+    background: #2563eb;
+
+    color: white;
+
+    box-shadow:
+        0 4px 12px rgba(
+            37,
+            99,
+            235,
+            0.35
+        );
+
+}
+
+
+/* =================================
+   LOGOUT
+================================= */
+
+.beneficiary-logout {
+
+    margin-top: auto;
+
+    border: none;
+
+    background: #dc2626;
+
+    color: white;
+
+    padding: 15px;
+
+    border-radius: 10px;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+}
+
+
+.beneficiary-logout:hover {
+
+    background: #b91c1c;
+
+}
+
+
+/* =================================
+   MAIN
+================================= */
+
+.beneficiary-main {
+
+    margin-left: 270px;
+
+    width: calc(100% - 270px);
+
+    min-height: 100vh;
+
+    padding: 40px;
+
+}
+
+
+/* =================================
+   RESPONSIVE
+================================= */
+
+@media (max-width: 800px) {
+
+    .beneficiary-sidebar {
+
+        width: 220px;
+
+    }
+
+    .beneficiary-main {
+
+        margin-left: 220px;
+
+        width: calc(100% - 220px);
+
+        padding: 25px;
+
+    }
+
+}

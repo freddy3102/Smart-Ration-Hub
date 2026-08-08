@@ -2,92 +2,142 @@ from flask import Blueprint, jsonify, request
 from db import get_connection
 from business_date import get_business_date
 
+
 audit_bp = Blueprint("audit", __name__)
 
 
 @audit_bp.route("/audit", methods=["GET"])
 def get_audit():
 
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    conn = None
+    cursor = None
 
-    # ---------------------------------
-    # Current Business Date
-    # ---------------------------------
+    try:
 
-    business_date = get_business_date()
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
 
-    default_month = business_date.month
-    default_year = business_date.year
+        # ---------------------------------
+        # Current Business Date
+        # ---------------------------------
 
-    # ---------------------------------
-    # Optional Filters
-    # ---------------------------------
+        business_date = get_business_date()
 
-    month = request.args.get(
-        "month",
-        default_month,
-        type=int
-    )
+        default_month = business_date.month
+        default_year = business_date.year
 
-    year = request.args.get(
-        "year",
-        default_year,
-        type=int
-    )
+        # ---------------------------------
+        # Optional Filters
+        # ---------------------------------
 
-    # ---------------------------------
-    # Load Audit Records
-    # ---------------------------------
+        month = request.args.get(
+            "month",
+            default_month,
+            type=int
+        )
 
-    cursor.execute("""
+        year = request.args.get(
+            "year",
+            default_year,
+            type=int
+        )
 
-        SELECT
+        # ---------------------------------
+        # Load Audit Records
+        #
+        # Only:
+        #   1. Rice
+        #   2. Wheat
+        #
+        # Also exclude records where
+        # unclaimed quantity is zero.
+        # ---------------------------------
 
-            ua.audit_id,
+        cursor.execute("""
 
-            b.full_name,
+            SELECT
 
-            ri.item_name,
+                ua.audit_id,
 
-            ua.month,
-            ua.year,
+                ua.beneficiary_id,
 
-            ua.entitled_quantity,
+                b.full_name,
 
-            ua.claimed_quantity,
+                ua.item_id,
 
-            ua.unclaimed_quantity,
+                ri.item_name,
 
-            ua.warehouse_returned_quantity,
+                ua.month,
+                ua.year,
 
-            ua.audit_status
+                ua.entitled_quantity,
 
-        FROM unclaimed_audit ua
+                ua.claimed_quantity,
 
-        JOIN beneficiaries b
-            ON ua.beneficiary_id = b.beneficiary_id
+                ua.unclaimed_quantity,
 
-        JOIN ration_items ri
-            ON ua.item_id = ri.item_id
+                ua.warehouse_returned_quantity,
 
-        WHERE
-            ua.month=%s
-            AND ua.year=%s
+                ua.returned_to_warehouse,
 
-        ORDER BY
-            ua.audit_id
+                ua.audit_status
 
-    """, (
+            FROM unclaimed_audit ua
 
-        month,
-        year
+            JOIN beneficiaries b
+                ON ua.beneficiary_id = b.beneficiary_id
 
-    ))
+            JOIN ration_items ri
+                ON ua.item_id = ri.item_id
 
-    data = cursor.fetchall()
+            WHERE
 
-    cursor.close()
-    conn.close()
+                ua.month = %s
 
-    return jsonify(data)
+                AND ua.year = %s
+
+                AND ua.unclaimed_quantity > 0
+
+                AND LOWER(ri.item_name) IN (
+                    'rice',
+                    'wheat'
+                )
+
+            ORDER BY
+
+                ri.item_name,
+
+                ua.unclaimed_quantity DESC,
+
+                b.full_name
+
+        """, (
+
+            month,
+            year
+
+        ))
+
+        data = cursor.fetchall()
+
+        return jsonify(data), 200
+
+    except Exception as e:
+
+        print("AUDIT API ERROR:")
+        print(e)
+
+        return jsonify({
+
+            "message": "Unable to load audit records.",
+            "error": str(e)
+
+        }), 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()

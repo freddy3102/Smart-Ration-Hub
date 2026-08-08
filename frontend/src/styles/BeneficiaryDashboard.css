@@ -1,0 +1,77 @@
+.beneficiary-dashboard {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    font-family: Arial, sans-serif;
+}
+
+.dashboard-title {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+.info-card {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.info-card p {
+    margin: 8px 0;
+    font-size: 17px;
+}
+
+.stock-title {
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.stock-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stock-table th,
+.stock-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+.stock-table th {
+    background: #2e7d32;
+    color: white;
+}
+
+.stock-table tr:nth-child(even) {
+    background: #f7f7f7;
+}
+
+.stock-table tr:hover {
+    background: #eef6ee;
+}
+
+.available {
+    color: green;
+    font-weight: bold;
+}
+
+.out-of-stock {
+    color: red;
+    font-weight: bold;
+}
+
+.loading {
+    text-align: center;
+    margin-top: 80px;
+    font-size: 24px;
+    color: #555;
+}

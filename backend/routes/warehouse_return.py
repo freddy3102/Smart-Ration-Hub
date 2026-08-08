@@ -1,159 +1,366 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from db import get_connection
-from business_date import get_business_date
-
-warehouse_bp = Blueprint("warehouse", __name__)
 
 
-@warehouse_bp.route("/warehouse-return/<int:audit_id>", methods=["PUT"])
+warehouse_bp = Blueprint(
+    "warehouse",
+    __name__
+)
+
+
+# ==================================================
+# Warehouse Return
+# ==================================================
+
+@warehouse_bp.route(
+    "/warehouse-return/<int:audit_id>",
+    methods=["PUT"]
+)
 def warehouse_return(audit_id):
 
     data = request.get_json()
 
-    returned_qty = float(data["returned_quantity"])
-    processed_by = data["processed_by"]
+    if not data:
+        return jsonify({
+            "message": "Request body is required."
+        }), 400
 
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    returned_qty = data.get("returned_quantity")
+    processed_by = data.get("processed_by")
 
     # ---------------------------------
-    # Check Distribution Cycle Closed
+    # Validate Input
     # ---------------------------------
 
-    today = get_business_date()
+    if returned_qty is None or processed_by is None:
 
-    cursor.execute("""
+        return jsonify({
+            "message":
+            "Returned quantity and Processed By are required."
+        }), 400
 
-        SELECT closure_id
+    try:
 
-        FROM monthly_closure
+        returned_qty = float(returned_qty)
 
-        WHERE month=%s
-        AND year=%s
+    except (TypeError, ValueError):
 
-    """, (
+        return jsonify({
+            "message":
+            "Returned quantity must be a valid number."
+        }), 400
 
-        today.month,
-        today.year
+    if returned_qty <= 0:
 
-    ))
+        return jsonify({
+            "message":
+            "Returned quantity must be greater than zero."
+        }), 400
 
-    month_closed = cursor.fetchone()
+    conn = None
+    cursor = None
 
-    if month_closed is None:
+    try:
 
-        cursor.close()
-        conn.close()
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # ---------------------------------
+        # Get Audit Record
+        # ---------------------------------
+
+        cursor.execute("""
+            SELECT
+                audit_id,
+                beneficiary_id,
+                item_id,
+                month,
+                year,
+                unclaimed_quantity,
+                warehouse_returned_quantity,
+                returned_to_warehouse,
+                audit_status
+            FROM unclaimed_audit
+            WHERE audit_id=%s
+            FOR UPDATE
+        """, (
+            audit_id,
+        ))
+
+        audit = cursor.fetchone()
+
+        if audit is None:
+
+            return jsonify({
+                "message":
+                "Audit record not found."
+            }), 404
+
+        # ---------------------------------
+        # Audit Month & Year
+        # ---------------------------------
+
+        audit_month = audit["month"]
+        audit_year = audit["year"]
+
+        # ---------------------------------
+        # Check Monthly Closure
+        # ---------------------------------
+
+        cursor.execute("""
+            SELECT
+                closure_id,
+                verified
+            FROM monthly_closure
+            WHERE month=%s
+            AND year=%s
+        """, (
+            audit_month,
+            audit_year
+        ))
+
+        closure = cursor.fetchone()
+
+        if closure is None:
+
+            return jsonify({
+                "message":
+                "Distribution cycle has not been closed yet. "
+                "Warehouse return is allowed only after month-end closure."
+            }), 400
+
+        # ---------------------------------
+        # Already Verified?
+        # ---------------------------------
+
+        if closure["verified"]:
+
+            return jsonify({
+                "message":
+                "This month has already been verified. "
+                "Warehouse return is no longer allowed."
+            }), 400
+
+        # ---------------------------------
+        # Already Returned?
+        # ---------------------------------
+
+        if audit["audit_status"] == "Returned":
+
+            return jsonify({
+                "message":
+                "Stock for this audit record has already been marked as returned."
+            }), 400
+
+        if audit["returned_to_warehouse"]:
+
+            return jsonify({
+                "message":
+                "Stock for this audit record has already been returned."
+            }), 400
+
+        # ---------------------------------
+        # Unclaimed Quantity
+        # ---------------------------------
+
+        unclaimed_quantity = float(
+            audit["unclaimed_quantity"]
+        )
+
+        # ---------------------------------
+        # Nothing To Return
+        # ---------------------------------
+
+        if unclaimed_quantity <= 0:
+
+            return jsonify({
+                "message":
+                "There is no unclaimed stock available for return."
+            }), 400
+
+        # ---------------------------------
+        # Returned Quantity Validation
+        # ---------------------------------
+
+        if returned_qty > unclaimed_quantity:
+
+            return jsonify({
+
+                "message":
+                "Returned quantity cannot exceed unclaimed quantity.",
+
+                "unclaimed_quantity":
+                unclaimed_quantity,
+
+                "returned_quantity":
+                returned_qty
+
+            }), 400
+
+        # ---------------------------------
+        # Get Inventory
+        # ---------------------------------
+
+        cursor.execute("""
+            SELECT
+                available_quantity
+            FROM inventory
+            WHERE item_id=%s
+            FOR UPDATE
+        """, (
+            audit["item_id"],
+        ))
+
+        inventory = cursor.fetchone()
+
+        if inventory is None:
+
+            return jsonify({
+                "message":
+                "Inventory record not found for this item."
+            }), 404
+
+        available_quantity = float(
+            inventory["available_quantity"]
+        )
+
+        # ---------------------------------
+        # Prevent Negative Inventory
+        # ---------------------------------
+
+        if available_quantity < returned_qty:
+
+            return jsonify({
+
+                "message":
+                "Insufficient inventory to record this return.",
+
+                "available_quantity":
+                available_quantity,
+
+                "returned_quantity":
+                returned_qty
+
+            }), 400
+
+        # ---------------------------------
+        # Deduct From Inventory
+        #
+        # Stock leaves the ration shop
+        # and is now awaiting verification
+        # at the warehouse.
+        # ---------------------------------
+
+        cursor.execute("""
+            UPDATE inventory
+            SET
+                available_quantity =
+                    available_quantity - %s
+            WHERE item_id=%s
+        """, (
+            returned_qty,
+            audit["item_id"]
+        ))
+
+        # ---------------------------------
+        # Update Audit Record
+        # ---------------------------------
+
+        cursor.execute("""
+            UPDATE unclaimed_audit
+            SET
+                warehouse_returned_quantity=%s,
+                returned_to_warehouse=TRUE,
+                processed_by=%s,
+                processed_on=NOW(),
+                audit_status='Returned'
+            WHERE audit_id=%s
+        """, (
+            returned_qty,
+            processed_by,
+            audit_id
+        ))
+
+        # ---------------------------------
+        # Commit Both Changes Together
+        # ---------------------------------
+
+        conn.commit()
+
+        # ---------------------------------
+        # New Inventory Quantity
+        # ---------------------------------
+
+        new_inventory_quantity = (
+            available_quantity -
+            returned_qty
+        )
+
+        # ---------------------------------
+        # Response
+        # ---------------------------------
 
         return jsonify({
 
             "message":
-            "Distribution cycle has not been closed yet. Warehouse return is allowed only after month-end closure."
+            "Stock returned successfully. "
+            "Returned quantity has been deducted from inventory "
+            "and is awaiting warehouse verification.",
 
-        }), 400
+            "audit_id":
+            audit_id,
 
-    # -------------------------
-    # Get audit record
-    # -------------------------
+            "beneficiary_id":
+            audit["beneficiary_id"],
 
-    cursor.execute("""
+            "item_id":
+            audit["item_id"],
 
-        SELECT
+            "month":
+            audit_month,
 
-            item_id,
+            "year":
+            audit_year,
+
+            "unclaimed_quantity":
             unclaimed_quantity,
-            audit_status
 
-        FROM unclaimed_audit
+            "returned_quantity":
+            returned_qty,
 
-        WHERE audit_id=%s
+            "inventory_before_return":
+            available_quantity,
 
-    """, (audit_id,))
+            "inventory_after_return":
+            new_inventory_quantity,
 
-    audit = cursor.fetchone()
+            "audit_status":
+            "Returned",
 
-    if audit is None:
+            "inventory_updated":
+            True
 
-        cursor.close()
-        conn.close()
+        }), 200
 
-        return jsonify({
-            "message": "Audit record not found."
-        }), 404
+    except Exception as e:
 
-    if audit["audit_status"] == "Returned":
-
-        cursor.close()
-        conn.close()
-
-        return jsonify({
-            "message": "Stock already returned."
-        }), 400
-
-    if returned_qty > float(audit["unclaimed_quantity"]):
-
-        cursor.close()
-        conn.close()
+        if conn:
+            conn.rollback()
 
         return jsonify({
-            "message": "Returned quantity cannot exceed unclaimed quantity."
-        }), 400
 
-    # -------------------------
-    # Add stock back to inventory
-    # -------------------------
+            "message":
+            "Warehouse return failed.",
 
-    cursor.execute("""
+            "error":
+            str(e)
 
-        UPDATE inventory
+        }), 500
 
-        SET available_quantity =
-            available_quantity + %s
+    finally:
 
-        WHERE item_id=%s
+        if cursor:
+            cursor.close()
 
-    """, (
-
-        returned_qty,
-        audit["item_id"]
-
-    ))
-
-    # -------------------------
-    # Update audit
-    # -------------------------
-
-    cursor.execute("""
-
-        UPDATE unclaimed_audit
-
-        SET
-
-            warehouse_returned_quantity=%s,
-
-            returned_to_warehouse=TRUE,
-
-            processed_by=%s,
-
-            audit_status='Returned'
-
-        WHERE audit_id=%s
-
-    """, (
-
-        returned_qty,
-        processed_by,
-        audit_id
-
-    ))
-
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-
-    return jsonify({
-
-        "message": "Stock returned to warehouse successfully."
-
-    })
+        if conn:
+            conn.close()

@@ -1,0 +1,54 @@
+.beneficiary-stock-page {
+    padding: 40px;
+}
+
+.beneficiary-stock-page h1 {
+    color: #1e3a5f;
+    margin-bottom: 8px;
+}
+
+.stock-subtitle {
+    color: #64748b;
+    margin-bottom: 30px;
+}
+
+.beneficiary-stock-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.beneficiary-stock-table th {
+    background: #1e3a5f;
+    color: white;
+    padding: 16px;
+    text-align: left;
+}
+
+.beneficiary-stock-table td {
+    padding: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.beneficiary-stock-table tr:last-child td {
+    border-bottom: none;
+}
+
+.stock-available {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+.stock-unavailable {
+    color: #dc2626;
+    font-weight: bold;
+}
+
+.no-stock {
+    text-align: center;
+    padding: 30px !important;
+    color: #64748b;
+}

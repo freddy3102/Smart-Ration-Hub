@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import BeneficiaryLogin from "./pages/BeneficiaryLogin";
+import BeneficiaryDashboard from "./pages/BeneficiaryDashboard";
 import Dashboard from "./pages/Dashboard";
 import Beneficiaries from "./pages/Beneficiaries";
 import RationItems from "./pages/RationItems";
@@ -14,6 +15,9 @@ import Reports from "./pages/Reports";
 import WarehouseLogin from "./pages/WarehouseLogin";
 import WarehouseDashboard from "./pages/WarehouseDashboard";
 import WarehouseVerification from "./pages/WarehouseVerification";
+import BeneficiaryStock from "./pages/BeneficiaryStock";
+import BeneficiaryHistory from "./pages/BeneficiaryHistory";
+import BeneficiaryReports from "./pages/BeneficiaryReports";
 
 import "./App.css";
 
@@ -44,7 +48,14 @@ function App() {
                 element={<BeneficiaryLogin />}
             />
 
-            {/* Dashboard */}
+            {/* Beneficiary Dashboard */}
+
+            <Route
+                path="/beneficiary-dashboard"
+                element={<BeneficiaryDashboard />}
+            />
+
+            {/* Admin Dashboard */}
 
             <Route
                 path="/dashboard"
@@ -93,27 +104,47 @@ function App() {
                 element={<DistributionCycle />}
             />
 
+            {/* Reports */}
+
             <Route
+                path="/reports"
+                element={<Reports />}
+            />
 
-    path="/reports"
+            {/* Warehouse Login */}
 
-    element={<Reports />}
+            <Route
+                path="/warehouse-login"
+                element={<WarehouseLogin />}
+            />
 
+            {/* Warehouse Dashboard */}
+
+            <Route
+                path="/warehouse-dashboard"
+                element={<WarehouseDashboard />}
+            />
+
+            {/* Warehouse Verification */}
+
+            <Route
+                path="/warehouse-verification"
+                element={<WarehouseVerification />}
+            />
+
+            <Route
+    path="/beneficiary-stock"
+    element={<BeneficiaryStock />}
 />
 
 <Route
-    path="/warehouse-login"
-    element={<WarehouseLogin />}
+    path="/beneficiary-history"
+    element={<BeneficiaryHistory />}
 />
 
 <Route
-    path="/warehouse-dashboard"
-    element={<WarehouseDashboard />}
-/>
-
-<Route
-    path="/warehouse-verification"
-    element={<WarehouseVerification />}
+    path="/beneficiary-reports"
+    element={<BeneficiaryReports />}
 />
 
         </Routes>
