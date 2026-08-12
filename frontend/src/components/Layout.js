@@ -1,150 +1,265 @@
-import { Link, useLocation } from "react-router-dom";
+import {
+    NavLink,
+    useLocation,
+    useNavigate
+} from "react-router-dom";
+
 import "../styles/Layout.css";
+
 
 function Layout({ children }) {
 
     const location = useLocation();
 
+    const navigate = useNavigate();
+
+
+    const menuItems = [
+
+        {
+            path: "/dashboard",
+            icon: "📊",
+            label: "Dashboard"
+        },
+
+        {
+            path: "/beneficiaries",
+            icon: "👥",
+            label: "Beneficiaries"
+        },
+
+        {
+            path: "/ration-items",
+            icon: "🛒",
+            label: "Ration Items"
+        },
+
+        {
+            path: "/inventory",
+            icon: "📦",
+            label: "Inventory"
+        },
+
+        {
+            path: "/distribution",
+            icon: "🍚",
+            label: "Distribution"
+        },
+
+        {
+            path: "/distribution-cycle",
+            icon: "📅",
+            label: "Distribution Cycle"
+        },
+
+        {
+            path: "/audit",
+            icon: "📋",
+            label: "Audit"
+        },
+
+        {
+            path: "/reports",
+            icon: "📈",
+            label: "Reports"
+        }
+
+    ];
+
+
+    // ---------------------------------
+    // Admin Logout
+    // ---------------------------------
+
+    const logout = () => {
+
+        sessionStorage.removeItem(
+            "admin_authenticated"
+        );
+
+        sessionStorage.clear();
+
+
+        navigate(
+            "/admin-login",
+            {
+                replace: true
+            }
+        );
+
+    };
+
+
     return (
 
         <div className="layout">
 
+
+            {/* =================================
+                SIDEBAR
+            ================================= */}
+
             <aside className="sidebar">
+
+
+                {/* Brand */}
 
                 <div className="logo-section">
 
-                    <h2>🍚</h2>
+                    <div className="brand-icon">
+                        🍚
+                    </div>
 
-                    <h1>Smart Ration Hub</h1>
+                    <div className="brand-text">
 
-                    <p>Admin Panel</p>
+                        <h1>
+                            Smart Ration Hub
+                        </h1>
+
+                        <p>
+                            Admin Panel
+                        </p>
+
+                    </div>
 
                 </div>
 
-                <hr />
+
+                {/* Navigation */}
 
                 <nav className="menu">
 
-                    <Link
-                        to="/dashboard"
-                        className={
-                            location.pathname === "/dashboard"
-                                ? "active"
-                                : ""
-                        }
-                    >
-                        📊 Dashboard
-                    </Link>
+                    <div className="menu-label">
+                        MAIN MENU
+                    </div>
 
-                    <Link
-                        to="/beneficiaries"
-                        className={
-                            location.pathname === "/beneficiaries"
-                                ? "active"
-                                : ""
-                        }
-                    >
-                        👥 Beneficiaries
-                    </Link>
 
-                    <Link
-                        to="/ration-items"
-                        className={
-                            location.pathname === "/ration-items"
-                                ? "active"
-                                : ""
-                        }
-                    >
-                        🛒 Ration Items
-                    </Link>
+                    {menuItems.map(
+                        (item) => (
 
-                    <Link
-                        to="/inventory"
-                        className={
-                            location.pathname === "/inventory"
-                                ? "active"
-                                : ""
-                        }
-                    >
-                        📦 Inventory
-                    </Link>
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                className={({ isActive }) =>
+                                    isActive
+                                        ? "menu-link active"
+                                        : "menu-link"
+                                }
+                            >
 
-                    <Link
-                        to="/distribution"
-                        className={
-                            location.pathname === "/distribution"
-                                ? "active"
-                                : ""
-                        }
-                    >
-                        🍚 Distribution
-                    </Link>
+                                <span className="menu-icon">
+                                    {item.icon}
+                                </span>
 
-                    {/* Distribution Cycle */}
+                                <span className="menu-text">
+                                    {item.label}
+                                </span>
 
-                    <Link
-                        to="/distribution-cycle"
-                        className={
-                            location.pathname === "/distribution-cycle"
-                                ? "active"
-                                : ""
-                        }
-                    >
-                        📅 Distribution Cycle
-                    </Link>
+                                <span className="menu-arrow">
+                                    →
+                                </span>
 
-                    {/* Warehouse Audit */}
+                            </NavLink>
 
-                    <Link
-                        to="/audit"
-                        className={
-                            location.pathname === "/audit"
-                                ? "active"
-                                : ""
-                        }
-                    >
-                        📋 Audit
-                    </Link>
-
-                    <Link
-
-    to="/reports"
-
-    className={
-
-        location.pathname === "/reports"
-
-        ?
-
-        "active"
-
-        :
-
-        ""
-
-    }
-
->
-
-    📈 Reports
-
-</Link>
+                        )
+                    )}
 
                 </nav>
 
-                <div className="logout-section">
 
-                    <Link to="/">
-                        🚪 Logout
-                    </Link>
+                {/* Sidebar Bottom */}
+
+                <div className="sidebar-bottom">
+
+                    <div className="sidebar-divider" />
+
+
+                    <div className="system-status">
+
+                        <span className="status-dot" />
+
+                        <div>
+
+                            <strong>
+                                System Active
+                            </strong>
+
+                            <small>
+                                Smart Ration Hub
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        className="logout-link"
+                        onClick={logout}
+                    >
+
+                        <span className="menu-icon">
+                            🚪
+                        </span>
+
+                        <span>
+                            Logout
+                        </span>
+
+                    </button>
 
                 </div>
 
             </aside>
 
+
+            {/* =================================
+                MAIN CONTENT
+            ================================= */}
+
             <main className="main-content">
 
-                {children}
+
+                {/* Top Bar */}
+
+                <header className="topbar">
+
+                    <div className="breadcrumb">
+
+                        <span>
+                            Smart Ration Hub
+                        </span>
+
+                        <span className="breadcrumb-separator">
+                            /
+                        </span>
+
+                        <strong>
+
+                            {
+                                menuItems.find(
+                                    (item) =>
+                                        location.pathname ===
+                                        item.path
+                                )?.label ||
+                                "Dashboard"
+                            }
+
+                        </strong>
+
+                    </div>
+
+                </header>
+
+
+                {/* Content */}
+
+                <div className="content-area">
+
+                    {children}
+
+                </div>
 
             </main>
 
@@ -153,5 +268,6 @@ function Layout({ children }) {
     );
 
 }
+
 
 export default Layout;

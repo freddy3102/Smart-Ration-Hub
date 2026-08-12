@@ -31,75 +31,223 @@ function Dashboard() {
 
             <div className="dashboard">
 
+                {/* Header */}
+
                 <div className="dashboard-header">
 
-                    <h1>Dashboard</h1>
+                    <div>
 
-                    <p>
-                        Welcome back, Administrator 👋
-                    </p>
+                        <div className="breadcrumb">
+                            Smart Ration Hub
+                            <span>/</span>
+                            Dashboard
+                        </div>
+
+                        <h1>Dashboard</h1>
+
+                        <p>
+                            Welcome back, Administrator 👋
+                        </p>
+
+                    </div>
+
+                    <div className="dashboard-date">
+                        📅 {new Date().toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric"
+                        })}
+                    </div>
 
                 </div>
+
+
+                {/* Main Summary Cards */}
 
                 <div className="dashboard-grid">
 
+                    {/* Beneficiaries */}
+
                     <div className="dashboard-card beneficiaries">
 
-                        <h3>👥 Beneficiaries</h3>
+                        <div className="card-top">
 
-                        <h1>{data.total_beneficiaries}</h1>
+                            <div className="card-icon">
+                                👥
+                            </div>
+
+                            <div>
+                                <h3>Beneficiaries</h3>
+
+                                <span>
+                                    Total Registered
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <h1>
+                            {data.total_beneficiaries}
+                        </h1>
+
+                        <div className="card-footer">
+
+                            <a href="/beneficiaries">
+                                View beneficiaries
+                                <span>→</span>
+                            </a>
+
+                        </div>
 
                     </div>
 
-                    <div className="dashboard-card inventory">
 
-                        <h3>📦 Inventory</h3>
-
-                        <h1>{data.total_inventory_items}</h1>
-
-                    </div>
-
-                    <div className="dashboard-card distribution">
-
-                        <h3>🍚 Distributions</h3>
-
-                        <h1>{data.total_distributions}</h1>
-
-                    </div>
+                    {/* Low Stock */}
 
                     <div className="dashboard-card lowstock">
 
-                        <h3>⚠ Low Stock</h3>
+                        <div className="card-top">
 
-                        <h1>{data.low_stock_items}</h1>
+                            <div className="card-icon">
+                                ⚠️
+                            </div>
+
+                            <div>
+                                <h3>Low Stock Alerts</h3>
+
+                                <span>
+                                    Items running low
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <h1>
+                            {data.low_stock_items}
+                        </h1>
+
+                        <div className="card-footer">
+
+                            <a href="/inventory">
+                                View inventory
+                                <span>→</span>
+                            </a>
+
+                        </div>
 
                     </div>
 
                 </div>
 
+
+                {/* Bottom Section */}
+
                 <div className="dashboard-bottom">
+
+
+                    {/* System Status */}
 
                     <div className="status-card">
 
-                        <h2>📢 System Status</h2>
+                        <div className="section-heading">
 
-                        <p>✔ All services are running normally.</p>
+                            <div>
+
+                                <h2>
+                                    System Status
+                                </h2>
+
+                                <p>
+                                    Current status of Smart Ration Hub
+                                </p>
+
+                            </div>
+
+                            <span className="active-badge">
+                                ● Active
+                            </span>
+
+                        </div>
+
+
+                        <div className="status-content">
+
+                            <div className="status-icon">
+                                ✓
+                            </div>
+
+                            <div>
+
+                                <h3>
+                                    All systems are running normally
+                                </h3>
+
+                                <p>
+                                    Dashboard services and database
+                                    connections are operating normally.
+                                </p>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
-                    <div className="activity-card">
 
-                        <h2>🕒 Recent Activity</h2>
+                    {/* Inventory Overview */}
 
-                        <ul>
+                    <div className="overview-card">
 
-                            <li>Beneficiary module updated</li>
+                        <div className="section-heading">
 
-                            <li>Dashboard loaded successfully</li>
+                            <div>
 
-                            <li>Ready for Inventory Module</li>
+                                <h2>
+                                    Inventory Overview
+                                </h2>
 
-                        </ul>
+                                <p>
+                                    Current inventory status
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div className="inventory-overview">
+
+                            <div className="inventory-number">
+
+                                <span>
+                                    📦
+                                </span>
+
+                                <strong>
+                                    {data.total_inventory_items}
+                                </strong>
+
+                                <small>
+                                    Inventory Items
+                                </small>
+
+                            </div>
+
+
+                            <div className="inventory-link">
+
+                                <p>
+                                    Manage your ration stock
+                                    and monitor availability.
+                                </p>
+
+                                <a href="/inventory">
+                                    Open Inventory →
+                                </a>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -108,9 +256,7 @@ function Dashboard() {
             </div>
 
         </Layout>
-
     );
-
 }
 
 export default Dashboard;

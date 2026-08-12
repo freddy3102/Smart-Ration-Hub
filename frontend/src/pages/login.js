@@ -1,7 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 import "../styles/Login.css";
+
 
 function Login({ setLoggedIn }) {
 
@@ -9,6 +11,7 @@ function Login({ setLoggedIn }) {
     const [password, setPassword] = useState("");
 
     const navigate = useNavigate();
+
 
     const handleLogin = async () => {
 
@@ -22,31 +25,74 @@ function Login({ setLoggedIn }) {
                 }
             );
 
-            if (response.data.message === "Login successful") {
+
+            if (
+                response.data.message ===
+                "Login successful"
+            ) {
 
                 if (setLoggedIn) {
+
                     setLoggedIn(true);
+
                 }
 
-                navigate("/dashboard");
 
-            } else {
+                // ---------------------------------
+                // Create Admin Session
+                // ---------------------------------
 
-                alert(response.data.message);
+                sessionStorage.setItem(
+                    "admin_authenticated",
+                    "true"
+                );
+
+
+                // ---------------------------------
+                // Navigate to Dashboard
+                // ---------------------------------
+
+                navigate(
+                    "/dashboard",
+                    {
+                        replace: true
+                    }
+                );
 
             }
 
-        } catch (error) {
+            else {
+
+                alert(
+                    response.data.message
+                );
+
+            }
+
+        }
+
+        catch (error) {
 
             if (error.response) {
-                alert(error.response.data.message);
-            } else {
-                alert("Unable to connect to server");
+
+                alert(
+                    error.response.data.message
+                );
+
+            }
+
+            else {
+
+                alert(
+                    "Unable to connect to server"
+                );
+
             }
 
         }
 
     };
+
 
     return (
 
@@ -54,23 +100,38 @@ function Login({ setLoggedIn }) {
 
             <div className="login-card">
 
-                <h1>🏛️ Smart Ration Hub</h1>
+                <h1>
+                    🏛️ Smart Ration Hub
+                </h1>
 
-                <p>Administrator Login</p>
+                <p>
+                    Administrator Login
+                </p>
+
 
                 <input
                     type="text"
                     placeholder="Username"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(e) =>
+                        setUsername(
+                            e.target.value
+                        )
+                    }
                 />
+
 
                 <input
                     type="password"
                     placeholder="Password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) =>
+                        setPassword(
+                            e.target.value
+                        )
+                    }
                 />
+
 
                 <button
                     className="login-btn"
@@ -79,9 +140,12 @@ function Login({ setLoggedIn }) {
                     Login
                 </button>
 
+
                 <button
                     className="back-btn"
-                    onClick={() => navigate("/")}
+                    onClick={() =>
+                        navigate("/")
+                    }
                 >
                     ← Back
                 </button>
@@ -91,6 +155,8 @@ function Login({ setLoggedIn }) {
         </div>
 
     );
+
 }
+
 
 export default Login;

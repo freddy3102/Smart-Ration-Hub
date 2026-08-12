@@ -1,0 +1,819 @@
+/* =================================
+   PAGE
+================================= */
+
+.warehouse-audit-page {
+    min-height: 100vh;
+    background: #f4f7fb;
+    color: #172554;
+}
+
+
+/* =================================
+   HEADER
+================================= */
+
+.warehouse-audit-header {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 28px 5%;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 30px;
+}
+
+
+.warehouse-label {
+    display: block;
+
+    color: #2563eb;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+
+    margin-bottom: 6px;
+}
+
+
+.warehouse-audit-header h1 {
+    margin: 0 0 6px;
+
+    font-size: 32px;
+
+    color: #172554;
+}
+
+
+.warehouse-audit-header p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 15px;
+}
+
+
+/* =================================
+   MANAGER PROFILE
+================================= */
+
+.warehouse-manager-profile {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 10px 16px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+}
+
+
+.manager-avatar {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    background: #2563eb;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-weight: 700;
+
+    font-size: 18px;
+}
+
+
+.warehouse-manager-profile span {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    margin-bottom: 2px;
+}
+
+
+.warehouse-manager-profile strong {
+    display: block;
+
+    color: #1e293b;
+
+    font-size: 14px;
+}
+
+
+/* =================================
+   NAVIGATION
+================================= */
+
+.warehouse-audit-nav {
+    padding: 16px 5%;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    background: #f8fafc;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+.back-dashboard-btn,
+.warehouse-audit-logout {
+    border: none;
+
+    cursor: pointer;
+
+    border-radius: 8px;
+
+    padding: 10px 16px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+
+.back-dashboard-btn {
+    background: #e2e8f0;
+
+    color: #334155;
+}
+
+
+.back-dashboard-btn:hover {
+    background: #cbd5e1;
+
+    transform: translateY(-1px);
+}
+
+
+.warehouse-audit-logout {
+    background: #fee2e2;
+
+    color: #b91c1c;
+
+    border: 1px solid #fecaca;
+}
+
+
+.warehouse-audit-logout:hover {
+    background: #fecaca;
+}
+
+
+/* =================================
+   MAIN CONTENT
+================================= */
+
+.warehouse-audit-content {
+    width: 90%;
+
+    max-width: 1450px;
+
+    margin: 0 auto;
+
+    padding: 30px 0 50px;
+}
+
+
+/* =================================
+   INTRO
+================================= */
+
+.audit-page-intro {
+    margin-bottom: 25px;
+}
+
+
+.audit-page-intro h2 {
+    margin: 0 0 8px;
+
+    color: #172554;
+
+    font-size: 24px;
+}
+
+
+.audit-page-intro p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+}
+
+
+/* =================================
+   SUMMARY CARDS
+================================= */
+
+.summary-cards {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 18px;
+
+    margin-bottom: 22px;
+}
+
+
+.summary-cards .card {
+    background: white;
+
+    border-radius: 14px;
+
+    padding: 22px;
+
+    text-align: center;
+
+    border: 1px solid #e2e8f0;
+
+    box-shadow:
+        0 5px 18px rgba(15, 23, 42, 0.06);
+}
+
+
+.summary-cards .card h2 {
+    margin: 0 0 8px;
+
+    font-size: 30px;
+
+    color: #172554;
+}
+
+
+.summary-cards .card p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 14px;
+}
+
+
+.summary-cards .pending-card h2 {
+    color: #f59e0b;
+}
+
+
+.summary-cards .returned-card h2 {
+    color: #16a34a;
+}
+
+
+/* =================================
+   ANALYTICS
+================================= */
+
+.analytics-section {
+    display: grid;
+
+    grid-template-columns:
+        minmax(280px, 1fr)
+        minmax(400px, 2fr);
+
+    gap: 18px;
+
+    margin-bottom: 22px;
+}
+
+
+.chart-card,
+.mini-card {
+    background: white;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 5px 18px rgba(15, 23, 42, 0.06);
+}
+
+
+.chart-card {
+    padding: 22px;
+}
+
+
+.chart-card h2 {
+    margin: 0 0 12px;
+
+    font-size: 19px;
+
+    color: #1e293b;
+}
+
+
+.chart-wrapper {
+    height: 190px;
+
+    position: relative;
+}
+
+
+/* =================================
+   MINI STATS
+================================= */
+
+.mini-stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 18px;
+}
+
+
+.mini-card {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 25px;
+}
+
+
+.mini-card h2 {
+    margin: 0 0 8px;
+
+    color: #2563eb;
+
+    font-size: 28px;
+}
+
+
+.mini-card p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 14px;
+}
+
+
+/* =================================
+   FILTER
+================================= */
+
+.audit-filter {
+    display: flex;
+
+    gap: 12px;
+
+    margin-bottom: 14px;
+}
+
+
+.audit-filter select,
+.audit-filter input {
+    box-sizing: border-box;
+
+    padding: 11px 13px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    background: white;
+
+    color: #1e293b;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+
+.audit-filter select {
+    min-width: 150px;
+}
+
+
+.audit-filter input {
+    width: 120px;
+}
+
+
+.audit-filter select:focus,
+.audit-filter input:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+
+/* =================================
+   CYCLE STATUS
+================================= */
+
+.cycle-status-banner {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    background: white;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 10px;
+
+    padding: 13px 16px;
+
+    margin-bottom: 14px;
+
+    color: #334155;
+
+    font-size: 14px;
+}
+
+
+.status-open,
+.status-closed {
+    display: inline-block;
+
+    padding: 6px 14px;
+
+    border-radius: 20px;
+
+    font-weight: 700;
+
+    font-size: 13px;
+}
+
+
+.status-open {
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+.status-closed {
+    background: #fee2e2;
+
+    color: #b91c1c;
+}
+
+
+/* =================================
+   SEARCH
+================================= */
+
+.search-box {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 13px 15px;
+
+    margin-bottom: 14px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 9px;
+
+    background: white;
+
+    color: #1e293b;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+
+.search-box:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+
+/* =================================
+   TABLE
+================================= */
+
+.warehouse-audit-table-wrapper {
+    background: white;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    overflow-x: auto;
+
+    box-shadow:
+        0 5px 18px rgba(15, 23, 42, 0.06);
+}
+
+
+.warehouse-audit-table-wrapper table {
+    width: 100%;
+
+    min-width: 1100px;
+
+    border-collapse: collapse;
+}
+
+
+.warehouse-audit-table-wrapper thead {
+    background: #172554;
+
+    color: white;
+}
+
+
+.warehouse-audit-table-wrapper th {
+    padding: 14px 12px;
+
+    text-align: left;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+}
+
+
+.warehouse-audit-table-wrapper td {
+    padding: 13px 12px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    color: #334155;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+}
+
+
+.warehouse-audit-table-wrapper tbody tr:hover {
+    background: #f8fafc;
+}
+
+
+.warehouse-audit-table-wrapper tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =================================
+   STATUS BADGES
+================================= */
+
+.badge {
+    display: inline-block;
+
+    padding: 6px 11px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+.badge.returned {
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+.badge.pending {
+    background: #fef3c7;
+
+    color: #b45309;
+}
+
+
+/* =================================
+   RETURN BUTTON
+================================= */
+
+.return-btn {
+    border: none;
+
+    border-radius: 7px;
+
+    padding: 8px 12px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+
+.return-btn:hover:not(:disabled) {
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+}
+
+
+.return-btn:disabled {
+    background: #cbd5e1;
+
+    color: #64748b;
+
+    cursor: not-allowed;
+}
+
+
+.returned-text {
+    color: #16a34a;
+
+    font-weight: 700;
+
+    font-size: 13px;
+}
+
+
+/* =================================
+   EMPTY TABLE
+================================= */
+
+.empty-table {
+    text-align: center;
+
+    padding: 40px !important;
+
+    color: #64748b !important;
+}
+
+
+/* =================================
+   FOOTER
+================================= */
+
+.warehouse-audit-footer {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 22px 5%;
+
+    background: white;
+
+    border-top: 1px solid #e2e8f0;
+}
+
+
+.warehouse-audit-footer strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 13px;
+}
+
+
+.warehouse-audit-footer span {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* =================================
+   RESPONSIVE
+================================= */
+
+@media (max-width: 1000px) {
+
+    .summary-cards {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    .analytics-section {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .warehouse-audit-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+
+    .warehouse-manager-profile {
+        width: 100%;
+
+        box-sizing: border-box;
+    }
+
+
+    .warehouse-audit-nav {
+        padding: 14px 5%;
+    }
+
+
+    .warehouse-audit-content {
+        width: 92%;
+
+        padding-top: 22px;
+    }
+
+
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+
+    .mini-stats {
+        grid-template-columns: 1fr;
+    }
+
+
+    .audit-filter {
+        flex-direction: column;
+    }
+
+
+    .audit-filter select,
+    .audit-filter input {
+        width: 100%;
+    }
+
+
+    .cycle-status-banner {
+        flex-wrap: wrap;
+    }
+
+
+    .warehouse-audit-footer {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+}

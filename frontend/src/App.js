@@ -4,6 +4,7 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import BeneficiaryLogin from "./pages/BeneficiaryLogin";
 import BeneficiaryDashboard from "./pages/BeneficiaryDashboard";
+
 import Dashboard from "./pages/Dashboard";
 import Beneficiaries from "./pages/Beneficiaries";
 import RationItems from "./pages/RationItems";
@@ -12,14 +13,20 @@ import Distribution from "./pages/Distribution";
 import Audit from "./pages/Audit";
 import DistributionCycle from "./pages/DistributionCycle";
 import Reports from "./pages/Reports";
+
 import WarehouseLogin from "./pages/WarehouseLogin";
 import WarehouseDashboard from "./pages/WarehouseDashboard";
+import WarehouseAudit from "./pages/WarehouseAudit";
 import WarehouseVerification from "./pages/WarehouseVerification";
+
 import BeneficiaryStock from "./pages/BeneficiaryStock";
 import BeneficiaryHistory from "./pages/BeneficiaryHistory";
 import BeneficiaryReports from "./pages/BeneficiaryReports";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+
 import "./App.css";
+
 
 function App() {
 
@@ -27,7 +34,9 @@ function App() {
 
         <Routes>
 
-            {/* Landing Page */}
+            {/* =================================
+                PUBLIC PAGES
+            ================================= */}
 
             <Route
                 path="/"
@@ -48,69 +57,6 @@ function App() {
                 element={<BeneficiaryLogin />}
             />
 
-            {/* Beneficiary Dashboard */}
-
-            <Route
-                path="/beneficiary-dashboard"
-                element={<BeneficiaryDashboard />}
-            />
-
-            {/* Admin Dashboard */}
-
-            <Route
-                path="/dashboard"
-                element={<Dashboard />}
-            />
-
-            {/* Beneficiaries */}
-
-            <Route
-                path="/beneficiaries"
-                element={<Beneficiaries />}
-            />
-
-            {/* Ration Items */}
-
-            <Route
-                path="/ration-items"
-                element={<RationItems />}
-            />
-
-            {/* Inventory */}
-
-            <Route
-                path="/inventory"
-                element={<Inventory />}
-            />
-
-            {/* Distribution */}
-
-            <Route
-                path="/distribution"
-                element={<Distribution />}
-            />
-
-            {/* Warehouse Audit */}
-
-            <Route
-                path="/audit"
-                element={<Audit />}
-            />
-
-            {/* Distribution Cycle */}
-
-            <Route
-                path="/distribution-cycle"
-                element={<DistributionCycle />}
-            />
-
-            {/* Reports */}
-
-            <Route
-                path="/reports"
-                element={<Reports />}
-            />
-
             {/* Warehouse Login */}
 
             <Route
@@ -118,39 +64,110 @@ function App() {
                 element={<WarehouseLogin />}
             />
 
-            {/* Warehouse Dashboard */}
 
-            <Route
-                path="/warehouse-dashboard"
-                element={<WarehouseDashboard />}
-            />
+            {/* =================================
+                PROTECTED PAGES
+            ================================= */}
 
-            {/* Warehouse Verification */}
+            <Route element={<ProtectedRoute />}>
 
-            <Route
-                path="/warehouse-verification"
-                element={<WarehouseVerification />}
-            />
 
-            <Route
-    path="/beneficiary-stock"
-    element={<BeneficiaryStock />}
-/>
+                {/* =================================
+                    ADMIN MODULES
+                ================================= */}
 
-<Route
-    path="/beneficiary-history"
-    element={<BeneficiaryHistory />}
-/>
+                <Route
+                    path="/dashboard"
+                    element={<Dashboard />}
+                />
 
-<Route
-    path="/beneficiary-reports"
-    element={<BeneficiaryReports />}
-/>
+                <Route
+                    path="/beneficiaries"
+                    element={<Beneficiaries />}
+                />
+
+                <Route
+                    path="/ration-items"
+                    element={<RationItems />}
+                />
+
+                <Route
+                    path="/inventory"
+                    element={<Inventory />}
+                />
+
+                <Route
+                    path="/distribution"
+                    element={<Distribution />}
+                />
+
+                <Route
+                    path="/audit"
+                    element={<Audit />}
+                />
+
+                <Route
+                    path="/distribution-cycle"
+                    element={<DistributionCycle />}
+                />
+
+                <Route
+                    path="/reports"
+                    element={<Reports />}
+                />
+
+
+                {/* =================================
+                    WAREHOUSE MODULES
+                ================================= */}
+
+                <Route
+                    path="/warehouse-dashboard"
+                    element={<WarehouseDashboard />}
+                />
+
+                <Route
+                    path="/warehouse-audit"
+                    element={<WarehouseAudit />}
+                />
+
+                <Route
+                    path="/warehouse-verification"
+                    element={<WarehouseVerification />}
+                />
+
+
+                {/* =================================
+                    BENEFICIARY MODULES
+                ================================= */}
+
+                <Route
+                    path="/beneficiary-dashboard"
+                    element={<BeneficiaryDashboard />}
+                />
+
+                <Route
+                    path="/beneficiary-stock"
+                    element={<BeneficiaryStock />}
+                />
+
+                <Route
+                    path="/beneficiary-history"
+                    element={<BeneficiaryHistory />}
+                />
+
+                <Route
+                    path="/beneficiary-reports"
+                    element={<BeneficiaryReports />}
+                />
+
+            </Route>
 
         </Routes>
 
     );
 
 }
+
 
 export default App;

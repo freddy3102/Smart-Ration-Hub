@@ -3,7 +3,6 @@ import axios from "axios";
 import Layout from "../components/Layout";
 import "../styles/Reports.css";
 
-
 function Reports() {
 
     const today = new Date();
@@ -14,7 +13,6 @@ function Reports() {
     const [year, setYear] =
         useState(today.getFullYear());
 
-
     const [dailyReport, setDailyReport] =
         useState({
             business_date: "",
@@ -22,7 +20,6 @@ function Reports() {
             total_quantity: 0,
             items: []
         });
-
 
     const [monthlyReport, setMonthlyReport] =
         useState({
@@ -32,7 +29,6 @@ function Reports() {
             total_quantity: 0,
             items: []
         });
-
 
     const [verificationReport, setVerificationReport] =
         useState({
@@ -46,9 +42,7 @@ function Reports() {
             items: []
         });
 
-
     const monthNames = [
-
         "January",
         "February",
         "March",
@@ -61,9 +55,7 @@ function Reports() {
         "October",
         "November",
         "December"
-
     ];
-
 
     // ---------------------------------
     // Format Date
@@ -86,7 +78,6 @@ function Reports() {
 
     };
 
-
     // ---------------------------------
     // Load Reports
     // ---------------------------------
@@ -108,10 +99,14 @@ function Reports() {
                 verification
             ] = await Promise.all([
 
+                // Daily report
                 axios.get(
                     "http://127.0.0.1:5000/daily-report"
                 ),
 
+                // Monthly report
+                // Kept intentionally so existing
+                // functionality is not changed.
                 axios.get(
                     "http://127.0.0.1:5000/monthly-report",
                     {
@@ -122,6 +117,7 @@ function Reports() {
                     }
                 ),
 
+                // Monthly verification report
                 axios.get(
                     "http://127.0.0.1:5000/monthly-verification-report",
                     {
@@ -165,81 +161,28 @@ function Reports() {
 
             <div className="reports-container">
 
-                <h1>
-                    Reports Dashboard
-                </h1>
-
-
-                <p className="reports-subtitle">
-
-                    View daily distribution,
-                    monthly distribution and
-                    entitlement verification reports.
-
-                </p>
-
-
                 {/* =================================
-                    SUMMARY CARDS
+                    PAGE HEADER
                 ================================= */}
 
-                <div className="report-summary">
+                <div className="reports-header">
 
-                    <div className="report-card">
+                    <h1>
+                        Reports Dashboard
+                    </h1>
 
-                        <h2>
+                    <p className="reports-subtitle">
 
-                            {Number(
-                                dailyReport.total_quantity
-                            ).toFixed(2)} kg
+                        View daily distribution and
+                        entitlement verification reports.
 
-                        </h2>
-
-                        <p>
-                            Today's Quantity Distributed
-                        </p>
-
-                    </div>
-
-
-                    <div className="report-card">
-
-                        <h2>
-
-                            {Number(
-                                monthlyReport.total_quantity
-                            ).toFixed(2)} kg
-
-                        </h2>
-
-                        <p>
-                            This Month's Distribution
-                        </p>
-
-                    </div>
-
-
-                    <div className="report-card">
-
-                        <h2>
-
-                            {Number(
-                                verificationReport.total_unclaimed
-                            ).toFixed(2)} kg
-
-                        </h2>
-
-                        <p>
-                            Monthly Unclaimed Stock
-                        </p>
-
-                    </div>
+                    </p>
 
                 </div>
 
 
                 {/* =================================
-                    DAILY REPORT
+                    DAILY DISTRIBUTION REPORT
                 ================================= */}
 
                 <div
@@ -247,24 +190,37 @@ function Reports() {
                     id="daily-report"
                 >
 
-                    <h2>
-                        Daily Distribution Report
-                    </h2>
+                    <div className="section-header">
 
+                        <div>
+
+                            <h2>
+                                Daily Distribution Report
+                            </h2>
+
+                            <p>
+                                Distribution activity recorded
+                                for the current business date.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    {/* Daily Report Information */}
 
                     <div className="report-info">
 
                         <span>
 
                             <strong>
-                                Business Date :
-                            </strong>{" "}
+                                Business Date
+                            </strong>
 
-                            {
-                                formatDate(
-                                    dailyReport.business_date
-                                )
-                            }
+                            {formatDate(
+                                dailyReport.business_date
+                            )}
 
                         </span>
 
@@ -272,12 +228,10 @@ function Reports() {
                         <span>
 
                             <strong>
-                                Beneficiaries Served :
-                            </strong>{" "}
+                                Beneficiaries Served
+                            </strong>
 
-                            {
-                                dailyReport.beneficiaries_served
-                            }
+                            {dailyReport.beneficiaries_served}
 
                         </span>
 
@@ -285,8 +239,8 @@ function Reports() {
                         <span>
 
                             <strong>
-                                Total Distributed :
-                            </strong>{" "}
+                                Total Distributed
+                            </strong>
 
                             {
                                 Number(
@@ -299,302 +253,97 @@ function Reports() {
                     </div>
 
 
-                    <table>
+                    {/* Daily Distribution Table */}
 
-                        <thead>
+                    <div className="table-wrapper">
 
-                            <tr>
+                        <table>
 
-                                <th>
-                                    Sl. No.
-                                </th>
+                            <thead>
 
-                                <th>
-                                    Item
-                                </th>
+                                <tr>
 
-                                <th>
-                                    Quantity Distributed
-                                </th>
+                                    <th>
+                                        Sl. No.
+                                    </th>
 
-                            </tr>
+                                    <th>
+                                        Item
+                                    </th>
 
-                        </thead>
+                                    <th>
+                                        Quantity Distributed
+                                    </th>
+
+                                </tr>
+
+                            </thead>
 
 
-                        <tbody>
+                            <tbody>
 
-                            {
-                                dailyReport.items.length > 0
+                                {
+                                    dailyReport.items.length > 0
 
-                                    ?
+                                        ?
 
-                                    dailyReport.items.map(
-                                        (item, index) => (
+                                        dailyReport.items.map(
+                                            (item, index) => (
 
-                                            <tr key={index}>
+                                                <tr key={index}>
 
-                                                <td>
-                                                    {index + 1}
-                                                </td>
+                                                    <td>
+                                                        {index + 1}
+                                                    </td>
 
-                                                <td>
-                                                    {item.item_name}
-                                                </td>
+                                                    <td>
+                                                        <strong>
+                                                            {item.item_name}
+                                                        </strong>
+                                                    </td>
 
-                                                <td>
+                                                    <td>
+                                                        {
+                                                            Number(
+                                                                item.quantity
+                                                            ).toFixed(2)
+                                                        } kg
+                                                    </td>
 
-                                                    {
-                                                        Number(
-                                                            item.quantity
-                                                        ).toFixed(2)
-                                                    } kg
+                                                </tr>
 
-                                                </td>
-
-                                            </tr>
-
+                                            )
                                         )
-                                    )
 
-                                    :
+                                        :
 
-                                    <tr>
+                                        <tr>
 
-                                        <td
-                                            colSpan="3"
-                                            style={{
-                                                textAlign: "center",
-                                                padding: "30px"
-                                            }}
-                                        >
+                                            <td
+                                                colSpan="3"
+                                                className="empty-state"
+                                            >
 
-                                            No ration distributions
-                                            have been recorded for
-                                            the selected business date.
+                                                No ration distributions
+                                                have been recorded for
+                                                the selected business date.
 
-                                        </td>
+                                            </td>
 
-                                    </tr>
-                            }
+                                        </tr>
+                                }
 
-                        </tbody>
+                            </tbody>
 
-                    </table>
+                        </table>
+
+                    </div>
 
                 </div>
 
 
                 {/* =================================
-                    MONTHLY DISTRIBUTION REPORT
-                ================================= */}
-
-                <div
-                    className="report-section"
-                    id="monthly-report"
-                >
-
-                    <div className="report-filter">
-
-                        <label>
-                            Month
-                        </label>
-
-                        <select
-                            value={month}
-                            onChange={(e) =>
-                                setMonth(
-                                    Number(
-                                        e.target.value
-                                    )
-                                )
-                            }
-                        >
-
-                            {
-                                monthNames.map(
-                                    (m, index) => (
-
-                                        <option
-                                            key={index}
-                                            value={index + 1}
-                                        >
-
-                                            {m}
-
-                                        </option>
-
-                                    )
-                                )
-                            }
-
-                        </select>
-
-
-                        <label>
-                            Year
-                        </label>
-
-                        <input
-                            type="number"
-                            value={year}
-                            onChange={(e) =>
-                                setYear(
-                                    Number(
-                                        e.target.value
-                                    )
-                                )
-                            }
-                        />
-
-                    </div>
-
-
-                    <h2>
-                        Monthly Distribution Report
-                    </h2>
-
-
-                    <div className="report-info">
-
-                        <span>
-
-                            <strong>
-                                Month :
-                            </strong>{" "}
-
-                            {
-                                monthNames[
-                                    monthlyReport.month - 1
-                                ]
-                            }{" "}
-
-                            {
-                                monthlyReport.year
-                            }
-
-                        </span>
-
-
-                        <span>
-
-                            <strong>
-                                Beneficiaries Served :
-                            </strong>{" "}
-
-                            {
-                                monthlyReport.beneficiaries_served
-                            }
-
-                        </span>
-
-
-                        <span>
-
-                            <strong>
-                                Total Distributed :
-                            </strong>{" "}
-
-                            {
-                                Number(
-                                    monthlyReport.total_quantity
-                                ).toFixed(2)
-                            } kg
-
-                        </span>
-
-                    </div>
-
-
-                    <table>
-
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    Sl. No.
-                                </th>
-
-                                <th>
-                                    Item
-                                </th>
-
-                                <th>
-                                    Quantity Distributed
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-                            {
-                                monthlyReport.items.length > 0
-
-                                    ?
-
-                                    monthlyReport.items.map(
-                                        (item, index) => (
-
-                                            <tr key={index}>
-
-                                                <td>
-                                                    {index + 1}
-                                                </td>
-
-                                                <td>
-                                                    {item.item_name}
-                                                </td>
-
-                                                <td>
-
-                                                    {
-                                                        Number(
-                                                            item.quantity
-                                                        ).toFixed(2)
-                                                    } kg
-
-                                                </td>
-
-                                            </tr>
-
-                                        )
-                                    )
-
-                                    :
-
-                                    <tr>
-
-                                        <td
-                                            colSpan="3"
-                                            style={{
-                                                textAlign: "center",
-                                                padding: "30px",
-                                                color: "#64748b"
-                                            }}
-                                        >
-
-                                            No ration distributions
-                                            were recorded during
-                                            this month.
-
-                                        </td>
-
-                                    </tr>
-                            }
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-                {/* =================================
-                    MONTHLY VERIFICATION REPORT
+                    MONTHLY ENTITLEMENT VERIFICATION
                 ================================= */}
 
                 <div
@@ -602,304 +351,330 @@ function Reports() {
                     id="verification-report"
                 >
 
-                    <h2>
-                        Monthly Entitlement Verification
-                    </h2>
+                    <div className="section-header">
+
+                        <div>
+
+                            <h2>
+                                Monthly Entitlement Verification
+                            </h2>
+
+                            <p>
+                                Consolidated entitlement and
+                                warehouse return status for
+                                all beneficiaries.
+                            </p>
+
+                        </div>
+
+                    </div>
 
 
-                    <p className="reports-subtitle">
+                    {/* =================================
+                        MONTH / YEAR FILTER
+                    ================================= */}
 
-                        Consolidated entitlement and
-                        warehouse return status for
-                        all beneficiaries.
+                    <div className="report-filter">
 
-                    </p>
+                        <div className="filter-group">
+
+                            <label>
+                                Month
+                            </label>
+
+                            <select
+                                value={month}
+                                onChange={(e) =>
+                                    setMonth(
+                                        Number(
+                                            e.target.value
+                                        )
+                                    )
+                                }
+                            >
+
+                                {
+                                    monthNames.map(
+                                        (monthName, index) => (
+
+                                            <option
+                                                key={index}
+                                                value={index + 1}
+                                            >
+
+                                                {monthName}
+
+                                            </option>
+
+                                        )
+                                    )
+                                }
+
+                            </select>
+
+                        </div>
 
 
-                    {/* Verification Status */}
+                        <div className="filter-group">
 
-                    <div className="report-info">
+                            <label>
+                                Year
+                            </label>
 
-                        <span>
+                            <input
+                                type="number"
+                                value={year}
+                                onChange={(e) =>
+                                    setYear(
+                                        Number(
+                                            e.target.value
+                                        )
+                                    )
+                                }
+                            />
+
+                        </div>
+
+                    </div>
+
+
+                    {/* =================================
+                        VERIFICATION INFORMATION
+                    ================================= */}
+
+                    <div className="verification-header">
+
+                        <div className="verification-period">
+
+                            <span>
+                                Report Period
+                            </span>
 
                             <strong>
-                                Month :
-                            </strong>{" "}
 
-                            {
-                                monthNames[
-                                    verificationReport.month - 1
-                                ]
-                            }{" "}
+                                {
+                                    monthNames[
+                                        verificationReport.month - 1
+                                    ]
+                                }{" "}
 
-                            {
-                                verificationReport.year
-                            }
+                                {
+                                    verificationReport.year
+                                }
 
-                        </span>
+                            </strong>
+
+                        </div>
 
 
-                        <span>
+                        <div className="verification-status">
 
-                            <strong>
-                                Verification Status :
-                            </strong>{" "}
+                            <span>
+                                Verification Status
+                            </span>
 
-                            <span
-                                style={{
-                                    fontWeight: "bold",
-                                    color:
-                                        verificationReport.verification_status ===
-                                            "VERIFIED"
-                                            ? "#16a34a"
-                                            : "#d97706"
-                                }}
+                            <strong
+                                className={
+                                    verificationReport.verification_status ===
+                                    "VERIFIED"
+
+                                        ?
+
+                                        "verified"
+
+                                        :
+
+                                        "not-verified"
+                                }
                             >
 
                                 {
                                     verificationReport.verification_status ===
-                                        "VERIFIED"
-                                        ? "✓ VERIFIED"
-                                        : "⚠ NOT VERIFIED"
+                                    "VERIFIED"
+
+                                        ?
+
+                                        "✓ VERIFIED"
+
+                                        :
+
+                                        "⚠ NOT VERIFIED"
                                 }
 
-                            </span>
-
-                        </span>
-
-                    </div>
-
-
-                    {/* Overall Totals */}
-
-                    <div className="report-summary">
-
-                        <div className="report-card">
-
-                            <h2>
-
-                                {
-                                    Number(
-                                        verificationReport.total_entitled
-                                    ).toFixed(2)
-                                } kg
-
-                            </h2>
-
-                            <p>
-                                Total Entitled
-                            </p>
-
-                        </div>
-
-
-                        <div className="report-card">
-
-                            <h2>
-
-                                {
-                                    Number(
-                                        verificationReport.total_claimed
-                                    ).toFixed(2)
-                                } kg
-
-                            </h2>
-
-                            <p>
-                                Total Claimed
-                            </p>
-
-                        </div>
-
-
-                        <div className="report-card">
-
-                            <h2>
-
-                                {
-                                    Number(
-                                        verificationReport.total_unclaimed
-                                    ).toFixed(2)
-                                } kg
-
-                            </h2>
-
-                            <p>
-                                Total Unclaimed
-                            </p>
-
-                        </div>
-
-
-                        <div className="report-card">
-
-                            <h2>
-
-                                {
-                                    Number(
-                                        verificationReport.total_returned
-                                    ).toFixed(2)
-                                } kg
-
-                            </h2>
-
-                            <p>
-                                Returned to Warehouse
-                            </p>
+                            </strong>
 
                         </div>
 
                     </div>
 
 
-                    {/* Rice / Wheat Table */}
+                    {/* =================================
+                        VERIFICATION TABLE
+                    ================================= */}
 
-                    <table>
+                    <div className="table-wrapper">
 
-                        <thead>
+                        <table>
 
-                            <tr>
+                            <thead>
 
-                                <th>
-                                    Item
-                                </th>
+                                <tr>
 
-                                <th>
-                                    Total Entitled
-                                </th>
+                                    <th>
+                                        Item
+                                    </th>
 
-                                <th>
-                                    Total Claimed
-                                </th>
+                                    <th>
+                                        Total Entitled
+                                    </th>
 
-                                <th>
-                                    Total Unclaimed
-                                </th>
+                                    <th>
+                                        Total Claimed
+                                    </th>
 
-                                <th>
-                                    Returned
-                                </th>
+                                    <th>
+                                        Total Unclaimed
+                                    </th>
 
-                                <th>
-                                    Status
-                                </th>
+                                    <th>
+                                        Returned
+                                    </th>
 
-                            </tr>
+                                    <th>
+                                        Status
+                                    </th>
 
-                        </thead>
+                                </tr>
+
+                            </thead>
 
 
-                        <tbody>
+                            <tbody>
 
-                            {
-                                verificationReport.items.length > 0
+                                {
+                                    verificationReport.items.length > 0
 
-                                    ?
+                                        ?
 
-                                    verificationReport.items.map(
-                                        (item, index) => (
+                                        verificationReport.items.map(
+                                            (item, index) => (
 
-                                            <tr key={index}>
+                                                <tr key={index}>
 
-                                                <td>
-                                                    <strong>
-                                                        {item.item_name}
-                                                    </strong>
-                                                </td>
+                                                    <td>
 
-                                                <td>
+                                                        <strong>
+                                                            {item.item_name}
+                                                        </strong>
 
-                                                    {
-                                                        Number(
-                                                            item.total_entitled
-                                                        ).toFixed(2)
-                                                    } kg
+                                                    </td>
 
-                                                </td>
 
-                                                <td>
-
-                                                    {
-                                                        Number(
-                                                            item.total_claimed
-                                                        ).toFixed(2)
-                                                    } kg
-
-                                                </td>
-
-                                                <td>
-
-                                                    {
-                                                        Number(
-                                                            item.total_unclaimed
-                                                        ).toFixed(2)
-                                                    } kg
-
-                                                </td>
-
-                                                <td>
-
-                                                    {
-                                                        Number(
-                                                            item.total_returned
-                                                        ).toFixed(2)
-                                                    } kg
-
-                                                </td>
-
-                                                <td>
-
-                                                    <span
-                                                        style={{
-                                                            fontWeight: "bold",
-                                                            color:
-                                                                item.status ===
-                                                                    "VERIFIED"
-                                                                    ? "#16a34a"
-                                                                    : "#d97706"
-                                                        }}
-                                                    >
+                                                    <td>
 
                                                         {
-                                                            item.status ===
+                                                            Number(
+                                                                item.total_entitled
+                                                            ).toFixed(2)
+                                                        } kg
+
+                                                    </td>
+
+
+                                                    <td>
+
+                                                        {
+                                                            Number(
+                                                                item.total_claimed
+                                                            ).toFixed(2)
+                                                        } kg
+
+                                                    </td>
+
+
+                                                    <td>
+
+                                                        {
+                                                            Number(
+                                                                item.total_unclaimed
+                                                            ).toFixed(2)
+                                                        } kg
+
+                                                    </td>
+
+
+                                                    <td>
+
+                                                        {
+                                                            Number(
+                                                                item.total_returned
+                                                            ).toFixed(2)
+                                                        } kg
+
+                                                    </td>
+
+
+                                                    <td>
+
+                                                        <span
+                                                            className={
+                                                                item.status ===
                                                                 "VERIFIED"
-                                                                ? "✓ Verified"
-                                                                : "⚠ Not Verified"
-                                                        }
 
-                                                    </span>
+                                                                    ?
 
-                                                </td>
+                                                                    "table-status verified"
 
-                                            </tr>
+                                                                    :
 
+                                                                    "table-status not-verified"
+                                                            }
+                                                        >
+
+                                                            {
+                                                                item.status ===
+                                                                "VERIFIED"
+
+                                                                    ?
+
+                                                                    "✓ Verified"
+
+                                                                    :
+
+                                                                    "⚠ Not Verified"
+                                                            }
+
+                                                        </span>
+
+                                                    </td>
+
+                                                </tr>
+
+                                            )
                                         )
-                                    )
 
-                                    :
+                                        :
 
-                                    <tr>
+                                        <tr>
 
-                                        <td
-                                            colSpan="6"
-                                            style={{
-                                                textAlign: "center",
-                                                padding: "30px",
-                                                color: "#64748b"
-                                            }}
-                                        >
+                                            <td
+                                                colSpan="6"
+                                                className="empty-state"
+                                            >
 
-                                            No entitlement records
-                                            were found for this month.
+                                                No entitlement records
+                                                were found for this month.
 
-                                        </td>
+                                            </td>
 
-                                    </tr>
-                            }
+                                        </tr>
+                                }
 
-                        </tbody>
+                            </tbody>
 
-                    </table>
+                        </table>
+
+                    </div>
 
                 </div>
 
@@ -925,6 +700,5 @@ function Reports() {
     );
 
 }
-
 
 export default Reports;

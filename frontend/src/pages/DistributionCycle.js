@@ -14,12 +14,14 @@ function DistributionCycle() {
     const [currentMonth, setCurrentMonth] =
         useState("");
 
+
     useEffect(() => {
 
         loadBusinessDate();
         loadCycleStatus();
 
     }, []);
+
 
     // ---------------------------------
     // Load Business Date
@@ -60,6 +62,7 @@ function DistributionCycle() {
 
     };
 
+
     // ---------------------------------
     // Load Distribution Cycle Status
     // ---------------------------------
@@ -83,6 +86,7 @@ function DistributionCycle() {
         }
 
     };
+
 
     // ---------------------------------
     // Save Business Date
@@ -121,6 +125,7 @@ function DistributionCycle() {
 
     };
 
+
     // ---------------------------------
     // Close Distribution Cycle
     // ---------------------------------
@@ -137,6 +142,7 @@ function DistributionCycle() {
         if (!confirmClose) {
             return;
         }
+
 
         try {
 
@@ -165,11 +171,16 @@ function DistributionCycle() {
 
     };
 
+
     return (
 
         <Layout>
 
             <div className="cycle-container">
+
+                {/* ---------------------------------
+                    Page Header
+                --------------------------------- */}
 
                 <h1>
                     Distribution Cycle
@@ -183,7 +194,10 @@ function DistributionCycle() {
 
                 </p>
 
-                {/* Business Date */}
+
+                {/* ---------------------------------
+                    Business Date
+                --------------------------------- */}
 
                 <div className="cycle-card">
 
@@ -214,13 +228,19 @@ function DistributionCycle() {
 
                 </div>
 
-                {/* Cycle Status */}
+
+                {/* ---------------------------------
+                    Current Distribution Cycle
+                --------------------------------- */}
 
                 <div className="cycle-card">
 
                     <h2>
                         Current Distribution Cycle
                     </h2>
+
+
+                    {/* Current Business Date */}
 
                     <p>
                         Current Business Date
@@ -230,6 +250,9 @@ function DistributionCycle() {
                         {businessDate}
                     </h3>
 
+
+                    {/* Current Distribution Month */}
+
                     <p>
                         Current Distribution Month
                     </p>
@@ -238,37 +261,54 @@ function DistributionCycle() {
                         {currentMonth}
                     </h3>
 
+
+                    {/* Cycle Status */}
+
                     <p className="status-title">
                         Cycle Status
                     </p>
 
-                    <div
-                        className={
-                            cycleStatus ===
-                            "OPEN"
-                                ?
-                                "status-open"
-                                :
-                                "status-closed"
-                        }
-                    >
 
-                        {cycleStatus}
+                    <div className="status-row">
+
+                        <div
+                            className={
+                                cycleStatus === "OPEN"
+                                    ? "status-open"
+                                    : "status-closed"
+                            }
+                        >
+                            {cycleStatus}
+                        </div>
+
+
+                        <button
+                            className="close-btn"
+                            onClick={closeMonth}
+                            disabled={
+                                cycleStatus === "CLOSED"
+                            }
+                        >
+
+                            {
+                                cycleStatus === "CLOSED"
+                                    ?
+                                    "✔ Cycle Closed"
+                                    :
+                                    "📦 Close Distribution Cycle"
+                            }
+
+                        </button>
 
                     </div>
 
-                    <p
-                        style={{
-                            marginTop: "15px",
-                            color: "#64748b",
-                            fontSize: "15px",
-                            lineHeight: "1.6"
-                        }}
-                    >
+
+                    {/* Status Description */}
+
+                    <p className="cycle-description">
 
                         {
-                            cycleStatus ===
-                            "OPEN"
+                            cycleStatus === "OPEN"
 
                                 ?
 
@@ -280,32 +320,6 @@ function DistributionCycle() {
                         }
 
                     </p>
-
-                    <button
-                        className="close-btn"
-                        onClick={
-                            closeMonth
-                        }
-                        disabled={
-                            cycleStatus ===
-                            "CLOSED"
-                        }
-                    >
-
-                        {
-                            cycleStatus ===
-                            "CLOSED"
-
-                                ?
-
-                                "✔ Distribution Cycle Closed"
-
-                                :
-
-                                "📦 Close Distribution Cycle"
-                        }
-
-                    </button>
 
                 </div>
 

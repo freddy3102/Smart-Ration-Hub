@@ -1,5 +1,5 @@
 /* =================================
-   MAIN APP
+MAIN APP
 ================================= */
 
 .beneficiary-app {
@@ -14,7 +14,7 @@
 
 
 /* =================================
-   SIDEBAR
+SIDEBAR
 ================================= */
 
 .beneficiary-sidebar {
@@ -45,7 +45,7 @@
 
 
 /* =================================
-   BRAND
+BRAND
 ================================= */
 
 .beneficiary-brand {
@@ -63,7 +63,6 @@
 
 }
 
-
 .beneficiary-brand h2 {
 
     margin: 0;
@@ -73,7 +72,6 @@
     color: white;
 
 }
-
 
 .beneficiary-brand p {
 
@@ -87,7 +85,7 @@
 
 
 /* =================================
-   NAVIGATION
+NAVIGATION
 ================================= */
 
 .beneficiary-nav {
@@ -101,7 +99,6 @@
     margin-top: 30px;
 
 }
-
 
 .beneficiary-nav-link {
 
@@ -121,7 +118,6 @@
 
 }
 
-
 .beneficiary-nav-link:hover {
 
     background: rgba(
@@ -134,7 +130,6 @@
     color: white;
 
 }
-
 
 .beneficiary-nav-link.active {
 
@@ -154,14 +149,18 @@
 
 
 /* =================================
-   LOGOUT
+LOGOUT
 ================================= */
 
 .beneficiary-logout {
 
+    width: 100%;
+
     margin-top: auto;
 
     border: none;
+
+    outline: none;
 
     background: #dc2626;
 
@@ -171,24 +170,58 @@
 
     border-radius: 10px;
 
+    font-family: inherit;
+
     font-size: 16px;
 
     font-weight: 600;
 
     cursor: pointer;
 
-}
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 
+}
 
 .beneficiary-logout:hover {
 
     background: #b91c1c;
 
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 4px 12px rgba(
+            220,
+            38,
+            38,
+            0.25
+        );
+
+}
+
+.beneficiary-logout:active {
+
+    transform: translateY(0);
+
+}
+
+.beneficiary-logout:focus-visible {
+
+    box-shadow:
+        0 0 0 3px rgba(
+            255,
+            255,
+            255,
+            0.25
+        );
+
 }
 
 
 /* =================================
-   MAIN
+MAIN
 ================================= */
 
 .beneficiary-main {
@@ -205,7 +238,7 @@
 
 
 /* =================================
-   RESPONSIVE
+RESPONSIVE
 ================================= */
 
 @media (max-width: 800px) {
@@ -223,6 +256,51 @@
         width: calc(100% - 220px);
 
         padding: 25px;
+
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .beneficiary-sidebar {
+
+        width: 190px;
+
+        padding: 20px 12px;
+
+    }
+
+    .beneficiary-main {
+
+        margin-left: 190px;
+
+        width: calc(100% - 190px);
+
+        padding: 18px;
+
+    }
+
+    .beneficiary-brand h2 {
+
+        font-size: 20px;
+
+    }
+
+    .beneficiary-nav-link {
+
+        padding: 12px;
+
+        font-size: 14px;
+
+    }
+
+    .beneficiary-logout {
+
+        padding: 12px;
+
+        font-size: 14px;
 
     }
 

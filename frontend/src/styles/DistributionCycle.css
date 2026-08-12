@@ -1,155 +1,358 @@
-.cycle-container{
+/* ---------------------------------
+   Page Container
+--------------------------------- */
 
-    width:100%;
-    padding:35px;
-    box-sizing:border-box;
-
+.cycle-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-bottom: 50px;
 }
 
-.cycle-container h1{
 
-    font-size:42px;
-    color:#1e293b;
-    margin-bottom:8px;
+/* ---------------------------------
+   Page Header
+--------------------------------- */
 
+.cycle-container h1 {
+    font-size: 36px;
+    color: #172554;
+    margin-bottom: 8px;
+    font-weight: 700;
 }
 
-.cycle-subtitle{
-
-    font-size:17px;
-    color:#64748b;
-    margin-bottom:30px;
-
+.cycle-subtitle {
+    color: #64748b;
+    font-size: 16px;
+    margin-bottom: 30px;
+    line-height: 1.6;
 }
 
-.cycle-card{
 
-    background:#fff;
+/* ---------------------------------
+   Cards
+--------------------------------- */
 
-    border-radius:15px;
+.cycle-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 22px;
 
-    padding:30px;
+    box-shadow:
+        0 4px 16px rgba(15, 23, 42, 0.06);
 
-    margin-bottom:25px;
-
-    box-shadow:0 8px 20px rgba(0,0,0,.08);
-
+    border: 1px solid #e2e8f0;
 }
 
-.cycle-card h2{
-
-    color:#1e293b;
-
-    margin-bottom:20px;
-
+.cycle-card h2 {
+    color: #1e293b;
+    font-size: 22px;
+    margin-top: 0;
+    margin-bottom: 22px;
 }
 
-.cycle-card p{
-
-    color:#64748b;
-
-    margin-bottom:8px;
-
+.cycle-card p {
+    color: #64748b;
+    font-size: 15px;
+    margin-top: 18px;
+    margin-bottom: 6px;
 }
 
-.cycle-card h3{
 
-    font-size:30px;
+/* ---------------------------------
+   Business Date Input
+--------------------------------- */
 
-    color:#2563eb;
+.cycle-card input[type="date"] {
+    width: 100%;
+    box-sizing: border-box;
 
-    margin-bottom:25px;
+    padding: 13px 15px;
 
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+
+    font-size: 15px;
+    color: #1e293b;
+
+    background: #ffffff;
+
+    outline: none;
+
+    transition: 0.2s ease;
 }
 
-.cycle-card input{
+.cycle-card input[type="date"]:focus {
+    border-color: #2563eb;
 
-    width:100%;
-
-    padding:14px;
-
-    font-size:16px;
-
-    border:1px solid #d1d5db;
-
-    border-radius:10px;
-
-    margin-bottom:20px;
-
-    outline:none;
-
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-.cycle-card input:focus{
 
-    border-color:#2563eb;
+/* ---------------------------------
+   Save Button
+--------------------------------- */
 
+.save-btn {
+    margin-top: 16px;
+
+    padding: 12px 22px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #2563eb;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
 }
 
-.save-btn{
-
-    background:#2563eb;
-
-    color:white;
-
-    border:none;
-
-    padding:12px 24px;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
-    font-size:16px;
-
-    transition:.2s;
-
+.save-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
 }
 
-.save-btn:hover{
 
-    background:#1d4ed8;
+/* ---------------------------------
+   Current Business Date / Month
+--------------------------------- */
 
+.cycle-card h3 {
+    color: #2563eb;
+    font-size: 26px;
+
+    margin-top: 4px;
+    margin-bottom: 18px;
+
+    font-weight: 700;
 }
 
-.close-btn{
 
-    background:#dc2626;
+/* ---------------------------------
+   Cycle Status
+--------------------------------- */
 
-    color:white;
-
-    border:none;
-
-    padding:14px 28px;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
-    font-size:16px;
-
-    transition:.2s;
-
+.status-title {
+    margin-top: 22px !important;
+    margin-bottom: 8px !important;
+    font-weight: 500;
 }
 
-.close-btn:hover{
 
-    background:#b91c1c;
+/* ---------------------------------
+   Status Row
+--------------------------------- */
 
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
 }
 
-@media(max-width:768px){
 
-    .cycle-container{
+/* ---------------------------------
+   Open Status
+--------------------------------- */
 
-        padding:20px;
+.status-open {
+    flex: 1;
 
+    background: #dcfce7;
+    color: #15803d;
+
+    padding: 11px 14px;
+
+    border-radius: 20px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    box-sizing: border-box;
+}
+
+
+/* ---------------------------------
+   Closed Status
+--------------------------------- */
+
+.status-closed {
+    flex: 1;
+
+    background: #fee2e2;
+    color: #b91c1c;
+
+    padding: 11px 14px;
+
+    border-radius: 20px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    box-sizing: border-box;
+}
+
+
+/* ---------------------------------
+   Cycle Description
+--------------------------------- */
+
+.cycle-description {
+    margin-top: 18px !important;
+
+    color: #64748b !important;
+
+    font-size: 15px !important;
+
+    line-height: 1.6;
+
+    padding-top: 16px;
+
+    border-top: 1px solid #e2e8f0;
+}
+
+
+/* ---------------------------------
+   Close Distribution Cycle Button
+--------------------------------- */
+
+/*
+   Important:
+   The global .close-btn class is apparently
+   positioning this button at the top-right.
+
+   These rules deliberately override that behaviour.
+*/
+
+.cycle-card .close-btn {
+    position: static !important;
+
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+
+    float: none !important;
+
+    display: block !important;
+
+    margin-top: 20px !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    margin-left: 0 !important;
+
+    width: fit-content !important;
+    height: auto !important;
+
+    padding: 13px 24px !important;
+
+    border: none !important;
+    border-radius: 8px !important;
+
+    background: #dc2626 !important;
+    color: #ffffff !important;
+
+    font-size: 15px !important;
+    font-weight: 600 !important;
+
+    cursor: pointer !important;
+
+    white-space: nowrap !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+
+    transform: none;
+
+    transition: 0.2s ease;
+
+    box-shadow:
+        0 3px 8px rgba(220, 38, 38, 0.15);
+}
+
+
+/* ---------------------------------
+   Close Button Hover
+--------------------------------- */
+
+.cycle-card .close-btn:hover:not(:disabled) {
+    background: #b91c1c !important;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 12px rgba(220, 38, 38, 0.22);
+}
+
+
+/* ---------------------------------
+   Closed Button
+--------------------------------- */
+
+.cycle-card .close-btn:disabled {
+    position: static !important;
+
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+
+    display: block !important;
+
+    background: #16a34a !important;
+    color: #ffffff !important;
+
+    cursor: default !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+
+    box-shadow: none;
+
+    transform: none;
+}
+
+
+/* ---------------------------------
+   Responsive
+--------------------------------- */
+
+@media (max-width: 700px) {
+
+    .cycle-container {
+        padding: 0 5px 30px;
     }
 
-    .cycle-container h1{
-
-        font-size:32px;
-
+    .cycle-container h1 {
+        font-size: 30px;
     }
 
+    .cycle-card {
+        padding: 22px;
+    }
+
+    .status-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .status-open,
+    .status-closed {
+        width: 100%;
+    }
+
+    .cycle-card .close-btn {
+        position: static !important;
+
+        width: 100% !important;
+
+        margin-top: 18px !important;
+    }
 }

@@ -11,36 +11,82 @@ function Inventory() {
     const [editData, setEditData] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
 
+    // ---------------------------------
+    // Check User Role
+    // ---------------------------------
+    // Warehouse Manager has inventory
+    // management permission.
+    //
+    // Shop Owner gets read-only access.
+    // ---------------------------------
+
+    const warehouseManager =
+        localStorage.getItem("warehouse_manager");
+
+    const isWarehouseManager =
+        !!warehouseManager;
+
+
+    // ---------------------------------
+    // Load Inventory
+    // ---------------------------------
+
     useEffect(() => {
+
         fetchInventory();
+
     }, []);
+
 
     const fetchInventory = () => {
 
         axios
-            .get("http://127.0.0.1:5000/inventory")
+            .get(
+                "http://127.0.0.1:5000/inventory"
+            )
             .then((response) => {
-                setInventory(response.data);
+
+                setInventory(
+                    response.data
+                );
+
             })
             .catch((error) => {
+
                 console.log(error);
+
             });
 
     };
 
+
+    // ---------------------------------
+    // Delete Inventory
+    // ---------------------------------
+
     const deleteInventory = (id) => {
 
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this inventory item?"
-        );
+        // Shop Owner is read-only
+        if (!isWarehouseManager) {
+            return;
+        }
+
+        const confirmDelete =
+            window.confirm(
+                "Are you sure you want to delete this inventory item?"
+            );
 
         if (!confirmDelete) return;
 
         axios
-            .delete(`http://127.0.0.1:5000/inventory/${id}`)
+            .delete(
+                `http://127.0.0.1:5000/inventory/${id}`
+            )
             .then((response) => {
 
-                alert(response.data.message);
+                alert(
+                    response.data.message
+                );
 
                 fetchInventory();
 
@@ -48,32 +94,65 @@ function Inventory() {
             .catch((error) => {
 
                 if (error.response) {
-                    alert(error.response.data.message);
+
+                    alert(
+                        error.response.data.message
+                    );
+
                 } else {
-                    alert("Unable to delete inventory.");
+
+                    alert(
+                        "Unable to delete inventory."
+                    );
+
                 }
 
             });
 
     };
 
-    const filteredInventory = inventory.filter((item) =>
-        item.item_name
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
-    );
 
-    const availableCount = inventory.filter(
-        (item) => item.stock_status === "Available"
-    ).length;
+    // ---------------------------------
+    // Search
+    // ---------------------------------
 
-    const lowStockCount = inventory.filter(
-        (item) => item.stock_status === "Low Stock"
-    ).length;
+    const filteredInventory =
+        inventory.filter((item) =>
+            item.item_name
+                .toLowerCase()
+                .includes(
+                    searchTerm.toLowerCase()
+                )
+        );
 
-    const outStockCount = inventory.filter(
-        (item) => item.stock_status === "Out of Stock"
-    ).length;
+
+    // ---------------------------------
+    // Summary Counts
+    // ---------------------------------
+
+    const availableCount =
+        inventory.filter(
+            (item) =>
+                item.stock_status ===
+                "Available"
+        ).length;
+
+
+    const lowStockCount =
+        inventory.filter(
+            (item) =>
+                item.stock_status ===
+                "Low Stock"
+        ).length;
+
+
+    const outStockCount =
+        inventory.filter(
+            (item) =>
+                item.stock_status ===
+                "Out of Stock"
+        ).length;
+
 
     return (
 
@@ -81,61 +160,125 @@ function Inventory() {
 
             <div className="inventory-page">
 
+                {/* =================================
+                    PAGE HEADER
+                ================================= */}
+
                 <div className="page-header">
 
-                    <h1>Inventory Management</h1>
+                    <div>
 
-                    <button
-                        className="add-btn"
-                        onClick={() => {
-                            setEditData(null);
-                            setShowForm(true);
-                        }}
-                    >
-                        + Add Inventory
-                    </button>
+                        <h1>
+                            Inventory Management
+                        </h1>
+
+                        {!isWarehouseManager && (
+
+                            <p
+                                style={{
+                                    marginTop: "6px",
+                                    color: "#64748b",
+                                    fontSize: "14px"
+                                }}
+                            >
+                                View current inventory
+                                and stock availability.
+                            </p>
+
+                        )}
+
+                    </div>
+
+
+                    {/* ---------------------------------
+                        Warehouse Manager Only
+                    --------------------------------- */}
+
+                    {isWarehouseManager && (
+
+                        <button
+                            className="add-btn"
+                            onClick={() => {
+
+                                setEditData(null);
+
+                                setShowForm(true);
+
+                            }}
+                        >
+
+                            + Add Inventory
+
+                        </button>
+
+                    )}
 
                 </div>
 
-                {/* Summary Cards */}
+
+                {/* =================================
+                    SUMMARY CARDS
+                ================================= */}
 
                 <div className="summary-cards">
 
                     <div className="summary-card total-card">
 
-                        <h3>📦 Total Items</h3>
+                        <h3>
+                            📦 Total Items
+                        </h3>
 
-                        <h2>{inventory.length}</h2>
+                        <h2>
+                            {inventory.length}
+                        </h2>
 
                     </div>
+
 
                     <div className="summary-card available-card">
 
-                        <h3>🟢 Available</h3>
+                        <h3>
+                            🟢 Available
+                        </h3>
 
-                        <h2>{availableCount}</h2>
+                        <h2>
+                            {availableCount}
+                        </h2>
 
                     </div>
+
 
                     <div className="summary-card low-card">
 
-                        <h3>🟠 Low Stock</h3>
+                        <h3>
+                            🟠 Low Stock
+                        </h3>
 
-                        <h2>{lowStockCount}</h2>
+                        <h2>
+                            {lowStockCount}
+                        </h2>
 
                     </div>
 
+
                     <div className="summary-card out-card">
 
-                        <h3>🔴 Out of Stock</h3>
+                        <h3>
+                            🔴 Out of Stock
+                        </h3>
 
-                        <h2>{outStockCount}</h2>
+                        <h2>
+                            {outStockCount}
+                        </h2>
 
                     </div>
 
                 </div>
 
-                {/* Search */}
+
+                {/* =================================
+                    SEARCH
+                ================================= */}
 
                 <input
                     type="text"
@@ -143,19 +286,27 @@ function Inventory() {
                     placeholder="🔍 Search Item..."
                     value={searchTerm}
                     onChange={(e) =>
-                        setSearchTerm(e.target.value)
+                        setSearchTerm(
+                            e.target.value
+                        )
                     }
                 />
 
-                {/* Modal */}
+
+                {/* =================================
+                    MODAL
+                ================================= */}
 
                 {showForm && (
 
                     <div
                         className="modal-overlay"
                         onClick={() => {
+
                             setShowForm(false);
+
                             setEditData(null);
+
                         }}
                     >
 
@@ -169,20 +320,33 @@ function Inventory() {
                             <button
                                 className="close-btn"
                                 onClick={() => {
+
                                     setShowForm(false);
+
                                     setEditData(null);
+
                                 }}
                             >
+
                                 ✖
+
                             </button>
 
+
                             <InventoryForm
+
                                 editData={editData}
+
                                 onSuccess={() => {
+
                                     fetchInventory();
+
                                     setShowForm(false);
+
                                     setEditData(null);
+
                                 }}
+
                             />
 
                         </div>
@@ -191,7 +355,10 @@ function Inventory() {
 
                 )}
 
-                {/* Inventory Table */}
+
+                {/* =================================
+                    INVENTORY TABLE
+                ================================= */}
 
                 <table className="inventory-table">
 
@@ -199,84 +366,179 @@ function Inventory() {
 
                         <tr>
 
-                            <th>ID</th>
+                            <th>
+                                ID
+                            </th>
 
-                            <th>Item Name</th>
+                            <th>
+                                Item Name
+                            </th>
 
-                            <th>Unit</th>
+                            <th>
+                                Unit
+                            </th>
 
-                            <th>Subsidy Price</th>
+                            <th>
+                                Subsidy Price
+                            </th>
 
-                            <th>Available Qty</th>
+                            <th>
+                                Available Qty
+                            </th>
 
-                            <th>Minimum Stock</th>
+                            <th>
+                                Minimum Stock
+                            </th>
 
-                            <th>Status</th>
+                            <th>
+                                Status
+                            </th>
 
-                            <th>Actions</th>
+                            <th>
+                                Actions
+                            </th>
 
                         </tr>
 
                     </thead>
 
+
                     <tbody>
 
-                        {filteredInventory.map((item) => (
+                        {filteredInventory.map(
+                            (item) => (
 
-                            <tr key={item.inventory_id}>
+                                <tr
+                                    key={
+                                        item.inventory_id
+                                    }
+                                >
 
-                                <td>{item.inventory_id}</td>
-
-                                <td>{item.item_name}</td>
-
-                                <td>{item.unit}</td>
-
-                                <td>₹ {item.subsidy_price}</td>
-
-                                <td>{item.available_quantity}</td>
-
-                                <td>{item.minimum_stock}</td>
-
-                                <td>
-
-                                    <span
-                                        className={`status ${item.stock_status
-                                            .replace(/\s/g, "")
-                                            .toLowerCase()}`}
-                                    >
-                                        {item.stock_status}
-                                    </span>
-
-                                </td>
-
-                                <td>
-
-                                    <button
-                                        className="edit-btn"
-                                        onClick={() => {
-                                            setEditData(item);
-                                            setShowForm(true);
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
-
-                                    <button
-                                        className="delete-btn"
-                                        onClick={() =>
-                                            deleteInventory(
-                                                item.inventory_id
-                                            )
+                                    <td>
+                                        {
+                                            item.inventory_id
                                         }
-                                    >
-                                        Delete
-                                    </button>
+                                    </td>
 
-                                </td>
+                                    <td>
+                                        {
+                                            item.item_name
+                                        }
+                                    </td>
 
-                            </tr>
+                                    <td>
+                                        {
+                                            item.unit
+                                        }
+                                    </td>
 
-                        ))}
+                                    <td>
+                                        ₹ {item.subsidy_price}
+                                    </td>
+
+                                    <td>
+                                        {
+                                            item.available_quantity
+                                        }
+                                    </td>
+
+                                    <td>
+                                        {
+                                            item.minimum_stock
+                                        }
+                                    </td>
+
+                                    <td>
+
+                                        <span
+                                            className={`status ${
+                                                item.stock_status
+                                                    .replace(
+                                                        /\s/g,
+                                                        ""
+                                                    )
+                                                    .toLowerCase()
+                                            }`}
+                                        >
+
+                                            {
+                                                item.stock_status
+                                            }
+
+                                        </span>
+
+                                    </td>
+
+
+                                    {/* =================================
+                                        ACTIONS
+                                        Warehouse Manager Only
+                                    ================================= */}
+
+                                    <td>
+
+                                        {isWarehouseManager ? (
+
+                                            <>
+
+                                                <button
+                                                    className="edit-btn"
+                                                    onClick={() => {
+
+                                                        setEditData(
+                                                            item
+                                                        );
+
+                                                        setShowForm(
+                                                            true
+                                                        );
+
+                                                    }}
+                                                >
+
+                                                    Edit
+
+                                                </button>
+
+
+                                                <button
+                                                    className="delete-btn"
+                                                    onClick={() =>
+                                                        deleteInventory(
+                                                            item.inventory_id
+                                                        )
+                                                    }
+                                                >
+
+                                                    Delete
+
+                                                </button>
+
+                                            </>
+
+                                        ) : (
+
+                                            <span
+                                                style={{
+                                                    color:
+                                                        "#64748b",
+                                                    fontSize:
+                                                        "13px"
+                                                }}
+                                            >
+
+                                                View Only
+
+                                            </span>
+
+                                        )}
+
+                                    </td>
+
+                                </tr>
+
+                            )
+                        )}
 
                     </tbody>
 

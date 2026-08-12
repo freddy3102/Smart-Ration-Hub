@@ -1,91 +1,372 @@
-.warehouse-dashboard{
+/* =========================================
+   WAREHOUSE DASHBOARD
+========================================= */
 
-    min-height:100vh;
+.warehouse-dashboard {
+    min-height: 100vh;
+    background: #f4f7fb;
+    padding: 40px;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #172b4d;
+}
 
-    display:flex;
 
-    justify-content:center;
+/* =========================================
+   MAIN CONTAINER
+========================================= */
 
-    align-items:center;
+.warehouse-container {
+    max-width: 1180px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(23, 43, 77, 0.08);
+    overflow: hidden;
+}
 
-    background:#eef4fb;
+
+/* =========================================
+   HEADER
+========================================= */
+
+.warehouse-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 34px 42px;
+    background: #ffffff;
+    border-bottom: 1px solid #e8edf5;
+}
+
+.warehouse-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #2563eb;
+    margin-bottom: 8px;
+}
+
+.warehouse-header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    color: #17356d;
+}
+
+.warehouse-header p {
+    margin: 8px 0 0;
+    font-size: 15px;
+    color: #6b7c93;
+}
+
+
+/* =========================================
+   MANAGER PROFILE
+========================================= */
+
+.manager-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: #f7f9fc;
+    border: 1px solid #e5eaf2;
+    border-radius: 12px;
+}
+
+.manager-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #1f4b99;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.manager-profile div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.manager-profile span {
+    font-size: 12px;
+    color: #7a889d;
+}
+
+.manager-profile strong {
+    font-size: 14px;
+    color: #172b4d;
+}
+
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.warehouse-content {
+    padding: 38px 42px 42px;
+}
+
+.section-heading {
+    margin-bottom: 25px;
+}
+
+.section-heading h2 {
+    margin: 0;
+    font-size: 21px;
+    color: #172b4d;
+}
+
+.section-heading p {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: #7a889d;
+}
+
+
+/* =========================================
+   ACTION CARDS
+========================================= */
+
+.warehouse-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.warehouse-action-card {
+    display: flex;
+    gap: 20px;
+    padding: 28px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(23, 43, 77, 0.05);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.warehouse-action-card:hover {
+    transform: translateY(-3px);
+    border-color: #c8d6ee;
+    box-shadow: 0 10px 25px rgba(23, 43, 77, 0.10);
+}
+
+
+/* =========================================
+   ACTION ICON
+========================================= */
+
+.action-icon {
+    width: 54px;
+    height: 54px;
+    min-width: 54px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.audit-icon {
+    background: #fff4df;
+    color: #d97706;
+}
+
+.verification-icon {
+    background: #e7f8ed;
+    color: #16834a;
+}
+
+
+/* =========================================
+   ACTION CONTENT
+========================================= */
+
+.action-content {
+    flex: 1;
+}
+
+.action-number {
+    font-size: 11px;
+    font-weight: 700;
+    color: #8a97aa;
+    letter-spacing: 1px;
+}
+
+.action-content h3 {
+    margin: 5px 0 9px;
+    font-size: 19px;
+    color: #17356d;
+}
+
+.action-content p {
+    margin: 0 0 20px;
+    min-height: 62px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #697b91;
+}
+
+
+/* =========================================
+   ACTION BUTTON
+========================================= */
+
+.action-btn {
+    border: none;
+    background: #2563eb;
+    color: #ffffff;
+    padding: 11px 17px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.action-btn:hover {
+    background: #1d4ed8;
+    transform: translateX(2px);
+}
+
+.action-btn span {
+    font-size: 18px;
+    line-height: 1;
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.warehouse-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 42px;
+    background: #fafbfd;
+    border-top: 1px solid #e8edf5;
+}
+
+.warehouse-footer div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.warehouse-footer span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #52657d;
+}
+
+.warehouse-footer small {
+    font-size: 12px;
+    color: #9aa6b5;
+}
+
+
+/* =========================================
+   LOGOUT
+========================================= */
+
+.warehouse-logout {
+    border: 1px solid #f0b5b5;
+    background: #fff5f5;
+    color: #dc2626;
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.warehouse-logout:hover {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 850px) {
+
+    .warehouse-dashboard {
+        padding: 20px;
+    }
+
+    .warehouse-header {
+        padding: 28px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .warehouse-content {
+        padding: 28px;
+    }
+
+    .warehouse-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .warehouse-footer {
+        padding: 18px 28px;
+    }
 
 }
 
-.warehouse-card{
 
-    width:600px;
+@media (max-width: 520px) {
 
-    background:white;
+    .warehouse-dashboard {
+        padding: 10px;
+    }
 
-    padding:40px;
+    .warehouse-container {
+        border-radius: 12px;
+    }
 
-    border-radius:15px;
+    .warehouse-header h1 {
+        font-size: 26px;
+    }
 
-    box-shadow:0 10px 30px rgba(0,0,0,.15);
+    .warehouse-action-card {
+        padding: 20px;
+        flex-direction: column;
+    }
 
-    text-align:center;
+    .action-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+    }
 
-}
-
-.warehouse-card h1{
-
-    color:#0f4c81;
-
-}
-
-.dashboard-box{
-
-    margin-top:30px;
-
-    padding:25px;
-
-    border:1px solid #ddd;
-
-    border-radius:12px;
-
-}
-
-.dashboard-box button{
-
-    margin-top:20px;
-
-    padding:14px 25px;
-
-    background:#f39c12;
-
-    color:white;
-
-    border:none;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
-    font-size:16px;
-
-}
-
-.dashboard-box button:hover{
-
-    background:#d68910;
-
-}
-
-.logout-btn{
-
-    margin-top:35px;
-
-    padding:14px 30px;
-
-    background:#dc3545;
-
-    color:white;
-
-    border:none;
-
-    border-radius:8px;
-
-    cursor:pointer;
+    .warehouse-footer {
+        align-items: flex-start;
+        gap: 15px;
+        flex-direction: column;
+    }
 
 }

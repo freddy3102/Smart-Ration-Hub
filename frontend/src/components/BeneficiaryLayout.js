@@ -1,27 +1,56 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import {
+    NavLink,
+    useNavigate
+} from "react-router-dom";
+
 import "../styles/BeneficiaryLayout.css";
+
 
 function BeneficiaryLayout({ children }) {
 
     const navigate = useNavigate();
 
+
+    // ---------------------------------
+    // Beneficiary Logout
+    // ---------------------------------
+
     const logout = () => {
 
-        localStorage.removeItem("beneficiary_id");
+        localStorage.removeItem(
+            "beneficiary_id"
+        );
 
-        navigate("/beneficiary-login");
+        localStorage.removeItem(
+            "beneficiary_name"
+        );
+
+        sessionStorage.clear();
+
+
+        navigate(
+            "/beneficiary-login",
+            {
+                replace: true
+            }
+        );
 
     };
+
 
     return (
 
         <div className="beneficiary-app">
+
 
             {/* =================================
                 SIDEBAR
             ================================= */}
 
             <aside className="beneficiary-sidebar">
+
+
+                {/* Brand */}
 
                 <div className="beneficiary-brand">
 
@@ -35,6 +64,8 @@ function BeneficiaryLayout({ children }) {
 
                 </div>
 
+
+                {/* Navigation */}
 
                 <nav className="beneficiary-nav">
 
@@ -88,7 +119,10 @@ function BeneficiaryLayout({ children }) {
                 </nav>
 
 
+                {/* Logout */}
+
                 <button
+                    type="button"
                     className="beneficiary-logout"
                     onClick={logout}
                 >
@@ -99,7 +133,7 @@ function BeneficiaryLayout({ children }) {
 
 
             {/* =================================
-                MAIN CONTENT
+                MAIN
             ================================= */}
 
             <main className="beneficiary-main">
@@ -113,5 +147,6 @@ function BeneficiaryLayout({ children }) {
     );
 
 }
+
 
 export default BeneficiaryLayout;

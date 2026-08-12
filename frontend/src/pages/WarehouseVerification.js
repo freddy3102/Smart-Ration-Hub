@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "../styles/WarehouseVerification.css";
 
 function WarehouseVerification() {
+
+    const navigate = useNavigate();
 
     const months = [
         { value: 1, name: "January" },
@@ -19,23 +22,13 @@ function WarehouseVerification() {
         { value: 12, name: "December" }
     ];
 
-    const [businessDate, setBusinessDate] =
-        useState("");
+    const [businessDate, setBusinessDate] = useState("");
+    const [month, setMonth] = useState(null);
+    const [year, setYear] = useState(null);
+    const [summary, setSummary] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [verifying, setVerifying] = useState(false);
 
-    const [month, setMonth] =
-        useState(null);
-
-    const [year, setYear] =
-        useState(null);
-
-    const [summary, setSummary] =
-        useState(null);
-
-    const [loading, setLoading] =
-        useState(true);
-
-    const [verifying, setVerifying] =
-        useState(false);
 
     // ---------------------------------
     // Load Business Date
@@ -46,6 +39,7 @@ function WarehouseVerification() {
         loadBusinessDate();
 
     }, []);
+
 
     const loadBusinessDate = async () => {
 
@@ -88,6 +82,7 @@ function WarehouseVerification() {
 
     };
 
+
     // ---------------------------------
     // Load Verification Summary
     // ---------------------------------
@@ -104,6 +99,7 @@ function WarehouseVerification() {
         loadSummary();
 
     }, [month, year]);
+
 
     const loadSummary = async () => {
 
@@ -136,83 +132,86 @@ function WarehouseVerification() {
 
     };
 
+
     // ---------------------------------
     // Verify Month
     // ---------------------------------
 
     const verifyMonth = async () => {
 
-    if (!summary) {
-        return;
-    }
+        if (!summary) {
+            return;
+        }
 
-    if (
-        summary.status !==
-        "READY FOR VERIFICATION"
-    ) {
+        if (
+            summary.status !==
+            "READY FOR VERIFICATION"
+        ) {
 
-        alert(
-            "The month is not ready for verification."
-        );
+            alert(
+                "The month is not ready for verification."
+            );
 
-        return;
+            return;
 
-    }
+        }
 
-    const confirmed =
-        window.confirm(
-            `Verify warehouse returns for ${
-                months.find(
-                    m => m.value === month
-                )?.name
-            } ${year}?\n\n` +
-            "Verified returned stock will be added back to inventory."
-        );
+        const selectedMonthName =
+            months.find(
+                (m) => m.value === month
+            )?.name;
 
-    if (!confirmed) {
-        return;
-    }
+        const confirmed =
+            window.confirm(
+                `Verify warehouse returns for ${selectedMonthName} ${year}?\n\n` +
+                "Verified returned stock will be added back to inventory."
+            );
 
-    try {
+        if (!confirmed) {
+            return;
+        }
 
-        setVerifying(true);
+        try {
 
-        const res = await axios.post(
-            "http://127.0.0.1:5000/warehouse-verification",
-            {
-                month,
-                year,
-                manager_id: 1
-            }
-        );
+            setVerifying(true);
 
-        alert(
-            res.data.message ||
-            "Warehouse verification completed successfully."
-        );
+            const res = await axios.post(
+                "http://127.0.0.1:5000/warehouse-verification",
+                {
+                    month,
+                    year,
+                    manager_id: 1
+                }
+            );
 
-        await loadSummary();
+            alert(
+                res.data.message ||
+                "Warehouse verification completed successfully."
+            );
 
-    } catch (err) {
+            await loadSummary();
 
-        console.log(
-            "WAREHOUSE VERIFICATION ERROR:",
-            err.response?.data
-        );
+        } catch (err) {
 
-        alert(
-            err.response?.data?.error ||
-            err.response?.data?.message ||
-            "Verification Failed"
-        );
+            console.log(
+                "WAREHOUSE VERIFICATION ERROR:",
+                err.response?.data
+            );
 
-    } finally {
+            alert(
+                err.response?.data?.error ||
+                err.response?.data?.message ||
+                "Verification Failed"
+            );
 
-        setVerifying(false);
+        } finally {
 
-    }
+            setVerifying(false);
 
-};
+        }
+
+    };
+
 
     // ---------------------------------
     // Loading
@@ -242,15 +241,36 @@ function WarehouseVerification() {
 
     }
 
+
+    // ---------------------------------
+    // Main Page
+    // ---------------------------------
+
     return (
 
         <div className="verification-page">
 
             <div className="verification-card">
 
+                {/* Back to Warehouse Dashboard */}
+
+                <button
+                    type="button"
+                    className="back-dashboard-btn"
+                    onClick={() =>
+                        navigate(
+                            "/warehouse-dashboard"
+                        )
+                    }
+                >
+                    ← Warehouse Dashboard
+                </button>
+
+
                 <h1>
                     Warehouse Verification
                 </h1>
+
 
                 <p>
                     Business Date:{" "}
@@ -258,6 +278,9 @@ function WarehouseVerification() {
                         {businessDate}
                     </strong>
                 </p>
+
+
+                {/* Month / Year */}
 
                 <div className="selectors">
 
@@ -282,16 +305,10 @@ function WarehouseVerification() {
                                 (m) => (
 
                                     <option
-                                        key={
-                                            m.value
-                                        }
-                                        value={
-                                            m.value
-                                        }
+                                        key={m.value}
+                                        value={m.value}
                                     >
-
                                         {m.name}
-
                                     </option>
 
                                 )
@@ -300,6 +317,7 @@ function WarehouseVerification() {
                         </select>
 
                     </div>
+
 
                     <div>
 
@@ -331,9 +349,7 @@ function WarehouseVerification() {
                                         key={y}
                                         value={y}
                                     >
-
                                         {y}
-
                                     </option>
 
                                 )
@@ -344,6 +360,9 @@ function WarehouseVerification() {
                     </div>
 
                 </div>
+
+
+                {/* Verification Summary */}
 
                 {summary && (
 
@@ -363,6 +382,7 @@ function WarehouseVerification() {
 
                             </p>
 
+
                             <p>
 
                                 <strong>
@@ -374,6 +394,7 @@ function WarehouseVerification() {
                                 ).toFixed(2)} kg
 
                             </p>
+
 
                             <p>
 
@@ -387,6 +408,7 @@ function WarehouseVerification() {
 
                             </p>
 
+
                             <p>
 
                                 <strong>
@@ -397,26 +419,21 @@ function WarehouseVerification() {
                                     className={
                                         summary.status ===
                                         "VERIFIED"
-                                            ?
-                                            "status verified"
-                                            :
-                                            summary.status ===
-                                            "READY FOR VERIFICATION"
-                                                ?
-                                                "status ready"
-                                                :
-                                                summary.status ===
-                                                "MISMATCH"
-                                                    ?
-                                                    "status mismatch"
-                                                    :
-                                                    "status"
+                                            ? "status verified"
+
+                                            : summary.status ===
+                                              "READY FOR VERIFICATION"
+                                                ? "status ready"
+
+                                                : summary.status ===
+                                                  "MISMATCH"
+                                                    ? "status mismatch"
+
+                                                    : "status"
                                     }
                                 >
 
-                                    {
-                                        summary.status
-                                    }
+                                    {summary.status}
 
                                 </span>
 
@@ -424,7 +441,11 @@ function WarehouseVerification() {
 
                         </div>
 
+
+                        {/* Verify Button */}
+
                         <button
+                            type="button"
                             className="verify-btn"
                             disabled={
                                 summary.status !==
@@ -437,10 +458,8 @@ function WarehouseVerification() {
                         >
 
                             {verifying
-                                ?
-                                "Verifying..."
-                                :
-                                "Verify Month"
+                                ? "Verifying..."
+                                : "Verify Month"
                             }
 
                         </button>
@@ -457,4 +476,6 @@ function WarehouseVerification() {
 
 }
 
+
+// IMPORTANT: This must be present
 export default WarehouseVerification;
