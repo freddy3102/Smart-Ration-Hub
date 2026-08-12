@@ -269,24 +269,51 @@ def beneficiary_dashboard():
         # LIVE STOCK
         #
         # Rice and Wheat only
+        #
+        # Includes:
+        # - Available quantity
+        # - Minimum stock
+        # - Stock status
+        #
+        # Uses the SAME stock-status rule
+        # as the Admin Inventory module.
         # ==================================================
 
         cursor.execute("""
             SELECT
                 ri.item_id,
                 ri.item_name,
-                i.available_quantity
+                i.available_quantity,
+                i.minimum_stock,
+
+                CASE
+
+                    WHEN i.available_quantity = 0
+                        THEN 'Out of Stock'
+
+                    WHEN i.available_quantity <= i.minimum_stock
+                        THEN 'Low Stock'
+
+                    ELSE 'Available'
+
+                END AS stock_status
+
             FROM inventory i
+
             JOIN ration_items ri
                 ON i.item_id = ri.item_id
+
             WHERE LOWER(ri.item_name)
                 IN ('rice', 'wheat')
+
             ORDER BY
                 CASE
                     WHEN LOWER(ri.item_name) = 'rice'
                     THEN 1
+
                     WHEN LOWER(ri.item_name) = 'wheat'
                     THEN 2
+
                     ELSE 3
                 END
         """)

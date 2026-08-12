@@ -272,10 +272,6 @@ function BeneficiaryHistory() {
                                     </th>
 
                                     <th>
-                                        Status
-                                    </th>
-
-                                    <th>
                                         Verification
                                     </th>
 
@@ -367,34 +363,6 @@ function BeneficiaryHistory() {
                                                 </td>
 
 
-                                                {/* RETURN STATUS */}
-
-                                                <td>
-
-                                                    <span
-                                                        className={
-                                                            row.audit_status ===
-                                                            "Returned"
-
-                                                                ?
-
-                                                                "history-status returned"
-
-                                                                :
-
-                                                                "history-status pending"
-                                                        }
-                                                    >
-
-                                                        {
-                                                            row.audit_status
-                                                        }
-
-                                                    </span>
-
-                                                </td>
-
-
                                                 {/* VERIFICATION */}
 
                                                 <td>
@@ -432,7 +400,7 @@ function BeneficiaryHistory() {
                                     <tr>
 
                                         <td
-                                            colSpan="7"
+                                            colSpan="6"
                                             className="no-history"
                                         >
 

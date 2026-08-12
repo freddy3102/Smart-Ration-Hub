@@ -10,6 +10,7 @@ function BeneficiaryStock() {
     const beneficiary_id =
         localStorage.getItem("beneficiary_id");
 
+
     useEffect(() => {
 
         axios.get(
@@ -22,7 +23,9 @@ function BeneficiaryStock() {
         )
         .then((res) => {
 
-            setStock(res.data.live_stock || []);
+            setStock(
+                res.data.live_stock || []
+            );
 
         })
         .catch((err) => {
@@ -42,10 +45,19 @@ function BeneficiaryStock() {
     if (loading) {
 
         return (
+
             <div className="beneficiary-stock-page">
-                <h1>Live Stock Availability</h1>
-                <p>Loading stock...</p>
+
+                <h1>
+                    Live Stock Availability
+                </h1>
+
+                <p>
+                    Loading stock...
+                </p>
+
             </div>
+
         );
 
     }
@@ -60,7 +72,10 @@ function BeneficiaryStock() {
             </h1>
 
             <p className="stock-subtitle">
-                Current availability of ration items at the ration shop.
+
+                Current availability of ration items
+                at the ration shop.
+
             </p>
 
 
@@ -99,26 +114,36 @@ function BeneficiaryStock() {
                                     {item.item_name}
                                 </td>
 
+
                                 <td>
+
                                     {Number(
-                                        item.available_quantity
+                                        item.available_quantity || 0
                                     ).toFixed(2)} kg
+
                                 </td>
 
+
                                 <td>
 
-                                    {Number(
-                                        item.available_quantity
-                                    ) > 0 ? (
+                                    {item.stock_status ===
+                                    "Low Stock" ? (
 
-                                        <span className="stock-available">
-                                            Available
+                                        <span className="stock-low">
+                                            Low Stock
+                                        </span>
+
+                                    ) : item.stock_status ===
+                                    "Out of Stock" ? (
+
+                                        <span className="stock-unavailable">
+                                            Out of Stock
                                         </span>
 
                                     ) : (
 
-                                        <span className="stock-unavailable">
-                                            Out of Stock
+                                        <span className="stock-available">
+                                            Available
                                         </span>
 
                                     )}
@@ -137,7 +162,9 @@ function BeneficiaryStock() {
                                 colSpan="3"
                                 className="no-stock"
                             >
+
                                 No stock information available.
+
                             </td>
 
                         </tr>

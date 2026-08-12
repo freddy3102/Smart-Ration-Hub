@@ -14,11 +14,6 @@ function Inventory() {
     // ---------------------------------
     // Check User Role
     // ---------------------------------
-    // Warehouse Manager has inventory
-    // management permission.
-    //
-    // Shop Owner gets read-only access.
-    // ---------------------------------
 
     const warehouseManager =
         localStorage.getItem("warehouse_manager");
@@ -41,71 +36,15 @@ function Inventory() {
     const fetchInventory = () => {
 
         axios
-            .get(
-                "http://127.0.0.1:5000/inventory"
-            )
+            .get("http://127.0.0.1:5000/inventory")
             .then((response) => {
 
-                setInventory(
-                    response.data
-                );
+                setInventory(response.data);
 
             })
             .catch((error) => {
 
                 console.log(error);
-
-            });
-
-    };
-
-
-    // ---------------------------------
-    // Delete Inventory
-    // ---------------------------------
-
-    const deleteInventory = (id) => {
-
-        // Shop Owner is read-only
-        if (!isWarehouseManager) {
-            return;
-        }
-
-        const confirmDelete =
-            window.confirm(
-                "Are you sure you want to delete this inventory item?"
-            );
-
-        if (!confirmDelete) return;
-
-        axios
-            .delete(
-                `http://127.0.0.1:5000/inventory/${id}`
-            )
-            .then((response) => {
-
-                alert(
-                    response.data.message
-                );
-
-                fetchInventory();
-
-            })
-            .catch((error) => {
-
-                if (error.response) {
-
-                    alert(
-                        error.response.data.message
-                    );
-
-                } else {
-
-                    alert(
-                        "Unable to delete inventory."
-                    );
-
-                }
 
             });
 
@@ -191,7 +130,7 @@ function Inventory() {
 
 
                     {/* ---------------------------------
-                        Warehouse Manager Only
+                        Add Inventory
                     --------------------------------- */}
 
                     {isWarehouseManager && (
@@ -201,14 +140,11 @@ function Inventory() {
                             onClick={() => {
 
                                 setEditData(null);
-
                                 setShowForm(true);
 
                             }}
                         >
-
                             + Add Inventory
-
                         </button>
 
                     )}
@@ -304,7 +240,6 @@ function Inventory() {
                         onClick={() => {
 
                             setShowForm(false);
-
                             setEditData(null);
 
                         }}
@@ -322,14 +257,11 @@ function Inventory() {
                                 onClick={() => {
 
                                     setShowForm(false);
-
                                     setEditData(null);
 
                                 }}
                             >
-
                                 ✖
-
                             </button>
 
 
@@ -460,11 +392,9 @@ function Inventory() {
                                                     .toLowerCase()
                                             }`}
                                         >
-
                                             {
                                                 item.stock_status
                                             }
-
                                         </span>
 
                                     </td>
@@ -472,49 +402,28 @@ function Inventory() {
 
                                     {/* =================================
                                         ACTIONS
-                                        Warehouse Manager Only
                                     ================================= */}
 
                                     <td>
 
                                         {isWarehouseManager ? (
 
-                                            <>
+                                            <button
+                                                className="edit-btn"
+                                                onClick={() => {
 
-                                                <button
-                                                    className="edit-btn"
-                                                    onClick={() => {
+                                                    setEditData(
+                                                        item
+                                                    );
 
-                                                        setEditData(
-                                                            item
-                                                        );
+                                                    setShowForm(
+                                                        true
+                                                    );
 
-                                                        setShowForm(
-                                                            true
-                                                        );
-
-                                                    }}
-                                                >
-
-                                                    Edit
-
-                                                </button>
-
-
-                                                <button
-                                                    className="delete-btn"
-                                                    onClick={() =>
-                                                        deleteInventory(
-                                                            item.inventory_id
-                                                        )
-                                                    }
-                                                >
-
-                                                    Delete
-
-                                                </button>
-
-                                            </>
+                                                }}
+                                            >
+                                                Edit
+                                            </button>
 
                                         ) : (
 
@@ -526,9 +435,7 @@ function Inventory() {
                                                         "13px"
                                                 }}
                                             >
-
                                                 View Only
-
                                             </span>
 
                                         )}

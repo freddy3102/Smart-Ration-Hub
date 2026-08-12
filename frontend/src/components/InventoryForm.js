@@ -12,41 +12,79 @@ function InventoryForm({ editData, onSuccess }) {
         minimum_stock: ""
     });
 
+
+    // ---------------------------------
+    // Load Ration Items
+    // ---------------------------------
+
     useEffect(() => {
 
         axios
             .get("http://127.0.0.1:5000/ration-items")
             .then((response) => {
+
                 setItems(response.data);
+
             })
             .catch((error) => {
+
                 console.log(error);
+
             });
 
     }, []);
+
+
+    // ---------------------------------
+    // Load Edit Data
+    // ---------------------------------
 
     useEffect(() => {
 
         if (editData) {
 
             setFormData({
-                item_id: editData.item_id,
-                available_quantity: editData.available_quantity,
-                minimum_stock: editData.minimum_stock
+                item_id:
+                    editData.item_id,
+
+                available_quantity:
+                    editData.available_quantity,
+
+                minimum_stock:
+                    editData.minimum_stock
+            });
+
+        } else {
+
+            setFormData({
+                item_id: "",
+                available_quantity: "",
+                minimum_stock: ""
             });
 
         }
 
     }, [editData]);
 
+
+    // ---------------------------------
+    // Handle Change
+    // ---------------------------------
+
     const handleChange = (e) => {
 
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [e.target.name]:
+                e.target.value
         });
 
     };
+
+
+    // ---------------------------------
+    // Submit
+    // ---------------------------------
 
     const handleSubmit = async (e) => {
 
@@ -56,21 +94,45 @@ function InventoryForm({ editData, onSuccess }) {
 
             if (editData) {
 
-                const response = await axios.put(
-                    `http://127.0.0.1:5000/inventory/${editData.inventory_id}`,
-                    formData
-                );
+                /*
+                 * IMPORTANT:
+                 * Available quantity is not
+                 * editable during update.
+                 *
+                 * Only minimum stock is sent
+                 * for modification.
+                 */
 
-                alert(response.data.message);
+                const response =
+                    await axios.put(
+                        `http://127.0.0.1:5000/inventory/${editData.inventory_id}`,
+                        {
+                            minimum_stock:
+                                formData.minimum_stock
+                        }
+                    );
+
+                alert(
+                    response.data.message
+                );
 
             } else {
 
-                const response = await axios.post(
-                    "http://127.0.0.1:5000/inventory",
-                    formData
-                );
+                /*
+                 * New inventory:
+                 * Initial available quantity
+                 * can be entered.
+                 */
 
-                alert(response.data.message);
+                const response =
+                    await axios.post(
+                        "http://127.0.0.1:5000/inventory",
+                        formData
+                    );
+
+                alert(
+                    response.data.message
+                );
 
             }
 
@@ -81,26 +143,46 @@ function InventoryForm({ editData, onSuccess }) {
         } catch (error) {
 
             if (error.response) {
-                alert(error.response.data.message);
+
+                alert(
+                    error.response.data.message
+                );
+
             } else {
-                alert("Server Error");
+
+                alert(
+                    "Server Error"
+                );
+
             }
 
         }
 
     };
 
+
     return (
 
         <form onSubmit={handleSubmit}>
 
             <h2>
-                {editData ? "Update Inventory" : "Add Inventory"}
+                {
+                    editData
+                        ? "Update Inventory"
+                        : "Add Inventory"
+                }
             </h2>
+
+
+            {/* =================================
+                ITEM NAME
+            ================================= */}
 
             <div className="form-group">
 
-                <label>Item Name</label>
+                <label>
+                    Item Name
+                </label>
 
                 <select
                     name="item_id"
@@ -129,41 +211,86 @@ function InventoryForm({ editData, onSuccess }) {
 
             </div>
 
+
+            {/* =================================
+                AVAILABLE QUANTITY
+            ================================= */}
+
             <div className="form-group">
 
-                <label>Available Quantity</label>
+                <label>
+                    Available Quantity
+                </label>
 
                 <input
                     type="number"
                     name="available_quantity"
                     placeholder="Enter Available Quantity"
-                    value={formData.available_quantity}
+                    value={
+                        formData.available_quantity
+                    }
                     onChange={handleChange}
+                    disabled={editData}
+                    min="0"
+                    step="0.01"
                     required
                 />
 
+                {editData && (
+
+                    <small
+                        style={{
+                            color: "#64748b",
+                            display: "block",
+                            marginTop: "5px"
+                        }}
+                    >
+                        Available quantity is managed
+                        through warehouse stock updates.
+                    </small>
+
+                )}
+
             </div>
+
+
+            {/* =================================
+                MINIMUM STOCK
+            ================================= */}
 
             <div className="form-group">
 
-                <label>Minimum Stock Alert</label>
+                <label>
+                    Minimum Stock Alert
+                </label>
 
                 <input
                     type="number"
                     name="minimum_stock"
                     placeholder="Enter Minimum Stock"
-                    value={formData.minimum_stock}
+                    value={
+                        formData.minimum_stock
+                    }
                     onChange={handleChange}
+                    min="0"
+                    step="0.01"
                     required
                 />
 
             </div>
 
+
+            {/* =================================
+                SUBMIT
+            ================================= */}
+
             <button type="submit">
 
-                {editData
-                    ? "Update Inventory"
-                    : "Save Inventory"}
+                {
+                    editData
+                        ? "Update Inventory"
+                        : "Save Inventory"
+                }
 
             </button>
 
