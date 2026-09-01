@@ -23,9 +23,9 @@ def warehouse_verification():
 
     try:
 
-        # ---------------------------------
-        # Month & Year
-        # ---------------------------------
+        # ==================================================
+        # MONTH & YEAR
+        # ==================================================
 
         month = request.args.get(
             "month",
@@ -41,33 +41,47 @@ def warehouse_verification():
 
             return jsonify({
                 "message":
-                "Month and Year are required."
+                    "Month and Year are required."
             }), 400
-
-        # ---------------------------------
-        # Validate Month
-        # ---------------------------------
 
         if month < 1 or month > 12:
 
             return jsonify({
                 "message":
-                "Invalid month."
+                    "Invalid month."
             }), 400
 
-        # ---------------------------------
-        # Database
-        # ---------------------------------
+        # ==================================================
+        # DATABASE
+        # ==================================================
 
         conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
 
-        # ---------------------------------
-        # Total Unclaimed Quantity
-        # ---------------------------------
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+        # ==================================================
+        # TOTAL UNCLAIMED
+        #
+        # IMPORTANT:
+        #
+        # We use unclaimed_quantity, which remains unchanged
+        # even after the employee records the return.
+        #
+        # Therefore:
+        #
+        # Unclaimed = 10
+        # Returned  = 10
+        #
+        # Difference = 0
+        #
+        # This allows the manager to verify successfully.
+        # ==================================================
 
         cursor.execute("""
             SELECT
+
                 IFNULL(
                     SUM(unclaimed_quantity),
                     0
@@ -75,23 +89,27 @@ def warehouse_verification():
 
             FROM unclaimed_audit
 
-            WHERE month=%s
-            AND year=%s
+            WHERE month = %s
+            AND year = %s
+
         """, (
             month,
             year
         ))
 
         total_unclaimed = float(
-            cursor.fetchone()["total_unclaimed"]
+            cursor.fetchone()[
+                "total_unclaimed"
+            ] or 0
         )
 
-        # ---------------------------------
-        # Total Returned Quantity
-        # ---------------------------------
+        # ==================================================
+        # TOTAL RETURNED
+        # ==================================================
 
         cursor.execute("""
             SELECT
+
                 IFNULL(
                     SUM(warehouse_returned_quantity),
                     0
@@ -99,38 +117,44 @@ def warehouse_verification():
 
             FROM unclaimed_audit
 
-            WHERE month=%s
-            AND year=%s
+            WHERE month = %s
+            AND year = %s
+
         """, (
             month,
             year
         ))
 
         total_returned = float(
-            cursor.fetchone()["total_returned"]
+            cursor.fetchone()[
+                "total_returned"
+            ] or 0
         )
 
-        # ---------------------------------
-        # Difference
-        # ---------------------------------
+        # ==================================================
+        # DIFFERENCE
+        # ==================================================
 
         difference = (
             total_unclaimed -
             total_returned
         )
 
-        # ---------------------------------
-        # Verification Status
-        # ---------------------------------
+        # ==================================================
+        # MONTHLY CLOSURE
+        # ==================================================
 
         cursor.execute("""
             SELECT
+
+                closure_id,
                 verified
 
             FROM monthly_closure
 
-            WHERE month=%s
-            AND year=%s
+            WHERE month = %s
+            AND year = %s
+
         """, (
             month,
             year
@@ -138,9 +162,9 @@ def warehouse_verification():
 
         closure = cursor.fetchone()
 
-        # ---------------------------------
-        # Determine Status
-        # ---------------------------------
+        # ==================================================
+        # DETERMINE STATUS
+        # ==================================================
 
         if not closure:
 
@@ -164,33 +188,41 @@ def warehouse_verification():
 
         return jsonify({
 
-            "month": month,
+            "month":
+                month,
 
-            "year": year,
+            "year":
+                year,
 
             "total_unclaimed":
-            total_unclaimed,
+                total_unclaimed,
 
             "total_returned":
-            total_returned,
+                total_returned,
 
             "difference":
-            difference,
+                difference,
 
             "status":
-            status
+                status
 
         }), 200
 
     except Exception as e:
 
+        print(
+            "WAREHOUSE VERIFICATION GET ERROR:"
+        )
+
+        print(e)
+
         return jsonify({
 
             "message":
-            "Unable to load warehouse verification data.",
+                "Unable to load warehouse verification data.",
 
             "error":
-            str(e)
+                str(e)
 
         }), 500
 
@@ -205,6 +237,8 @@ def warehouse_verification():
 
 # ==================================================
 # Warehouse Verification
+#
+# THIS is where inventory is updated.
 # ==================================================
 
 @warehouse_verification_bp.route(
@@ -213,22 +247,15 @@ def warehouse_verification():
 )
 def verify_warehouse():
 
-    data = request.get_json()
-
-    if not data:
-
-        return jsonify({
-            "message":
-            "Request body is required."
-        }), 400
+    data = request.get_json() or {}
 
     month = data.get("month")
     year = data.get("year")
     manager_id = data.get("manager_id")
 
-    # ---------------------------------
-    # Validate Input
-    # ---------------------------------
+    # ==================================================
+    # VALIDATE INPUT
+    # ==================================================
 
     if (
         month is None
@@ -239,7 +266,7 @@ def verify_warehouse():
         return jsonify({
 
             "message":
-            "Month, Year and Manager ID are required."
+                "Month, Year and Manager ID are required."
 
         }), 400
 
@@ -254,7 +281,7 @@ def verify_warehouse():
         return jsonify({
 
             "message":
-            "Month, Year and Manager ID must be valid numbers."
+                "Month, Year and Manager ID must be valid numbers."
 
         }), 400
 
@@ -263,7 +290,7 @@ def verify_warehouse():
         return jsonify({
 
             "message":
-            "Invalid month."
+                "Invalid month."
 
         }), 400
 
@@ -273,23 +300,28 @@ def verify_warehouse():
     try:
 
         conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
 
-        # ---------------------------------
-        # Monthly Closure Exists?
-        # ---------------------------------
+        cursor = conn.cursor(
+            dictionary=True
+        )
+
+        # ==================================================
+        # LOCK MONTHLY CLOSURE
+        # ==================================================
 
         cursor.execute("""
             SELECT
+
                 closure_id,
                 verified
 
             FROM monthly_closure
 
-            WHERE month=%s
-            AND year=%s
+            WHERE month = %s
+            AND year = %s
 
             FOR UPDATE
+
         """, (
             month,
             year
@@ -297,31 +329,35 @@ def verify_warehouse():
 
         closure = cursor.fetchone()
 
+        # ==================================================
+        # CLOSURE NOT FOUND
+        # ==================================================
+
         if not closure:
 
             return jsonify({
 
                 "message":
-                "Monthly closure not found."
+                    "Monthly closure not found."
 
             }), 404
 
-        # ---------------------------------
-        # Already Verified?
-        # ---------------------------------
+        # ==================================================
+        # ALREADY VERIFIED
+        # ==================================================
 
         if closure["verified"]:
 
             return jsonify({
 
                 "message":
-                "This month has already been verified."
+                    "This month has already been verified."
 
             }), 400
 
-        # ---------------------------------
-        # Total Unclaimed
-        # ---------------------------------
+        # ==================================================
+        # TOTAL UNCLAIMED
+        # ==================================================
 
         cursor.execute("""
             SELECT
@@ -333,20 +369,23 @@ def verify_warehouse():
 
             FROM unclaimed_audit
 
-            WHERE month=%s
-            AND year=%s
+            WHERE month = %s
+            AND year = %s
+
         """, (
             month,
             year
         ))
 
         total_unclaimed = float(
-            cursor.fetchone()["total_unclaimed"]
+            cursor.fetchone()[
+                "total_unclaimed"
+            ] or 0
         )
 
-        # ---------------------------------
-        # Total Returned
-        # ---------------------------------
+        # ==================================================
+        # TOTAL RETURNED
+        # ==================================================
 
         cursor.execute("""
             SELECT
@@ -358,33 +397,36 @@ def verify_warehouse():
 
             FROM unclaimed_audit
 
-            WHERE month=%s
-            AND year=%s
+            WHERE month = %s
+            AND year = %s
+
         """, (
             month,
             year
         ))
 
         total_returned = float(
-            cursor.fetchone()["total_returned"]
+            cursor.fetchone()[
+                "total_returned"
+            ] or 0
         )
 
-        # ---------------------------------
-        # No Unclaimed Stock
-        # ---------------------------------
+        # ==================================================
+        # NO UNCLAIMED STOCK
+        # ==================================================
 
         if total_unclaimed <= 0:
 
             return jsonify({
 
                 "message":
-                "No unclaimed stock available for verification."
+                    "No unclaimed stock available for verification."
 
             }), 400
 
-        # ---------------------------------
-        # Verify Totals
-        # ---------------------------------
+        # ==================================================
+        # CHECK TOTALS
+        # ==================================================
 
         difference = (
             total_unclaimed -
@@ -396,61 +438,78 @@ def verify_warehouse():
             return jsonify({
 
                 "message":
-                "Verification failed. Total returned quantity does not match total unclaimed quantity.",
+                    "Verification failed. "
+                    "Total returned quantity does not "
+                    "match total unclaimed quantity.",
 
                 "total_unclaimed":
-                total_unclaimed,
+                    total_unclaimed,
 
                 "total_returned":
-                total_returned,
+                    total_returned,
 
                 "difference":
-                difference
+                    difference
 
             }), 400
 
-        # ---------------------------------
-        # Get Returned Stock
+        # ==================================================
+        # GET ALL RETURNED AUDIT RECORDS
         #
-        # Only stock that was actually
-        # returned is added back.
-        # ---------------------------------
+        # These are the exact quantities that will now
+        # be added back to inventory.
+        # ==================================================
 
         cursor.execute("""
             SELECT
+
                 audit_id,
+                beneficiary_id,
                 item_id,
                 warehouse_returned_quantity
 
             FROM unclaimed_audit
 
-            WHERE month=%s
-            AND year=%s
-            AND returned_to_warehouse=TRUE
-            AND audit_status='Returned'
+            WHERE month = %s
+            AND year = %s
+
+            AND returned_to_warehouse = TRUE
+
+            AND audit_status = 'Returned'
+
             AND warehouse_returned_quantity > 0
 
             FOR UPDATE
+
         """, (
             month,
             year
         ))
 
-        returned_items = cursor.fetchall()
+        returned_items = (
+            cursor.fetchall()
+        )
+
+        # ==================================================
+        # NO RETURNED STOCK
+        # ==================================================
 
         if not returned_items:
 
             return jsonify({
 
                 "message":
-                "No returned stock is available for verification."
+                    "No returned stock is available "
+                    "for verification."
 
             }), 400
 
-        # ---------------------------------
-        # Add Returned Stock Back To
-        # Inventory
-        # ---------------------------------
+        # ==================================================
+        # ADD RETURNED STOCK TO INVENTORY
+        #
+        # THIS IS THE ONLY PLACE WHERE INVENTORY
+        # IS INCREASED FOR WAREHOUSE RETURNS.
+        # ==================================================
 
         inventory_added = {}
 
@@ -459,22 +518,27 @@ def verify_warehouse():
             item_id = row["item_id"]
 
             returned_quantity = float(
-                row["warehouse_returned_quantity"]
+                row[
+                    "warehouse_returned_quantity"
+                ] or 0
             )
 
-            # ---------------------------------
-            # Get Inventory
-            # ---------------------------------
+            # ---------------------------------------------
+            # Lock inventory row
+            # ---------------------------------------------
 
             cursor.execute("""
                 SELECT
+
+                    inventory_id,
                     available_quantity
 
                 FROM inventory
 
-                WHERE item_id=%s
+                WHERE item_id = %s
 
                 FOR UPDATE
+
             """, (
                 item_id,
             ))
@@ -484,119 +548,153 @@ def verify_warehouse():
             if inventory is None:
 
                 raise Exception(
-                    f"Inventory record not found for item_id {item_id}."
+                    "Inventory record not found "
+                    f"for item_id {item_id}."
                 )
 
-            # ---------------------------------
-            # Add Returned Quantity
-            # ---------------------------------
+            current_quantity = float(
+                inventory[
+                    "available_quantity"
+                ] or 0
+            )
+
+            new_quantity = (
+                current_quantity +
+                returned_quantity
+            )
+
+            # ---------------------------------------------
+            # Update inventory
+            # ---------------------------------------------
 
             cursor.execute("""
                 UPDATE inventory
 
                 SET
-                    available_quantity =
-                        available_quantity + %s
+                    available_quantity = %s
 
-                WHERE item_id=%s
+                WHERE inventory_id = %s
+
             """, (
-                returned_quantity,
-                item_id
+                new_quantity,
+                inventory["inventory_id"]
             ))
 
-            # ---------------------------------
-            # Track Item-wise Addition
-            # ---------------------------------
+            # ---------------------------------------------
+            # Track item-wise addition
+            # ---------------------------------------------
 
             if item_id not in inventory_added:
 
-                inventory_added[item_id] = 0
+                inventory_added[item_id] = 0.0
 
             inventory_added[item_id] += (
                 returned_quantity
             )
 
-        # ---------------------------------
-        # Update Monthly Closure
-        # ---------------------------------
+        # ==================================================
+        # UPDATE MONTHLY CLOSURE
+        # ==================================================
 
         cursor.execute("""
             UPDATE monthly_closure
 
             SET
+
                 verified = TRUE,
+
                 verified_by = %s,
+
                 verified_at = NOW()
 
-            WHERE month=%s
-            AND year=%s
+            WHERE month = %s
+            AND year = %s
+
         """, (
             manager_id,
             month,
             year
         ))
 
-        # ---------------------------------
-        # Commit Everything Together
-        # ---------------------------------
+        # ==================================================
+        # COMMIT EVERYTHING
+        #
+        # Inventory updates + verification status are
+        # committed together.
+        # ==================================================
 
         conn.commit()
 
-        # ---------------------------------
-        # Response
-        # ---------------------------------
+        # ==================================================
+        # RESPONSE
+        # ==================================================
 
         return jsonify({
 
             "message":
-            "Warehouse verification completed successfully. "
-            "Verified returned stock has been added back to inventory.",
+                "Warehouse verification completed successfully. "
+                "Returned stock has been added back to inventory.",
 
             "month":
-            month,
+                month,
 
             "year":
-            year,
+                year,
 
             "total_unclaimed":
-            total_unclaimed,
+                total_unclaimed,
 
             "total_returned":
-            total_returned,
+                total_returned,
 
             "difference":
-            difference,
+                difference,
 
             "inventory_updated":
-            True,
+                True,
 
             "items_processed":
-            len(returned_items),
+                len(returned_items),
 
             "inventory_added":
-            inventory_added
+                inventory_added,
+
+            "verified":
+                True,
+
+            "verified_by":
+                manager_id
 
         }), 200
 
     except Exception as e:
 
         if conn:
+
             conn.rollback()
+
+        print(
+            "WAREHOUSE VERIFICATION ERROR:"
+        )
+
+        print(e)
 
         return jsonify({
 
             "message":
-            "Warehouse verification failed.",
+                "Warehouse verification failed.",
 
             "error":
-            str(e)
+                str(e)
 
         }), 500
 
     finally:
 
         if cursor:
+
             cursor.close()
 
         if conn:
+
             conn.close()

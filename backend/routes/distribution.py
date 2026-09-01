@@ -11,18 +11,18 @@ def distribute():
 
     data = request.get_json() or {}
 
-    # ---------------------------------
-    # Get Request Data
-    # ---------------------------------
+    # ==================================================
+    # GET REQUEST DATA
+    # ==================================================
 
     beneficiary_id = data.get("beneficiary_id")
     item_id = data.get("item_id")
     quantity_value = data.get("quantity_given")
     distributed_by = data.get("distributed_by")
 
-    # ---------------------------------
-    # Basic Validation
-    # ---------------------------------
+    # ==================================================
+    # BASIC VALIDATION
+    # ==================================================
 
     if not beneficiary_id:
         return jsonify({
@@ -41,6 +41,7 @@ def distribute():
 
     try:
         quantity = float(quantity_value)
+
     except (TypeError, ValueError):
 
         return jsonify({
@@ -50,13 +51,15 @@ def distribute():
     if quantity <= 0:
 
         return jsonify({
-            "message": "Quantity must be greater than zero."
+            "message":
+                "Quantity must be greater than zero."
         }), 400
 
     if not distributed_by:
 
         return jsonify({
-            "message": "Distributor information is required."
+            "message":
+                "Distributor information is required."
         }), 400
 
     conn = get_connection()
@@ -76,6 +79,9 @@ def distribute():
         # ==================================================
         # CHECK 1
         # MONTH CLOSED?
+        #
+        # Distribution is not allowed after the current
+        # month's closure.
         # ==================================================
 
         cursor.execute("""
@@ -94,7 +100,8 @@ def distribute():
 
             return jsonify({
                 "message":
-                    "Distribution for this month has already been closed."
+                    "Distribution for this month has "
+                    "already been closed."
             }), 400
 
         # ==================================================
@@ -120,7 +127,8 @@ def distribute():
         if beneficiary is None:
 
             return jsonify({
-                "message": "Beneficiary not found."
+                "message":
+                    "Beneficiary not found."
             }), 404
 
         category_id = beneficiary["category_id"]
@@ -143,12 +151,21 @@ def distribute():
 
         # ==================================================
         # GET RATION ITEM
+        #
+        # All four items are now supported:
+        #
+        # Rice
+        # Wheat
+        # Sugar
+        # Kerosene
         # ==================================================
 
         cursor.execute("""
             SELECT
                 item_id,
-                item_name
+                item_name,
+                unit,
+                subsidy_price
             FROM ration_items
             WHERE item_id = %s
         """, (
@@ -160,66 +177,32 @@ def distribute():
         if item is None:
 
             return jsonify({
-                "message": "Ration item not found."
+                "message":
+                    "Ration item not found."
             }), 404
 
         item_name = item["item_name"]
-
-        # ==================================================
-        # ONLY RICE AND WHEAT
-        # ==================================================
-
-        if item_name.lower() not in ("rice", "wheat"):
-
-            return jsonify({
-                "message":
-                    "Only Rice and Wheat are supported for distribution."
-            }), 400
-
-        # ==================================================
-        # CHECK 3
-        # STOCK ALREADY RETURNED?
-        # ==================================================
-
-        cursor.execute("""
-            SELECT
-                audit_status
-            FROM unclaimed_audit
-            WHERE beneficiary_id = %s
-            AND item_id = %s
-            AND month = %s
-            AND year = %s
-            ORDER BY audit_id DESC
-            LIMIT 1
-        """, (
-            beneficiary_id,
-            item_id,
-            current_month,
-            current_year
-        ))
-
-        audit = cursor.fetchone()
-
-        if audit and audit["audit_status"] == "Returned":
-
-            return jsonify({
-                "message":
-                    "Distribution not allowed. "
-                    "Unclaimed stock has already been returned "
-                    "to the warehouse."
-            }), 400
+        unit = item["unit"]
 
         # ==================================================
         # GET ENTITLEMENT RULE
+        #
+        # IMPORTANT:
+        #
+        # entitlement_period determines whether the item
+        # is MONTHLY or QUARTERLY.
         # ==================================================
 
         cursor.execute("""
             SELECT
                 monthly_quantity,
-                entitlement_type
+                entitlement_type,
+                entitlement_period
             FROM entitlement_rules
             WHERE category_id = %s
             AND item_id = %s
+            ORDER BY entitlement_id DESC
+            LIMIT 1
         """, (
             category_id,
             item_id
@@ -230,19 +213,26 @@ def distribute():
         # ==================================================
         # NPNS SPECIAL CASE
         #
-        # NPNS is availability based and therefore does
-        # not have a fixed monthly entitlement.
+        # NPNS is availability based.
+        #
+        # Therefore there is no fixed entitlement.
+        # The beneficiary can receive the item only when
+        # stock is available.
         # ==================================================
 
         if category_name.upper() == "NPNS":
 
             entitlement_type = "AVAILABILITY"
+            entitlement_period = "MONTHLY"
 
             base_quantity = 0.0
-
-            monthly_quantity = None
+            allowed_quantity = None
 
         else:
+
+            # ==================================================
+            # ENTITLEMENT RULE MUST EXIST
+            # ==================================================
 
             if entitlement is None:
 
@@ -257,23 +247,39 @@ def distribute():
             )
 
             entitlement_type = (
-                entitlement["entitlement_type"]
+                entitlement["entitlement_type"] or
+                "HOUSEHOLD"
+            )
+
+            entitlement_period = (
+                entitlement["entitlement_period"] or
+                "MONTHLY"
+            )
+
+            entitlement_period = (
+                entitlement_period.upper()
             )
 
             # ==================================================
-            # CALCULATE ACTUAL MONTHLY ENTITLEMENT
+            # CALCULATE BASE ENTITLEMENT
+            #
+            # PERSON:
+            # quantity × number of family members
+            #
+            # HOUSEHOLD:
+            # fixed quantity per household
             # ==================================================
 
             if entitlement_type == "PERSON":
 
-                monthly_quantity = (
+                base_entitlement = (
                     base_quantity *
                     family_members
                 )
 
             elif entitlement_type == "HOUSEHOLD":
 
-                monthly_quantity = base_quantity
+                base_entitlement = base_quantity
 
             else:
 
@@ -283,70 +289,164 @@ def distribute():
                         "for this category and item."
                 }), 400
 
-        # ==================================================
-        # ALREADY CLAIMED THIS MONTH
-        # ==================================================
+            # ==================================================
+            # DETERMINE ALLOWED PERIOD
+            # ==================================================
 
-        cursor.execute("""
-            SELECT
-                IFNULL(
-                    SUM(quantity_given),
-                    0
-                ) AS claimed
-            FROM distributions
-            WHERE beneficiary_id = %s
-            AND item_id = %s
-            AND MONTH(distribution_date) = %s
-            AND YEAR(distribution_date) = %s
-        """, (
-            beneficiary_id,
-            item_id,
-            current_month,
-            current_year
-        ))
+            if entitlement_period == "QUARTERLY":
 
-        claimed_result = cursor.fetchone()
+                allowed_quantity = base_entitlement
 
-        claimed = float(
-            claimed_result["claimed"] or 0
-        )
+            elif entitlement_period == "MONTHLY":
+
+                allowed_quantity = base_entitlement
+
+            else:
+
+                return jsonify({
+                    "message":
+                        "Invalid entitlement period configured "
+                        "for this category and item."
+                }), 400
 
         # ==================================================
-        # FIXED ENTITLEMENT CATEGORIES
+        # CALCULATE CLAIMED QUANTITY
         #
-        # AAY
-        # Rice  = 28 kg / household
-        # Wheat = 7 kg / household
+        # MONTHLY ITEM:
+        # Only current month is considered.
         #
-        # PHH
-        # Rice  = 4 kg / person
-        # Wheat = 1 kg / person
+        # QUARTERLY ITEM:
+        # All three months of the current quarter
+        # are considered.
         #
-        # NPS
-        # Rice  = 2 kg / person
-        # Wheat = 1 kg / person
+        # This is the important change.
         # ==================================================
 
-        if entitlement_type != "AVAILABILITY":
+        if entitlement_type == "AVAILABILITY":
+
+            claimed = 0.0
+
+        elif entitlement_period == "QUARTERLY":
+
+            # ---------------------------------------------
+            # Calculate current quarter
+            #
+            # Q1 = Jan-Mar
+            # Q2 = Apr-Jun
+            # Q3 = Jul-Sep
+            # Q4 = Oct-Dec
+            # ---------------------------------------------
+
+            current_quarter = (
+                (current_month - 1) // 3
+            ) + 1
+
+            quarter_start_month = (
+                (current_quarter - 1) * 3
+            ) + 1
+
+            quarter_end_month = (
+                quarter_start_month + 2
+            )
+
+            cursor.execute("""
+                SELECT
+                    IFNULL(
+                        SUM(quantity_given),
+                        0
+                    ) AS claimed
+                FROM distributions
+                WHERE beneficiary_id = %s
+                AND item_id = %s
+                AND YEAR(distribution_date) = %s
+                AND MONTH(distribution_date)
+                    BETWEEN %s AND %s
+            """, (
+                beneficiary_id,
+                item_id,
+                current_year,
+                quarter_start_month,
+                quarter_end_month
+            ))
+
+            claimed_result = cursor.fetchone()
+
+            claimed = float(
+                claimed_result["claimed"] or 0
+            )
+
+        else:
+
+            # ==================================================
+            # MONTHLY CLAIMED
+            # ==================================================
+
+            cursor.execute("""
+                SELECT
+                    IFNULL(
+                        SUM(quantity_given),
+                        0
+                    ) AS claimed
+                FROM distributions
+                WHERE beneficiary_id = %s
+                AND item_id = %s
+                AND MONTH(distribution_date) = %s
+                AND YEAR(distribution_date) = %s
+            """, (
+                beneficiary_id,
+                item_id,
+                current_month,
+                current_year
+            ))
+
+            claimed_result = cursor.fetchone()
+
+            claimed = float(
+                claimed_result["claimed"] or 0
+            )
+
+        # ==================================================
+        # CALCULATE REMAINING ENTITLEMENT
+        # ==================================================
+
+        if entitlement_type == "AVAILABILITY":
+
+            remaining = None
+
+        else:
 
             remaining = (
-                monthly_quantity - claimed
+                allowed_quantity -
+                claimed
             )
 
             if remaining < 0:
                 remaining = 0.0
 
-            # ---------------------------------------------
-            # Prevent Over Claim
-            # ---------------------------------------------
+            # ==================================================
+            # PREVENT OVER CLAIM
+            # ==================================================
 
             if quantity > remaining:
+
+                if entitlement_period == "QUARTERLY":
+
+                    period_message = (
+                        "quarter"
+                    )
+
+                else:
+
+                    period_message = (
+                        "month"
+                    )
 
                 return jsonify({
 
                     "message":
-                        f"Only {remaining:.2f} kg remains "
-                        f"for this month.",
+                        f"Only {remaining:.2f} "
+                        f"{unit.lower()} remains for "
+                        f"this {period_message}.",
 
                     "category":
                         category_name,
@@ -354,8 +454,14 @@ def distribute():
                     "item":
                         item_name,
 
-                    "monthly_entitlement":
-                        monthly_quantity,
+                    "entitlement_period":
+                        entitlement_period,
+
+                    "entitlement_type":
+                        entitlement_type,
+
+                    "entitlement":
+                        allowed_quantity,
 
                     "already_claimed":
                         claimed,
@@ -365,26 +471,17 @@ def distribute():
 
                 }), 400
 
-        else:
-
-            # ==================================================
-            # NPNS
-            #
-            # No fixed entitlement.
-            # Quantity is limited only by available stock.
-            # ==================================================
-
-            remaining = None
-
         # ==================================================
         # INVENTORY CHECK
         # ==================================================
 
         cursor.execute("""
             SELECT
+                inventory_id,
                 available_quantity
             FROM inventory
             WHERE item_id = %s
+            FOR UPDATE
         """, (
             item_id,
         ))
@@ -394,12 +491,17 @@ def distribute():
         if inventory is None:
 
             return jsonify({
-                "message": "Inventory not found."
+                "message":
+                    "Inventory not found for this item."
             }), 404
 
         available_quantity = float(
             inventory["available_quantity"] or 0
         )
+
+        # ==================================================
+        # PREVENT NEGATIVE STOCK
+        # ==================================================
 
         if available_quantity < quantity:
 
@@ -407,6 +509,9 @@ def distribute():
 
                 "message":
                     "Insufficient inventory.",
+
+                "item":
+                    item_name,
 
                 "available_quantity":
                     available_quantity,
@@ -424,10 +529,10 @@ def distribute():
             UPDATE inventory
             SET available_quantity =
                 available_quantity - %s
-            WHERE item_id = %s
+            WHERE inventory_id = %s
         """, (
             quantity,
-            item_id
+            inventory["inventory_id"]
         ))
 
         # ==================================================
@@ -460,36 +565,66 @@ def distribute():
         ))
 
         # ==================================================
-        # UPDATE AUDIT
+        # UPDATE AUDIT RECORD
+        #
+        # The audit remains MONTHLY.
+        #
+        # For a quarterly item, this record represents
+        # what happened during THIS MONTH.
+        #
+        # The entitlement check itself remains quarterly.
         # ==================================================
 
         new_claimed = claimed + quantity
 
         if entitlement_type == "AVAILABILITY":
 
-            # NPNS has no predetermined entitlement.
-            #
-            # For audit purposes, the quantity actually
-            # claimed is recorded as the entitlement used
-            # for that distribution cycle.
-
             audit_entitled = new_claimed
             new_unclaimed = 0.0
 
         else:
 
-            audit_entitled = monthly_quantity
+            if entitlement_period == "QUARTERLY":
 
-            new_unclaimed = (
-                monthly_quantity -
-                new_claimed
-            )
+                # -----------------------------------------
+                # For a quarterly item:
+                #
+                # The audit record records the quarterly
+                # entitlement and the amount claimed so far
+                # in the quarter.
+                #
+                # It does NOT create a fresh entitlement
+                # every month.
+                # -----------------------------------------
 
-            if new_unclaimed < 0:
-                new_unclaimed = 0.0
+                audit_entitled = allowed_quantity
+
+                new_unclaimed = (
+                    allowed_quantity -
+                    new_claimed
+                )
+
+                if new_unclaimed < 0:
+                    new_unclaimed = 0.0
+
+            else:
+
+                # -----------------------------------------
+                # Monthly item
+                # -----------------------------------------
+
+                audit_entitled = allowed_quantity
+
+                new_unclaimed = (
+                    allowed_quantity -
+                    new_claimed
+                )
+
+                if new_unclaimed < 0:
+                    new_unclaimed = 0.0
 
         # ==================================================
-        # CHECK EXISTING AUDIT RECORD
+        # CHECK EXISTING MONTHLY AUDIT RECORD
         # ==================================================
 
         cursor.execute("""
@@ -511,6 +646,10 @@ def distribute():
 
         audit_record = cursor.fetchone()
 
+        # ==================================================
+        # UPDATE EXISTING AUDIT
+        # ==================================================
+
         if audit_record:
 
             cursor.execute("""
@@ -526,6 +665,10 @@ def distribute():
                 new_unclaimed,
                 audit_record["audit_id"]
             ))
+
+        # ==================================================
+        # CREATE MONTHLY AUDIT
+        # ==================================================
 
         else:
 
@@ -563,13 +706,13 @@ def distribute():
             ))
 
         # ==================================================
-        # COMMIT
+        # COMMIT EVERYTHING
         # ==================================================
 
         conn.commit()
 
         # ==================================================
-        # RESPONSE
+        # CALCULATE RESPONSE REMAINING
         # ==================================================
 
         if entitlement_type == "AVAILABILITY":
@@ -579,8 +722,17 @@ def distribute():
         else:
 
             remaining_after_distribution = (
-                new_unclaimed
+                allowed_quantity -
+                new_claimed
             )
+
+            if remaining_after_distribution < 0:
+
+                remaining_after_distribution = 0.0
+
+        # ==================================================
+        # SUCCESS RESPONSE
+        # ==================================================
 
         return jsonify({
 
@@ -599,17 +751,23 @@ def distribute():
             "item_name":
                 item_name,
 
+            "unit":
+                unit,
+
             "family_members":
                 family_members,
 
             "entitlement_type":
                 entitlement_type,
 
+            "entitlement_period":
+                entitlement_period,
+
             "base_entitlement":
                 base_quantity,
 
-            "monthly_entitlement":
-                monthly_quantity,
+            "allowed_entitlement":
+                allowed_quantity,
 
             "already_claimed":
                 claimed,
@@ -623,6 +781,10 @@ def distribute():
         }), 201
 
     except Exception as e:
+
+        # ==================================================
+        # ROLLBACK
+        # ==================================================
 
         conn.rollback()
 

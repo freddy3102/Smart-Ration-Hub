@@ -62,13 +62,15 @@ function Audit() {
             .then((res) => {
 
                 /*
-                 * Only Rice and Wheat with
-                 * actual unclaimed stock are
-                 * displayed on the Audit page.
+                 * Display:
                  *
-                 * This prevents records with
-                 * zero unclaimed quantity from
-                 * appearing as Pending Returns.
+                 * Rice
+                 * Wheat
+                 * Sugar
+                 * Kerosene
+                 *
+                 * Only records having actual
+                 * unclaimed/claimed activity.
                  */
 
                 const filteredData = res.data.filter((row) => {
@@ -81,12 +83,20 @@ function Audit() {
                     const unclaimed =
                         Number(row.unclaimed_quantity || 0);
 
+                    const claimed =
+                        Number(row.claimed_quantity || 0);
+
                     return (
                         (
                             itemName === "rice" ||
-                            itemName === "wheat"
+                            itemName === "wheat" ||
+                            itemName === "sugar" ||
+                            itemName === "kerosene"
                         ) &&
-                        unclaimed > 0
+                        (
+                            unclaimed > 0 ||
+                            claimed > 0
+                        )
                     );
 
                 });
@@ -129,6 +139,25 @@ function Audit() {
                 setCycleStatus("");
 
             });
+
+    };
+
+
+    // ---------------------------------
+    // Check Quarterly Item
+    // ---------------------------------
+
+    const isQuarterlyItem = (row) => {
+
+        const itemName =
+            String(row.item_name || "")
+                .trim()
+                .toLowerCase();
+
+        return (
+            itemName === "sugar" ||
+            itemName === "kerosene"
+        );
 
     };
 
@@ -402,9 +431,9 @@ function Audit() {
 
                 <p className="audit-subtitle">
 
-                    Track all unclaimed ration stock and ensure it is
-                    returned to the warehouse to prevent misuse
-                    and black-market diversion.
+                    Track unclaimed ration stock and ensure it is
+                    returned to the warehouse according to its
+                    distribution period.
 
                 </p>
 
@@ -457,7 +486,7 @@ function Audit() {
                     <div className="card">
 
                         <h2>
-                            {totalQty.toFixed(2)} kg
+                            {totalQty.toFixed(2)}
                         </h2>
 
                         <p>
@@ -524,7 +553,7 @@ function Audit() {
                         <div className="mini-card">
 
                             <h2>
-                                {returnedQty.toFixed(2)} kg
+                                {returnedQty.toFixed(2)}
                             </h2>
 
                             <p>
@@ -657,6 +686,33 @@ function Audit() {
 
 
                 {/* ---------------------------------
+                    RETURN RULE
+                --------------------------------- */}
+
+                <div
+                    style={{
+                        marginBottom: "15px",
+                        padding: "10px 14px",
+                        background: "#f8fafc",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                        color: "#475569"
+                    }}
+                >
+
+                    <strong>
+                        Return Rules:
+                    </strong>{" "}
+
+                    Rice and Wheat are audited and returned monthly.
+                    Sugar and Kerosene are audited monthly, but their
+                    unclaimed quantity can be returned only at quarter
+                    end (March, June, September or December).
+
+                </div>
+
+
+                {/* ---------------------------------
                     SEARCH
                 --------------------------------- */}
 
@@ -687,7 +743,9 @@ function Audit() {
 
                         <tr>
 
-                            <th>ID</th>
+                            <th>
+                                ID
+                            </th>
 
                             <th>
                                 Beneficiary
@@ -695,6 +753,10 @@ function Audit() {
 
                             <th>
                                 Item
+                            </th>
+
+                            <th>
+                                Period
                             </th>
 
                             <th>
@@ -740,172 +802,369 @@ function Audit() {
 
                             ?
 
-                            filtered.map((row) => (
+                            filtered.map((row) => {
 
-                                <tr
-                                    key={row.audit_id}
-                                >
-
-                                    <td>
-
-                                        {getAuditDisplayId(
-                                            row
-                                        )}
-
-                                    </td>
+                                const quarterly =
+                                    isQuarterlyItem(row);
 
 
-                                    <td>
-                                        {row.full_name}
-                                    </td>
+                                /*
+                                 * Sugar/Kerosene can only
+                                 * be returned when the
+                                 * selected month is the
+                                 * final month of a quarter.
+                                 */
+
+                                const isQuarterEnd =
+                                    (
+                                        selectedMonth === 3 ||
+                                        selectedMonth === 6 ||
+                                        selectedMonth === 9 ||
+                                        selectedMonth === 12
+                                    );
 
 
-                                    <td>
-                                        {row.item_name}
-                                    </td>
+                                const canReturn =
+                                    cycleStatus === "CLOSED" &&
+                                    (
+                                        !quarterly ||
+                                        isQuarterEnd
+                                    );
 
 
-                                    <td>
-                                        {row.month}
-                                    </td>
+                                return (
+
+                                    <tr
+                                        key={
+                                            row.audit_id
+                                        }
+                                    >
+
+                                        {/* ID */}
+
+                                        <td>
+
+                                            {getAuditDisplayId(
+                                                row
+                                            )}
+
+                                        </td>
 
 
-                                    <td>
-                                        {row.year}
-                                    </td>
+                                        {/* Beneficiary */}
+
+                                        <td>
+                                            {row.full_name}
+                                        </td>
 
 
-                                    <td>
-                                        {row.entitled_quantity}
-                                    </td>
+                                        {/* Item */}
+
+                                        <td>
+
+                                            <strong>
+                                                {row.item_name}
+                                            </strong>
+
+                                        </td>
 
 
-                                    <td>
-                                        {row.claimed_quantity}
-                                    </td>
+                                        {/* Period */}
 
-
-                                    <td>
-                                        {row.unclaimed_quantity}
-                                    </td>
-
-
-                                    <td>
-                                        {row.warehouse_returned_quantity}
-                                    </td>
-
-
-                                    <td>
-
-                                        <span
-
-                                            className={
-
-                                                row.audit_status ===
-                                                "Returned"
-
-                                                    ? "badge returned"
-
-                                                    : "badge pending"
-
-                                            }
-
-                                        >
-
-                                            {row.audit_status}
-
-                                        </span>
-
-                                    </td>
-
-
-                                    <td>
-
-                                        {row.audit_status ===
-                                        "Returned"
-
-                                            ?
+                                        <td>
 
                                             <span
-
                                                 style={{
-
                                                     color:
-                                                        "#16a34a",
-
+                                                        quarterly
+                                                            ? "#7c3aed"
+                                                            : "#334155",
                                                     fontWeight:
-                                                        "bold",
-
-                                                    fontSize:
-                                                        "17px"
-
+                                                        "600"
                                                 }}
-
                                             >
 
-                                                ✔ Returned
+                                                {quarterly
+                                                    ? "Quarterly"
+                                                    : "Monthly"}
 
                                             </span>
 
-                                            :
+                                        </td>
 
-                                            <button
 
-                                                className="return-btn"
+                                        {/* Month */}
 
-                                                disabled={
-                                                    cycleStatus !==
-                                                    "CLOSED"
-                                                }
+                                        <td>
+                                            {row.month}
+                                        </td>
 
-                                                title={
 
-                                                    cycleStatus !==
-                                                    "CLOSED"
+                                        {/* Year */}
 
-                                                        ?
+                                        <td>
+                                            {row.year}
+                                        </td>
 
-                                                        "Warehouse return is available only after the distribution cycle is closed."
 
-                                                        :
+                                        {/* Entitled */}
 
-                                                        ""
+                                        <td>
 
-                                                }
+                                            {Number(
+                                                row.entitled_quantity || 0
+                                            ).toFixed(2)}
 
-                                                onClick={() =>
-                                                    returnStock(
-                                                        row.audit_id,
-                                                        row.unclaimed_quantity
-                                                    )
+                                            {" "}
+
+                                            {row.unit || ""}
+
+                                        </td>
+
+
+                                        {/* Claimed */}
+
+                                        <td>
+
+                                            {Number(
+                                                row.claimed_quantity || 0
+                                            ).toFixed(2)}
+
+                                            {" "}
+
+                                            {row.unit || ""}
+
+                                        </td>
+
+
+                                        {/* Unclaimed */}
+
+                                        <td>
+
+                                            {Number(
+                                                row.unclaimed_quantity || 0
+                                            ).toFixed(2)}
+
+                                            {" "}
+
+                                            {row.unit || ""}
+
+                                        </td>
+
+
+                                        {/* Returned */}
+
+                                        <td>
+
+                                            {Number(
+                                                row.warehouse_returned_quantity || 0
+                                            ).toFixed(2)}
+
+                                            {" "}
+
+                                            {row.unit || ""}
+
+                                        </td>
+
+
+                                        {/* Status */}
+
+                                        <td>
+
+                                            <span
+
+                                                className={
+
+                                                    row.audit_status ===
+                                                    "Returned"
+
+                                                        ? "badge returned"
+
+                                                        : "badge pending"
+
                                                 }
 
                                             >
 
-                                                {
+                                                {row.audit_status}
 
-                                                    cycleStatus ===
-                                                    "CLOSED"
+                                            </span>
 
-                                                        ?
+                                        </td>
 
-                                                        "↩ Return"
 
-                                                        :
+                                        {/* Action */}
 
-                                                        "🔒 Cycle Open"
+                                        <td>
 
-                                                }
+                                            {row.audit_status ===
+                                            "Returned"
 
-                                            </button>
+                                                ?
 
-                                        }
+                                                <span
 
-                                    </td>
+                                                    style={{
 
-                                </tr>
+                                                        color:
+                                                            "#16a34a",
 
-                            ))
+                                                        fontWeight:
+                                                            "bold",
+
+                                                        fontSize:
+                                                            "14px"
+
+                                                    }}
+
+                                                >
+
+                                                    ✔ Returned
+
+                                                </span>
+
+                                                :
+
+                                                quarterly
+
+                                                    ?
+
+                                                    <div>
+
+                                                        <button
+
+                                                            className="return-btn"
+
+                                                            disabled={
+                                                                !canReturn
+                                                            }
+
+                                                            title={
+
+                                                                !isQuarterEnd
+
+                                                                    ?
+
+                                                                    "Sugar and Kerosene can be returned only at quarter end."
+
+                                                                    :
+
+                                                                    cycleStatus !== "CLOSED"
+
+                                                                        ?
+
+                                                                        "Warehouse return is available only after the distribution cycle is closed."
+
+                                                                        :
+
+                                                                        ""
+
+                                                            }
+
+                                                            onClick={() =>
+                                                                returnStock(
+                                                                    row.audit_id,
+                                                                    row.unclaimed_quantity
+                                                                )
+                                                            }
+
+                                                        >
+
+                                                            {canReturn
+                                                                ? "↩ Return"
+                                                                : "Quarterly"}
+
+                                                        </button>
+
+
+                                                        {!canReturn && (
+
+                                                            <small
+                                                                style={{
+                                                                    display:
+                                                                        "block",
+                                                                    marginTop:
+                                                                        "5px",
+                                                                    color:
+                                                                        "#64748b",
+                                                                    fontSize:
+                                                                        "11px",
+                                                                    lineHeight:
+                                                                        "14px"
+                                                                }}
+                                                            >
+
+                                                                Sugar and Kerosene
+                                                                can be returned
+                                                                only at quarter end.
+
+                                                            </small>
+
+                                                        )}
+
+                                                    </div>
+
+                                                    :
+
+                                                    <button
+
+                                                        className="return-btn"
+
+                                                        disabled={
+                                                            cycleStatus !==
+                                                            "CLOSED"
+                                                        }
+
+                                                        title={
+
+                                                            cycleStatus !==
+                                                            "CLOSED"
+
+                                                                ?
+
+                                                                "Warehouse return is available only after the distribution cycle is closed."
+
+                                                                :
+
+                                                                ""
+
+                                                        }
+
+                                                        onClick={() =>
+                                                            returnStock(
+                                                                row.audit_id,
+                                                                row.unclaimed_quantity
+                                                            )
+                                                        }
+
+                                                    >
+
+                                                        {
+
+                                                            cycleStatus ===
+                                                            "CLOSED"
+
+                                                                ?
+
+                                                                "↩ Return"
+
+                                                                :
+
+                                                                "🔒 Cycle Open"
+
+                                                        }
+
+                                                    </button>
+
+                                            }
+
+                                        </td>
+
+                                    </tr>
+
+                                );
+
+                            })
 
                             :
 
@@ -913,7 +1172,7 @@ function Audit() {
 
                                 <td
 
-                                    colSpan="11"
+                                    colSpan="12"
 
                                     style={{
 
@@ -930,8 +1189,8 @@ function Audit() {
 
                                 >
 
-                                    No unclaimed Rice or Wheat
-                                    stock found for the selected
+                                    No unclaimed ration stock
+                                    found for the selected
                                     month.
 
                                 </td>

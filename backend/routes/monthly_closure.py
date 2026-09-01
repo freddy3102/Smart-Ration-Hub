@@ -1,14 +1,38 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 from db import get_connection
 from business_date import get_business_date
 import calendar
 import traceback
 
 
-monthly_closure_bp = Blueprint("monthly_closure", __name__)
+monthly_closure_bp = Blueprint(
+    "monthly_closure",
+    __name__
+)
 
 
-@monthly_closure_bp.route("/close-month", methods=["POST"])
+# ==================================================
+# Helper: Check Quarter End
+# ==================================================
+
+def is_quarter_end(month):
+
+    return month in (
+        3,
+        6,
+        9,
+        12
+    )
+
+
+# ==================================================
+# CLOSE MONTH
+# ==================================================
+
+@monthly_closure_bp.route(
+    "/close-month",
+    methods=["POST"]
+)
 def close_month():
 
     print("\n==============================")
@@ -20,22 +44,30 @@ def close_month():
 
     try:
 
-        # ---------------------------------
-        # Business Date
-        # ---------------------------------
+        # ==================================================
+        # BUSINESS DATE
+        # ==================================================
 
         today = get_business_date()
 
         current_month = today.month
         current_year = today.year
 
-        print(f"Business Date : {today}")
-        print(f"Month : {current_month}")
-        print(f"Year  : {current_year}")
+        print(
+            f"Business Date : {today}"
+        )
 
-        # ---------------------------------
-        # Check Month End
-        # ---------------------------------
+        print(
+            f"Month : {current_month}"
+        )
+
+        print(
+            f"Year  : {current_year}"
+        )
+
+        # ==================================================
+        # CHECK MONTH END
+        # ==================================================
 
         last_day = calendar.monthrange(
             current_year,
@@ -45,24 +77,36 @@ def close_month():
         if today.day != last_day:
 
             return jsonify({
+
                 "message":
-                "Cannot close month. Business month has not ended."
+                    "Cannot close month. "
+                    "Business month has not ended."
+
             }), 400
 
+        # ==================================================
+        # DATABASE
+        # ==================================================
+
         conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
 
-        print("Database connected.")
+        cursor = conn.cursor(
+            dictionary=True
+        )
 
-        # ---------------------------------
-        # Already Closed?
-        # ---------------------------------
+        # ==================================================
+        # ALREADY CLOSED?
+        # ==================================================
 
         cursor.execute("""
-            SELECT closure_id
+            SELECT
+                closure_id
             FROM monthly_closure
-            WHERE month=%s
-            AND year=%s
+
+            WHERE month = %s
+            AND year = %s
+
+            FOR UPDATE
         """, (
             current_month,
             current_year
@@ -70,185 +114,384 @@ def close_month():
 
         if cursor.fetchone():
 
-            print("Month already closed.")
-
             return jsonify({
+
                 "message":
-                "This month has already been closed."
+                    "This month has already been closed."
+
             }), 400
 
-        print("Month not closed yet.")
+        # ==================================================
+        # QUARTER STATUS
+        # ==================================================
 
-        # ---------------------------------
-        # Load Entitlements
-        # ---------------------------------
+        quarter_end = is_quarter_end(
+            current_month
+        )
+
+        print(
+            f"Quarter End : {quarter_end}"
+        )
+
+        # ==================================================
+        # LOAD ENTITLEMENTS
+        # ==================================================
 
         cursor.execute("""
             SELECT
+
                 b.beneficiary_id,
                 b.full_name,
                 b.family_members,
 
                 r.item_id,
                 ri.item_name,
+                ri.unit,
 
                 r.monthly_quantity,
-                r.entitlement_type
+                r.entitlement_type,
+                r.entitlement_period
 
             FROM beneficiaries b
 
             JOIN entitlement_rules r
-                ON b.category_id = r.category_id
+                ON b.category_id =
+                   r.category_id
 
             JOIN ration_items ri
-                ON r.item_id = ri.item_id
+                ON r.item_id =
+                   ri.item_id
+
+            WHERE LOWER(ri.item_name) IN (
+                'rice',
+                'wheat',
+                'sugar',
+                'kerosene'
+            )
 
             ORDER BY
+
                 b.beneficiary_id,
                 ri.item_name
 
         """)
 
-        entitlement_data = cursor.fetchall()
-
-        print(
-            f"Entitlement Records : "
-            f"{len(entitlement_data)}"
+        entitlement_data = (
+            cursor.fetchall()
         )
 
         inserted = 0
 
-        # ---------------------------------
-        # Generate Audit Records
-        # ---------------------------------
+        # ==================================================
+        # PROCESS EACH BENEFICIARY + ITEM
+        # ==================================================
 
         for row in entitlement_data:
 
-            print("--------------------------------")
-            print(row)
-
-            # ---------------------------------
-            # Already Claimed
-            # ---------------------------------
-
-            cursor.execute("""
-                SELECT
-                    IFNULL(
-                        SUM(quantity_given),
-                        0
-                    ) AS claimed
-
-                FROM distributions
-
-                WHERE beneficiary_id=%s
-                AND item_id=%s
-                AND MONTH(distribution_date)=%s
-                AND YEAR(distribution_date)=%s
-
-            """, (
-                row["beneficiary_id"],
-                row["item_id"],
-                current_month,
-                current_year
-            ))
-
-            claimed = float(
-                cursor.fetchone()["claimed"]
+            beneficiary_id = (
+                row["beneficiary_id"]
             )
 
-            # ---------------------------------
-            # Calculate Actual Entitlement
-            # ---------------------------------
+            item_id = row["item_id"]
+
+            item_name = (
+                row["item_name"] or ""
+            ).strip()
+
+            item_name_lower = (
+                item_name.lower()
+            )
+
+            entitlement_period = (
+                row["entitlement_period"]
+                or "MONTHLY"
+            ).upper()
+
+            entitlement_type = (
+                row["entitlement_type"]
+                or "HOUSEHOLD"
+            ).upper()
 
             base_quantity = float(
                 row["monthly_quantity"]
+                or 0
             )
-
-            entitlement_type = row[
-                "entitlement_type"
-            ]
 
             family_members = int(
-                row["family_members"] or 1
+                row["family_members"]
+                or 1
             )
 
-            if entitlement_type == "PERSON":
+            # ==================================================
+            # DETERMINE WHETHER THIS ITEM SHOULD BE AUDITED
+            # ==================================================
 
-                entitled = (
-                    base_quantity *
-                    family_members
+            is_quarterly_item = (
+                entitlement_period == "QUARTERLY"
+                or
+                item_name_lower in (
+                    "sugar",
+                    "kerosene"
                 )
+            )
+
+            # ==================================================
+            # QUARTERLY ITEMS
+            #
+            # Only create audit at quarter end.
+            # ==================================================
+
+            if is_quarterly_item:
+
+                if not quarter_end:
+
+                    print(
+                        f"Skipping quarterly item "
+                        f"{item_name} for "
+                        f"{current_month}/{current_year}. "
+                        f"Quarter has not ended."
+                    )
+
+                    continue
+
+                # ---------------------------------------------
+                # Quarterly entitlement
+                # ---------------------------------------------
+
+                if entitlement_type == "PERSON":
+
+                    entitled = (
+                        base_quantity *
+                        family_members
+                    )
+
+                else:
+
+                    entitled = base_quantity
+
+                # ---------------------------------------------
+                # Sum all distributions during the quarter
+                # ---------------------------------------------
+
+                if current_month in (3,):
+
+                    quarter_start = 1
+
+                elif current_month in (6,):
+
+                    quarter_start = 4
+
+                elif current_month in (9,):
+
+                    quarter_start = 7
+
+                else:
+
+                    quarter_start = 10
+
+                quarter_end = current_month
+
+                cursor.execute("""
+                    SELECT
+
+                        IFNULL(
+                            SUM(quantity_given),
+                            0
+                        ) AS claimed
+
+                    FROM distributions
+
+                    WHERE beneficiary_id = %s
+
+                    AND item_id = %s
+
+                    AND YEAR(distribution_date) = %s
+
+                    AND MONTH(distribution_date)
+                        BETWEEN %s AND %s
+
+                """, (
+                    beneficiary_id,
+                    item_id,
+                    current_year,
+                    quarter_start,
+                    quarter_end
+                ))
+
+                claimed_result = (
+                    cursor.fetchone()
+                )
+
+                claimed = float(
+                    claimed_result["claimed"]
+                    or 0
+                )
+
+                unclaimed = (
+                    entitled -
+                    claimed
+                )
+
+                if unclaimed < 0:
+
+                    unclaimed = 0
+
+                print(
+                    f"QUARTERLY | "
+                    f"{item_name} | "
+                    f"Entitled={entitled} | "
+                    f"Claimed={claimed} | "
+                    f"Unclaimed={unclaimed}"
+                )
+
+            # ==================================================
+            # MONTHLY ITEMS
+            #
+            # Rice / Wheat
+            # ==================================================
 
             else:
 
-                # HOUSEHOLD entitlement
-                entitled = base_quantity
+                # ---------------------------------------------
+                # Calculate monthly entitlement
+                # ---------------------------------------------
 
-            # ---------------------------------
-            # Calculate Unclaimed
-            # ---------------------------------
+                if entitlement_type == "PERSON":
 
-            unclaimed = entitled - claimed
+                    entitled = (
+                        base_quantity *
+                        family_members
+                    )
 
-            # Avoid negative value
+                else:
 
-            if unclaimed < 0:
-                unclaimed = 0
+                    entitled = base_quantity
 
-            print(
-                f"Type={entitlement_type}, "
-                f"Base={base_quantity}, "
-                f"Family Members={family_members}, "
-                f"Entitled={entitled}, "
-                f"Claimed={claimed}, "
-                f"Unclaimed={unclaimed}"
-            )
+                # ---------------------------------------------
+                # Monthly claimed
+                # ---------------------------------------------
 
-            # ---------------------------------
-            # Skip Fully Claimed Beneficiaries
-            # ---------------------------------
+                cursor.execute("""
+                    SELECT
+
+                        IFNULL(
+                            SUM(quantity_given),
+                            0
+                        ) AS claimed
+
+                    FROM distributions
+
+                    WHERE beneficiary_id = %s
+
+                    AND item_id = %s
+
+                    AND MONTH(distribution_date) = %s
+
+                    AND YEAR(distribution_date) = %s
+
+                """, (
+                    beneficiary_id,
+                    item_id,
+                    current_month,
+                    current_year
+                ))
+
+                claimed_result = (
+                    cursor.fetchone()
+                )
+
+                claimed = float(
+                    claimed_result["claimed"]
+                    or 0
+                )
+
+                unclaimed = (
+                    entitled -
+                    claimed
+                )
+
+                if unclaimed < 0:
+
+                    unclaimed = 0
+
+                print(
+                    f"MONTHLY | "
+                    f"{item_name} | "
+                    f"Entitled={entitled} | "
+                    f"Claimed={claimed} | "
+                    f"Unclaimed={unclaimed}"
+                )
+
+            # ==================================================
+            # FULLY CLAIMED
+            # ==================================================
 
             if unclaimed <= 0:
 
-                print(
-                    "No unclaimed stock."
-                )
-
                 continue
 
-            # ---------------------------------
-            # Prevent Duplicate Audit Records
-            # ---------------------------------
+            # ==================================================
+            # CHECK EXISTING AUDIT
+            # ==================================================
 
             cursor.execute("""
-                SELECT audit_id
+                SELECT
+                    audit_id
 
                 FROM unclaimed_audit
 
-                WHERE beneficiary_id=%s
-                AND item_id=%s
-                AND month=%s
-                AND year=%s
+                WHERE beneficiary_id = %s
+
+                AND item_id = %s
+
+                AND month = %s
+
+                AND year = %s
+
+                LIMIT 1
 
             """, (
-                row["beneficiary_id"],
-                row["item_id"],
+                beneficiary_id,
+                item_id,
                 current_month,
                 current_year
             ))
 
-            if cursor.fetchone():
+            existing = (
+                cursor.fetchone()
+            )
 
-                print(
-                    "Audit record already exists. "
-                    "Skipping..."
-                )
+            # ==================================================
+            # UPDATE EXISTING AUDIT
+            # ==================================================
+
+            if existing:
+
+                cursor.execute("""
+                    UPDATE unclaimed_audit
+
+                    SET
+
+                        entitled_quantity = %s,
+
+                        claimed_quantity = %s,
+
+                        unclaimed_quantity = %s
+
+                    WHERE audit_id = %s
+
+                """, (
+                    entitled,
+                    claimed,
+                    unclaimed,
+                    existing["audit_id"]
+                ))
 
                 continue
 
-            # ---------------------------------
-            # Insert Audit Record
-            # ---------------------------------
+            # ==================================================
+            # INSERT AUDIT
+            # ==================================================
 
             cursor.execute("""
                 INSERT INTO unclaimed_audit
@@ -292,8 +535,8 @@ def close_month():
                 )
 
             """, (
-                row["beneficiary_id"],
-                row["item_id"],
+                beneficiary_id,
+                item_id,
 
                 current_month,
                 current_year,
@@ -305,18 +548,9 @@ def close_month():
 
             inserted += 1
 
-            print(
-                "Audit row inserted."
-            )
-
-        print(
-            f"Inserted {inserted} "
-            f"audit records."
-        )
-
-        # ---------------------------------
-        # Record Month Closure
-        # ---------------------------------
+        # ==================================================
+        # CREATE MONTHLY CLOSURE
+        # ==================================================
 
         cursor.execute("""
             INSERT INTO monthly_closure
@@ -339,41 +573,39 @@ def close_month():
             1
         ))
 
-        print(
-            "Monthly closure record inserted."
-        )
-
-        # ---------------------------------
-        # Save Changes
-        # ---------------------------------
+        # ==================================================
+        # COMMIT
+        # ==================================================
 
         conn.commit()
 
-        print("COMMIT SUCCESSFUL")
-
-        # ---------------------------------
-        # Response
-        # ---------------------------------
+        # ==================================================
+        # RESPONSE
+        # ==================================================
 
         return jsonify({
 
             "message":
-            "Month closed successfully.",
+                "Month closed successfully.",
 
             "month":
-            current_month,
+                current_month,
 
             "year":
-            current_year,
+                current_year,
+
+            "quarter_end":
+                quarter_end,
 
             "audit_records_created":
-            inserted
+                inserted
 
         }), 200
 
     except Exception as e:
 
         if conn:
+
             conn.rollback()
 
         print(
@@ -385,21 +617,19 @@ def close_month():
         return jsonify({
 
             "message":
-            "Month closure failed.",
+                "Month closure failed.",
 
             "error":
-            str(e)
+                str(e)
 
         }), 500
 
     finally:
 
         if cursor:
+
             cursor.close()
 
         if conn:
-            conn.close()
 
-        print(
-            "Database connection closed."
-        )
+            conn.close()
