@@ -1,30 +1,766 @@
+/* =========================================
+   BENEFICIARY MONTHLY REPORTS
+========================================= */
+
 .beneficiary-reports-page {
-    padding: 40px;
+
+    width: 100%;
+
+    max-width: 1400px;
+
+    margin: 0 auto;
+
+    padding: 10px 0 40px;
+
+    box-sizing: border-box;
 }
 
-.beneficiary-reports-page h1 {
-    color: #1e3a5f;
-    margin-bottom: 8px;
+
+/* =========================================
+   PAGE HEADER
+========================================= */
+
+.beneficiary-reports-header {
+
+    margin-bottom: 28px;
 }
 
-.reports-subtitle {
+
+.reports-page-label {
+
+    margin: 0 0 8px;
+
+    color: #2563eb;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+
+.beneficiary-reports-header h1 {
+
+    margin: 0 0 8px;
+
+    color: #172554;
+
+    font-size: 38px;
+
+    line-height: 1.2;
+
+    font-weight: 700;
+}
+
+
+.reports-page-subtitle {
+
+    margin: 0;
+
     color: #64748b;
-    margin-bottom: 30px;
+
+    font-size: 16px;
+
+    line-height: 1.5;
 }
 
-.report-placeholder {
-    background: white;
-    padding: 35px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+
+/* =========================================
+   MAIN REPORT CARD
+========================================= */
+
+.beneficiary-report-section {
+
+    width: 100%;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 18px;
+
+    padding: 30px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 6px 24px rgba(15, 23, 42, 0.07);
 }
 
-.report-placeholder h2 {
-    color: #1e3a5f;
-    margin-bottom: 15px;
+
+/* =========================================
+   SECTION HEADER
+========================================= */
+
+.beneficiary-section-header {
+
+    margin-bottom: 24px;
 }
 
-.report-placeholder p {
+
+.beneficiary-section-header h2 {
+
+    margin: 0 0 7px;
+
+    color: #172554;
+
+    font-size: 25px;
+
+    font-weight: 700;
+}
+
+
+.beneficiary-section-header p {
+
+    margin: 0;
+
     color: #64748b;
-    line-height: 1.6;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   FILTER
+========================================= */
+
+.beneficiary-report-filter {
+
+    display: flex;
+
+    align-items: flex-end;
+
+    gap: 18px;
+
+    margin-bottom: 24px;
+
+    padding: 20px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+}
+
+
+.beneficiary-filter-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+
+.beneficiary-filter-group label {
+
+    color: #475569;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+.beneficiary-filter-group select,
+.beneficiary-filter-group input {
+
+    height: 42px;
+
+    min-width: 155px;
+
+    padding: 0 12px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+
+.beneficiary-filter-group select:focus,
+.beneficiary-filter-group input:focus {
+
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+
+/* =========================================
+   VERIFICATION HEADER
+========================================= */
+
+.beneficiary-verification-header {
+
+    display: grid;
+
+    grid-template-columns:
+        1.2fr
+        0.8fr
+        1fr
+        1.2fr;
+
+    gap: 20px;
+
+    padding: 20px;
+
+    margin-bottom: 18px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+}
+
+
+.beneficiary-verification-period,
+.beneficiary-verification-status {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+.beneficiary-verification-period span,
+.beneficiary-verification-status span {
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    font-weight: 500;
+}
+
+
+.beneficiary-verification-period strong {
+
+    color: #1e293b;
+
+    font-size: 17px;
+
+    font-weight: 700;
+}
+
+
+.beneficiary-verification-status strong {
+
+    font-size: 14px;
+
+    font-weight: 700;
+}
+
+
+.beneficiary-verification-status .verified {
+
+    color: #16a34a;
+}
+
+
+.beneficiary-verification-status .not-verified {
+
+    color: #d97706;
+}
+
+
+/* =========================================
+   QUARTER INFORMATION
+========================================= */
+
+.beneficiary-quarter-info {
+
+    margin-bottom: 22px;
+
+    padding: 16px 18px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    color: #475569;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+.beneficiary-quarter-info strong {
+
+    color: #1e293b;
+}
+
+
+/* =========================================
+   SUMMARY CARDS
+========================================= */
+
+.beneficiary-verification-summary {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 18px;
+
+    margin-bottom: 25px;
+}
+
+
+.beneficiary-verification-card {
+
+    min-height: 110px;
+
+    padding: 22px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 4px 15px rgba(15, 23, 42, 0.05);
+}
+
+
+.beneficiary-verification-card h2 {
+
+    margin: 0 0 7px;
+
+    color: #172554;
+
+    font-size: 25px;
+
+    font-weight: 700;
+}
+
+
+.beneficiary-verification-card p {
+
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   TABLE
+========================================= */
+
+.beneficiary-report-table-wrapper {
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 4px 15px rgba(15, 23, 42, 0.04);
+}
+
+
+.beneficiary-report-table {
+
+    width: 100%;
+
+    min-width: 900px;
+
+    border-collapse: collapse;
+
+    background: #ffffff;
+}
+
+
+.beneficiary-report-table thead {
+
+    background: #172554;
+
+    color: #ffffff;
+}
+
+
+.beneficiary-report-table th {
+
+    padding: 15px 16px;
+
+    text-align: left;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.beneficiary-report-table td {
+
+    padding: 17px 16px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    color: #475569;
+
+    font-size: 13px;
+
+    vertical-align: middle;
+}
+
+
+.beneficiary-report-table tbody tr:last-child td {
+
+    border-bottom: none;
+}
+
+
+.beneficiary-report-table tbody tr:hover td {
+
+    background: #f8fafc;
+}
+
+
+.beneficiary-report-table td strong {
+
+    color: #172554;
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   TABLE STATUS
+========================================= */
+
+.beneficiary-table-status {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 90px;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.status-verified {
+
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+.status-complete {
+
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+.status-ready {
+
+    background: #dbeafe;
+
+    color: #1d4ed8;
+}
+
+
+.status-open {
+
+    background: #e0f2fe;
+
+    color: #0369a1;
+}
+
+
+.status-pending {
+
+    background: #fef3c7;
+
+    color: #b45309;
+}
+
+
+/* =========================================
+   TRANSPARENCY INFORMATION
+========================================= */
+
+.beneficiary-report-footer-info {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 20px;
+
+    margin-top: 20px;
+
+    padding: 18px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+}
+
+
+.beneficiary-report-footer-info > div {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+.beneficiary-report-footer-info strong {
+
+    color: #172554;
+
+    font-size: 13px;
+}
+
+
+.beneficiary-report-footer-info span {
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   GENERATED TIME
+========================================= */
+
+.beneficiary-report-generated {
+
+    margin-top: 18px;
+
+    text-align: right;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* =========================================
+   LOADING
+========================================= */
+
+.reports-loading {
+
+    min-height: 280px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 18px;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    box-shadow:
+        0 6px 24px rgba(15, 23, 42, 0.05);
+}
+
+
+.reports-loading-spinner {
+
+    width: 30px;
+
+    height: 30px;
+
+    border: 3px solid #dbeafe;
+
+    border-top-color: #2563eb;
+
+    border-radius: 50%;
+
+    animation:
+        beneficiary-report-spin
+        0.8s linear infinite;
+}
+
+
+@keyframes beneficiary-report-spin {
+
+    from {
+
+        transform: rotate(0deg);
+
+    }
+
+    to {
+
+        transform: rotate(360deg);
+
+    }
+
+}
+
+
+/* =========================================
+   EMPTY STATE
+========================================= */
+
+.beneficiary-empty-state {
+
+    padding: 45px 20px !important;
+
+    text-align: center !important;
+
+    color: #64748b !important;
+
+    font-size: 13px !important;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1050px) {
+
+    .beneficiary-verification-header {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+
+    .beneficiary-verification-summary {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+
+    .beneficiary-report-footer-info {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .beneficiary-reports-page {
+
+        padding: 5px 0 25px;
+
+    }
+
+
+    .beneficiary-report-section {
+
+        padding: 18px;
+
+    }
+
+
+    .beneficiary-reports-header h1 {
+
+        font-size: 30px;
+
+    }
+
+
+    .beneficiary-report-filter {
+
+        align-items: stretch;
+
+        flex-direction: column;
+
+    }
+
+
+    .beneficiary-filter-group select,
+    .beneficiary-filter-group input {
+
+        width: 100%;
+
+    }
+
+
+    .beneficiary-verification-header {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .beneficiary-verification-summary {
+
+        grid-template-columns: 1fr;
+
+    }
+
 }

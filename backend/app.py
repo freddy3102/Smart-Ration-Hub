@@ -13,6 +13,7 @@ from warehouse_login import warehouse_login_bp
 from routes.warehouse_dashboard import warehouse_dashboard_bp
 from routes.warehouse_verification import warehouse_verification_bp
 from routes.beneficiary_dashboard import beneficiary_dashboard_bp
+from routes.dashboard import dashboard_bp
 from routes.auth import auth
 
 app = Flask(__name__)
@@ -31,6 +32,7 @@ app.register_blueprint(warehouse_login_bp)
 app.register_blueprint(warehouse_dashboard_bp)
 app.register_blueprint(warehouse_verification_bp)
 app.register_blueprint(audit_bp)
+app.register_blueprint(dashboard_bp)
 app.register_blueprint(beneficiary_dashboard_bp)
 
 @app.route("/")

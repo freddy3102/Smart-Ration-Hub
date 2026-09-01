@@ -1,77 +1,1190 @@
+/* =====================================
+   Beneficiary Dashboard
+===================================== */
+
 .beneficiary-dashboard {
-    max-width: 1000px;
-    margin: 40px auto;
-    padding: 30px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    font-family: Arial, sans-serif;
+    width: 100%;
+    max-width: 1400px;
+
+    margin: 0 auto;
+
+    padding: 10px 0 40px;
+
+    box-sizing: border-box;
 }
+
+
+/* =====================================
+   Hero
+===================================== */
+
+.beneficiary-hero {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 30px;
+
+    margin-bottom: 24px;
+}
+
+
+.hero-content {
+    min-width: 0;
+}
+
+
+.hero-small-text {
+    margin: 0 0 8px;
+
+    color: #2563eb;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
 
 .dashboard-title {
-    text-align: center;
-    color: #2c3e50;
-    margin-bottom: 30px;
+    margin: 0;
+
+    color: #172554;
+
+    font-size: 38px;
+
+    line-height: 1.2;
+
+    font-weight: 700;
 }
 
-.info-card {
+
+.dashboard-title span:not(.wave) {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #2563eb;
+
+    font-size: 42px;
+
+    line-height: 1.15;
+}
+
+
+.dashboard-title .wave {
+    display: block;
+
+    margin-top: 8px;
+
+    font-size: 30px;
+
+    line-height: 1;
+}
+
+
+.hero-description {
+    margin: 12px 0 0;
+
+    color: #64748b;
+
+    font-size: 16px;
+
+    line-height: 1.5;
+}
+
+
+/* =====================================
+   Current Period
+===================================== */
+
+.hero-date {
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    background: #f8f9fa;
+
+    align-items: center;
+
+    gap: 12px;
+
+    flex-shrink: 0;
+
+    padding: 14px 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 5px 20px rgba(15, 23, 42, 0.06);
+}
+
+
+.hero-date-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+
+    font-size: 20px;
+}
+
+
+.hero-date div {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.hero-date small {
+    color: #64748b;
+
+    font-size: 12px;
+
+    font-weight: 500;
+}
+
+
+.hero-date strong {
+    color: #1e293b;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+/* =====================================
+   Category Card
+===================================== */
+
+.beneficiary-category-card {
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    min-height: 58px;
+
+    padding: 22px 25px 22px 28px;
+
+    margin-bottom: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #dbeafe;
+
+    border-left: none;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 6px 22px rgba(15, 23, 42, 0.06);
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================
+   Category Ribbon
+===================================== */
+
+.category-ribbon {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 6px;
+
+    border-radius: 16px 0 0 16px;
+}
+
+
+/* =====================================
+   PHH - Pink
+===================================== */
+
+.category-ribbon-phh .category-ribbon {
+    background: #ec4899;
+}
+
+
+/* =====================================
+   AAY - Yellow
+===================================== */
+
+.category-ribbon-aay .category-ribbon {
+    background: #facc15;
+}
+
+
+/* =====================================
+   NPS - Blue
+===================================== */
+
+.category-ribbon-nps .category-ribbon {
+    background: #3b82f6;
+}
+
+
+/* =====================================
+   NP - White
+===================================== */
+
+.category-ribbon-np .category-ribbon {
+    background: #ffffff;
+
+    border-right: 1px solid #cbd5e1;
+}
+
+
+/* =====================================
+   Unknown Category
+===================================== */
+
+.category-ribbon-default .category-ribbon {
+    background: #94a3b8;
+}
+
+
+/* =====================================
+   Category Icon
+===================================== */
+
+.category-icon {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background: #eff6ff;
+
+    border-radius: 50%;
+
+    font-size: 26px;
+}
+
+
+/* =====================================
+   Category Details
+===================================== */
+
+.category-details {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    min-width: 0;
+}
+
+
+.category-label {
+    color: #64748b;
+
+    font-size: 13px;
+
+    line-height: 1.2;
+
+    font-weight: 500;
+}
+
+
+.category-value {
+    color: #172554;
+
+    font-size: 24px;
+
+    line-height: 1.2;
+
+    font-weight: 700;
+}
+
+
+/* =====================================
+   Category Badge
+===================================== */
+
+.category-badge {
+    margin-left: auto;
+
+    padding: 7px 14px;
+
+    border-radius: 20px;
+
+    background: #dcfce7;
+
+    color: #15803d;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* =====================================
+   Status Cards
+===================================== */
+
+.beneficiary-status-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 20px;
+}
+
+
+.beneficiary-status-card {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
     padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 30px;
+
+    min-height: 90px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 15px;
+
+    box-shadow:
+        0 5px 18px rgba(15, 23, 42, 0.05);
+
+    box-sizing: border-box;
 }
 
-.info-card p {
-    margin: 8px 0;
-    font-size: 17px;
+
+.status-card-icon {
+    width: 50px;
+    height: 50px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 13px;
+
+    font-size: 23px;
 }
 
-.stock-title {
-    margin-bottom: 15px;
-    color: #2c3e50;
+
+.status-card-icon.blue {
+    background: #eff6ff;
 }
+
+
+.status-card-icon.green {
+    background: #ecfdf5;
+}
+
+
+.status-card-icon.yellow {
+    background: #fffbeb;
+}
+
+
+.beneficiary-status-card div:last-child {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+    min-width: 0;
+}
+
+
+.beneficiary-status-card span {
+    color: #64748b;
+
+    font-size: 13px;
+
+    line-height: 1.3;
+}
+
+
+.beneficiary-status-card strong {
+    color: #172554;
+
+    font-size: 19px;
+
+    line-height: 1.3;
+
+    font-weight: 700;
+}
+
+
+/* =====================================
+   Cycle Status
+===================================== */
+
+.cycle-open {
+    color: #15803d !important;
+}
+
+
+.cycle-closed {
+    color: #dc2626 !important;
+}
+
+
+/* =====================================
+   Information Banner
+===================================== */
+
+.beneficiary-info-banner {
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 18px 22px;
+
+    margin-bottom: 25px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eff6ff,
+            #f8fbff
+        );
+
+    border: 1px solid #dbeafe;
+
+    border-radius: 15px;
+
+    box-sizing: border-box;
+}
+
+
+.info-banner-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 20px;
+
+    font-weight: 700;
+}
+
+
+.beneficiary-info-banner strong {
+    color: #172554;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+.beneficiary-info-banner p {
+    margin: 4px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+/* =====================================
+   Section Card
+   Kept for other dashboard components
+===================================== */
+
+.dashboard-section-card {
+    padding: 25px;
+
+    margin-bottom: 25px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 6px 24px rgba(15, 23, 42, 0.06);
+}
+
+
+.section-heading-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+
+    padding-bottom: 16px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+.section-heading-row h2 {
+    margin: 0 0 5px;
+
+    color: #172554;
+
+    font-size: 22px;
+}
+
+
+.section-heading-row p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 14px;
+}
+
+
+.section-link {
+    color: #2563eb;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    white-space: nowrap;
+}
+
+
+.section-link:hover {
+    text-decoration: underline;
+}
+
+
+/* =====================================
+   Live Stock Preview
+   Kept for compatibility
+===================================== */
+
+.stock-preview-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 14px;
+}
+
+
+.stock-preview-card {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 16px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 13px;
+
+    transition: 0.2s ease;
+}
+
+
+.stock-preview-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 16px rgba(15, 23, 42, 0.07);
+}
+
+
+.stock-preview-icon {
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background: #eff6ff;
+
+    border-radius: 11px;
+
+    font-size: 20px;
+}
+
+
+.stock-preview-card div:nth-child(2) {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    flex: 1;
+}
+
+
+.stock-preview-card div:nth-child(2) strong {
+    color: #1e293b;
+
+    font-size: 15px;
+}
+
+
+.stock-preview-card div:nth-child(2) span {
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+.stock-available,
+.stock-out {
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.stock-available {
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+.stock-out {
+    background: #fee2e2;
+
+    color: #dc2626;
+}
+
+
+/* =====================================
+   History Filters
+   Kept for compatibility
+===================================== */
+
+.history-filters {
+    display: flex;
+
+    gap: 16px;
+
+    padding: 16px;
+
+    margin-bottom: 18px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+}
+
+
+.history-filters > div {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+.history-filters label {
+    color: #475569;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.history-filters select {
+    min-width: 150px;
+
+    height: 40px;
+
+    padding: 0 12px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #1e293b;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+
+.history-filters select:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+
+/* =====================================
+   History Cycle
+===================================== */
+
+.history-cycle {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 16px;
+
+    color: #475569;
+
+    font-size: 14px;
+}
+
+
+.history-cycle strong {
+    color: #1e293b;
+}
+
+
+.history-cycle span {
+    padding: 6px 12px;
+
+    border-radius: 20px;
+
+    background: #f1f5f9;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+
+/* =====================================
+   Tables
+===================================== */
+
+.history-table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+}
+
 
 .stock-table {
     width: 100%;
+
     border-collapse: collapse;
+
+    min-width: 700px;
 }
 
-.stock-table th,
-.stock-table td {
-    border: 1px solid #ddd;
-    padding: 12px;
-    text-align: center;
+
+.stock-table thead {
+    background: #172554;
+
+    color: #ffffff;
 }
+
 
 .stock-table th {
-    background: #2e7d32;
-    color: white;
+    padding: 13px 15px;
+
+    text-align: left;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
 }
 
-.stock-table tr:nth-child(even) {
-    background: #f7f7f7;
+
+.stock-table td {
+    padding: 14px 15px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    color: #475569;
+
+    background: #ffffff;
+
+    font-size: 13px;
 }
 
-.stock-table tr:hover {
-    background: #eef6ee;
+
+.stock-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
-.available {
-    color: green;
-    font-weight: bold;
+
+.stock-table tbody tr:hover td {
+    background: #f8fafc;
 }
 
-.out-of-stock {
-    color: red;
-    font-weight: bold;
+
+.stock-table td strong {
+    color: #1e293b;
 }
+
+
+/* =====================================
+   History Status
+===================================== */
+
+.history-returned,
+.history-complete,
+.history-pending {
+    display: inline-flex;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.history-returned {
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+.history-complete {
+    background: #dbeafe;
+
+    color: #2563eb;
+}
+
+
+.history-pending {
+    background: #fef3c7;
+
+    color: #b45309;
+}
+
+
+.empty-history {
+    text-align: center !important;
+
+    padding: 30px !important;
+
+    color: #64748b !important;
+}
+
+
+/* =====================================
+   Footer
+===================================== */
+
+.beneficiary-footer-message {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    padding: 20px;
+
+    color: #64748b;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+
+.beneficiary-footer-message strong {
+    color: #475569;
+}
+
+
+.footer-divider {
+    color: #cbd5e1;
+}
+
+
+/* =====================================
+   Loading
+===================================== */
 
 .loading {
-    text-align: center;
-    margin-top: 80px;
-    font-size: 24px;
-    color: #555;
+    min-height: 300px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: #64748b;
+
+    font-size: 16px;
+}
+
+
+/* =====================================
+   Responsive - Tablet
+===================================== */
+
+@media (max-width: 900px) {
+
+    .beneficiary-hero {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+
+    .hero-date {
+        width: 100%;
+
+        box-sizing: border-box;
+    }
+
+
+    .beneficiary-status-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+/* =====================================
+   Responsive - Mobile
+===================================== */
+
+@media (max-width: 700px) {
+
+    .beneficiary-dashboard {
+        padding: 5px 0 25px;
+    }
+
+
+    .dashboard-title {
+        font-size: 30px;
+    }
+
+
+    .dashboard-title span:not(.wave) {
+        font-size: 34px;
+    }
+
+
+    .beneficiary-category-card {
+        gap: 14px;
+
+        padding: 18px 18px 18px 22px;
+    }
+
+
+    .category-icon {
+        width: 50px;
+        height: 50px;
+
+        font-size: 22px;
+    }
+
+
+    .category-label {
+        font-size: 12px;
+    }
+
+
+    .category-value {
+        font-size: 21px;
+    }
+
+
+    .category-badge {
+        display: none;
+    }
+
+
+    .dashboard-section-card {
+        padding: 18px;
+
+        border-radius: 14px;
+    }
+
+
+    .section-heading-row {
+        flex-direction: column;
+    }
+
+
+    .stock-preview-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .history-filters {
+        flex-direction: column;
+    }
+
+
+    .history-filters select {
+        width: 100%;
+    }
+
+
+    .beneficiary-info-banner {
+        align-items: flex-start;
+    }
+
+
+    .beneficiary-footer-message {
+        flex-wrap: wrap;
+    }
+
+}
+
+
+/* =====================================
+   Very Small Screens
+===================================== */
+
+@media (max-width: 450px) {
+
+    .dashboard-title {
+        font-size: 27px;
+    }
+
+
+    .dashboard-title span:not(.wave) {
+        font-size: 31px;
+    }
+
+
+    .hero-description {
+        font-size: 14px;
+    }
+
+
+    .hero-date {
+        padding: 12px 15px;
+    }
+
+
+    .beneficiary-category-card {
+        padding: 16px 15px 16px 20px;
+    }
+
+
+    .category-icon {
+        width: 46px;
+        height: 46px;
+
+        font-size: 20px;
+    }
+
+
+    .category-value {
+        font-size: 19px;
+    }
+
+
+    .beneficiary-status-card {
+        padding: 16px;
+    }
+
+
+    .status-card-icon {
+        width: 45px;
+        height: 45px;
+
+        font-size: 20px;
+    }
+
+
+    .beneficiary-info-banner {
+        padding: 16px;
+    }
+
 }

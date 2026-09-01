@@ -3,34 +3,38 @@ import axios from "axios";
 import Layout from "../components/Layout";
 import "../styles/Reports.css";
 
+
 function Reports() {
 
     const today = new Date();
 
-    const [month, setMonth] = useState(
-        today.getMonth() + 1
-    );
+    const [month, setMonth] =
+        useState(today.getMonth() + 1);
 
-    const [year, setYear] = useState(
-        today.getFullYear()
-    );
+    const [year, setYear] =
+        useState(today.getFullYear());
 
-    const [verificationReport, setVerificationReport] = useState({
-        month: today.getMonth() + 1,
-        year: today.getFullYear(),
-        quarter: "",
-        quarter_start_month: 0,
-        quarter_end_month: 0,
-        is_quarter_end: false,
-        verification_status: "NOT VERIFIED",
 
-        total_entitled: 0,
-        total_claimed: 0,
-        total_unclaimed: 0,
-        total_returned: 0,
+    const [verificationReport, setVerificationReport] =
+        useState({
+            month: today.getMonth() + 1,
+            year: today.getFullYear(),
 
-        items: []
-    });
+            quarter: "",
+            quarter_start_month: null,
+            quarter_end_month: null,
+            is_quarter_end: false,
+
+            verification_status: "NOT VERIFIED",
+
+            total_entitled: 0,
+            total_claimed: 0,
+            total_unclaimed: 0,
+            total_returned: 0,
+
+            items: []
+        });
+
 
     const monthNames = [
         "January",
@@ -47,36 +51,10 @@ function Reports() {
         "December"
     ];
 
-    // ==================================================
-    // FORMAT QUANTITY
-    // ==================================================
 
-    const formatQuantity = (value) => {
-
-        const number = Number(value || 0);
-
-        return number.toFixed(2);
-    };
-
-    // ==================================================
-    // GET ITEM
-    // ==================================================
-
-    const getItem = (name) => {
-
-        return (
-            verificationReport.items || []
-        ).find(
-            item =>
-                String(item.item_name || "")
-                    .trim()
-                    .toLowerCase() === name
-        );
-    };
-
-    // ==================================================
-    // LOAD VERIFICATION REPORT
-    // ==================================================
+    // =========================================
+    // LOAD REPORT
+    // =========================================
 
     useEffect(() => {
 
@@ -93,36 +71,38 @@ function Reports() {
                 "http://127.0.0.1:5000/monthly-verification-report",
                 {
                     params: {
-                        month: month,
-                        year: year
+                        month,
+                        year
                     }
                 }
             );
 
-            console.log(
-                "VERIFICATION REPORT:",
-                response.data
-            );
 
             setVerificationReport(
                 response.data
             );
 
-        } catch (error) {
+        }
+
+        catch (err) {
 
             console.log(
                 "Verification report error:",
-                error
+                err
             );
 
             setVerificationReport({
+
                 month,
                 year,
+
                 quarter: "",
-                quarter_start_month: 0,
-                quarter_end_month: 0,
+                quarter_start_month: null,
+                quarter_end_month: null,
                 is_quarter_end: false,
-                verification_status: "NOT VERIFIED",
+
+                verification_status:
+                    "NOT VERIFIED",
 
                 total_entitled: 0,
                 total_claimed: 0,
@@ -130,42 +110,123 @@ function Reports() {
                 total_returned: 0,
 
                 items: []
+
             });
+
         }
+
     };
 
-    // ==================================================
-    // ITEMS
-    // ==================================================
+
+    // =========================================
+    // GET ITEM
+    // =========================================
+
+    const getItem = (name) => {
+
+        return verificationReport.items.find(
+            (item) =>
+                String(item.item_name || "")
+                    .trim()
+                    .toLowerCase() ===
+                name.toLowerCase()
+        );
+
+    };
+
 
     const rice = getItem("rice");
     const wheat = getItem("wheat");
     const sugar = getItem("sugar");
     const kerosene = getItem("kerosene");
 
-    // ==================================================
-    // VERIFICATION STATUS
-    // ==================================================
 
-    const verificationStatus =
-        verificationReport.verification_status ||
-        "NOT VERIFIED";
+    // =========================================
+    // FORMAT QUANTITY
+    // =========================================
 
-    const isVerified =
-        verificationStatus === "VERIFIED";
+    const formatQuantity = (
+        item,
+        field = "total_entitled"
+    ) => {
 
-    // ==================================================
-    // QUARTER STATUS
-    // ==================================================
+        if (!item) {
+            return "0.00";
+        }
 
-    const quarterStatus =
+        return Number(
+            item[field] || 0
+        ).toFixed(2);
+
+    };
+
+
+    // =========================================
+    // FORMAT UNIT
+    // =========================================
+
+    const getUnit = (item) => {
+
+        if (!item) {
+            return "kg";
+        }
+
+        const unit =
+            String(item.unit || "kg")
+                .trim()
+                .toLowerCase();
+
+
+        if (
+            unit === "l" ||
+            unit === "litre" ||
+            unit === "liter" ||
+            unit === "litres" ||
+            unit === "liters"
+        ) {
+
+            return "Litre";
+
+        }
+
+
+        return "Kg";
+
+    };
+
+
+    // =========================================
+    // QUARTER MESSAGE
+    // =========================================
+
+    const quarterMessage =
         verificationReport.is_quarter_end
-            ? "QUARTER END"
-            : "QUARTER OPEN";
 
-    // ==================================================
-    // RETURN
-    // ==================================================
+            ?
+
+            "Quarter has ended. Sugar and Kerosene are now eligible for warehouse return and verification."
+
+            :
+
+            "Quarter is still open. Sugar and Kerosene can be collected during the quarter and are audited for return only at quarter end.";
+
+
+    // =========================================
+    // VERIFICATION STATUS CLASS
+    // =========================================
+
+    const verificationStatusClass =
+        verificationReport.verification_status ===
+        "VERIFIED"
+
+            ?
+
+            "verified"
+
+            :
+
+            "not-verified";
+
 
     return (
 
@@ -173,9 +234,10 @@ function Reports() {
 
             <div className="reports-container">
 
-                {/* ==================================================
-                    HEADER
-                ================================================== */}
+
+                {/* =================================
+                    PAGE HEADER
+                ================================= */}
 
                 <div className="reports-header">
 
@@ -193,14 +255,20 @@ function Reports() {
                 </div>
 
 
-                {/* ==================================================
+
+                {/* =================================
                     ENTITLEMENT VERIFICATION
-                ================================================== */}
+                ================================= */}
 
                 <div
                     className="report-section"
                     id="verification-report"
                 >
+
+
+                    {/* =================================
+                        SECTION HEADER
+                    ================================= */}
 
                     <div className="section-header">
 
@@ -211,9 +279,12 @@ function Reports() {
                             </h2>
 
                             <p>
-                                Monthly verification for Rice and Wheat,
-                                and quarterly verification for Sugar
-                                and Kerosene.
+
+                                Monthly verification for
+                                Rice and Wheat, and quarterly
+                                verification for Sugar and
+                                Kerosene.
+
                             </p>
 
                         </div>
@@ -221,9 +292,10 @@ function Reports() {
                     </div>
 
 
-                    {/* ==================================================
-                        FILTER
-                    ================================================== */}
+
+                    {/* =================================
+                        MONTH / YEAR FILTER
+                    ================================= */}
 
                     <div className="report-filter">
 
@@ -246,13 +318,18 @@ function Reports() {
 
                                 {
                                     monthNames.map(
-                                        (name, index) => (
+                                        (
+                                            monthName,
+                                            index
+                                        ) => (
 
                                             <option
                                                 key={index}
                                                 value={index + 1}
                                             >
-                                                {name}
+
+                                                {monthName}
+
                                             </option>
 
                                         )
@@ -262,6 +339,7 @@ function Reports() {
                             </select>
 
                         </div>
+
 
 
                         <div className="filter-group">
@@ -287,11 +365,13 @@ function Reports() {
                     </div>
 
 
-                    {/* ==================================================
-                        PERIOD / STATUS
-                    ================================================== */}
+
+                    {/* =================================
+                        VERIFICATION HEADER
+                    ================================= */}
 
                     <div className="verification-header">
+
 
                         <div className="verification-period">
 
@@ -303,12 +383,16 @@ function Reports() {
 
                                 {
                                     monthNames[
-                                        verificationReport.month - 1
+                                        (
+                                            verificationReport.month ||
+                                            month
+                                        ) - 1
                                     ]
                                 }{" "}
 
                                 {
-                                    verificationReport.year
+                                    verificationReport.year ||
+                                    year
                                 }
 
                             </strong>
@@ -316,23 +400,27 @@ function Reports() {
                         </div>
 
 
-                        <div className="verification-period">
+
+                        <div className="verification-quarter">
 
                             <span>
                                 Quarter
                             </span>
 
                             <strong>
+
                                 {
                                     verificationReport.quarter ||
                                     "-"
                                 }
+
                             </strong>
 
                         </div>
 
 
-                        <div className="verification-period">
+
+                        <div className="verification-quarter-status">
 
                             <span>
                                 Quarter Status
@@ -341,12 +429,15 @@ function Reports() {
                             <strong>
 
                                 {
-                                    quarterStatus
+                                    verificationReport.is_quarter_end
+                                        ? "QUARTER END"
+                                        : "QUARTER OPEN"
                                 }
 
                             </strong>
 
                         </div>
+
 
 
                         <div className="verification-status">
@@ -357,16 +448,25 @@ function Reports() {
 
                             <strong
                                 className={
-                                    isVerified
-                                        ? "verified"
-                                        : "not-verified"
+                                    verificationStatusClass
                                 }
                             >
 
                                 {
-                                    isVerified
-                                        ? "✓ VERIFIED"
-                                        : `⚠ ${verificationStatus}`
+                                    verificationReport.verification_status ===
+                                    "VERIFIED"
+
+                                        ?
+
+                                        "✓ VERIFIED"
+
+                                        :
+
+                                        "⚠ " +
+                                        (
+                                            verificationReport.verification_status ||
+                                            "NOT VERIFIED"
+                                        )
                                 }
 
                             </strong>
@@ -376,47 +476,43 @@ function Reports() {
                     </div>
 
 
-                    {/* ==================================================
-                        QUARTERLY INFORMATION
-                    ================================================== */}
 
-                    <div className="quarter-info">
+                    {/* =================================
+                        QUARTERLY INFORMATION
+                    ================================= */}
+
+                    <div className="quarter-message">
 
                         <strong>
                             Sugar & Kerosene:
                         </strong>{" "}
 
-                        {
-                            verificationReport.is_quarter_end
-
-                                ?
-
-                                "Quarter has ended. Sugar and Kerosene are now eligible for warehouse return and verification."
-
-                                :
-
-                                "Quarter is still open. Sugar and Kerosene can be collected during the quarter and are audited for return only at quarter end."
-
-                        }
+                        {quarterMessage}
 
                     </div>
 
 
-                    {/* ==================================================
-                        SUMMARY CARDS
-                    ================================================== */}
 
-                    <div className="verification-summary">
+                    {/* =================================
+                        ENTITLEMENT SUMMARY CARDS
+                    ================================= */}
 
-                        <div className="verification-card">
+                    <div className="entitlement-summary">
 
-                            <h2>
-                                {
-                                    formatQuantity(
-                                        rice?.total_entitled
-                                    )
-                                } kg
-                            </h2>
+
+                        {/* Rice */}
+
+                        <div className="entitlement-card">
+
+                            <h3>
+
+                                {formatQuantity(
+                                    rice
+                                )}{" "}
+
+                                {getUnit(rice)}
+
+                            </h3>
 
                             <p>
                                 Rice Entitled
@@ -425,15 +521,20 @@ function Reports() {
                         </div>
 
 
-                        <div className="verification-card">
 
-                            <h2>
-                                {
-                                    formatQuantity(
-                                        wheat?.total_entitled
-                                    )
-                                } kg
-                            </h2>
+                        {/* Wheat */}
+
+                        <div className="entitlement-card">
+
+                            <h3>
+
+                                {formatQuantity(
+                                    wheat
+                                )}{" "}
+
+                                {getUnit(wheat)}
+
+                            </h3>
 
                             <p>
                                 Wheat Entitled
@@ -442,15 +543,20 @@ function Reports() {
                         </div>
 
 
-                        <div className="verification-card">
 
-                            <h2>
-                                {
-                                    formatQuantity(
-                                        sugar?.total_entitled
-                                    )
-                                } kg
-                            </h2>
+                        {/* Sugar */}
+
+                        <div className="entitlement-card">
+
+                            <h3>
+
+                                {formatQuantity(
+                                    sugar
+                                )}{" "}
+
+                                {getUnit(sugar)}
+
+                            </h3>
 
                             <p>
                                 Sugar Qtr. Entitlement
@@ -459,22 +565,20 @@ function Reports() {
                         </div>
 
 
-                        <div className="verification-card">
 
-                            <h2>
+                        {/* Kerosene */}
 
-                                {
-                                    formatQuantity(
-                                        kerosene?.total_entitled
-                                    )
-                                }{" "}
+                        <div className="entitlement-card">
 
-                                {
-                                    kerosene?.unit ||
-                                    "Litre"
-                                }
+                            <h3>
 
-                            </h2>
+                                {formatQuantity(
+                                    kerosene
+                                )}{" "}
+
+                                {getUnit(kerosene)}
+
+                            </h3>
 
                             <p>
                                 Kerosene Qtr. Entitlement
@@ -485,9 +589,10 @@ function Reports() {
                     </div>
 
 
-                    {/* ==================================================
+
+                    {/* =================================
                         VERIFICATION TABLE
-                    ================================================== */}
+                    ================================= */}
 
                     <div className="table-wrapper">
 
@@ -530,18 +635,23 @@ function Reports() {
                             </thead>
 
 
+
                             <tbody>
 
                                 {
-                                    verificationReport.items &&
                                     verificationReport.items.length > 0
 
                                         ?
 
                                         verificationReport.items.map(
-                                            (item, index) => (
+                                            (
+                                                item,
+                                                index
+                                            ) => (
 
-                                                <tr key={index}>
+                                                <tr
+                                                    key={index}
+                                                >
 
                                                     <td>
 
@@ -554,6 +664,7 @@ function Reports() {
                                                     </td>
 
 
+
                                                     <td>
 
                                                         {
@@ -563,68 +674,73 @@ function Reports() {
                                                     </td>
 
 
+
                                                     <td>
 
                                                         {
-                                                            formatQuantity(
-                                                                item.total_entitled
-                                                            )
+                                                            Number(
+                                                                item.total_entitled ||
+                                                                0
+                                                            ).toFixed(2)
                                                         }{" "}
 
                                                         {
-                                                            item.unit ||
-                                                            "kg"
+                                                            getUnit(item)
                                                         }
 
                                                     </td>
 
 
+
                                                     <td>
 
                                                         {
-                                                            formatQuantity(
-                                                                item.total_claimed
-                                                            )
+                                                            Number(
+                                                                item.total_claimed ||
+                                                                0
+                                                            ).toFixed(2)
                                                         }{" "}
 
                                                         {
-                                                            item.unit ||
-                                                            "kg"
+                                                            getUnit(item)
                                                         }
 
                                                     </td>
 
 
+
                                                     <td>
 
                                                         {
-                                                            formatQuantity(
-                                                                item.total_unclaimed
-                                                            )
+                                                            Number(
+                                                                item.total_unclaimed ||
+                                                                0
+                                                            ).toFixed(2)
                                                         }{" "}
 
                                                         {
-                                                            item.unit ||
-                                                            "kg"
+                                                            getUnit(item)
                                                         }
 
                                                     </td>
 
 
+
                                                     <td>
 
                                                         {
-                                                            formatQuantity(
-                                                                item.total_returned
-                                                            )
+                                                            Number(
+                                                                item.total_returned ||
+                                                                0
+                                                            ).toFixed(2)
                                                         }{" "}
 
                                                         {
-                                                            item.unit ||
-                                                            "kg"
+                                                            getUnit(item)
                                                         }
 
                                                     </td>
+
 
 
                                                     <td>
@@ -675,12 +791,14 @@ function Reports() {
                                                 className="empty-state"
                                             >
 
-                                                No entitlement records
-                                                were found for this period.
+                                                No entitlement
+                                                records were found
+                                                for this month.
 
                                             </td>
 
                                         </tr>
+
                                 }
 
                             </tbody>
@@ -690,11 +808,12 @@ function Reports() {
                     </div>
 
 
-                    {/* ==================================================
-                        INVENTORY RULE
-                    ================================================== */}
 
-                    <div className="report-footer-info">
+                    {/* =================================
+                        INFORMATION FOOTER
+                    ================================= */}
+
+                    <div className="report-information">
 
                         <div>
 
@@ -703,12 +822,13 @@ function Reports() {
                             </strong>
 
                             <span>
-                                Returned stock is added back to
-                                inventory only after warehouse
-                                manager verification.
+                                Returned stock is added back
+                                to inventory only after
+                                warehouse manager verification.
                             </span>
 
                         </div>
+
 
 
                         <div>
@@ -718,11 +838,12 @@ function Reports() {
                             </strong>
 
                             <span>
-                                Audited and returned at the end
-                                of every month.
+                                Audited and returned at the
+                                end of every month.
                             </span>
 
                         </div>
+
 
 
                         <div>
@@ -732,8 +853,8 @@ function Reports() {
                             </strong>
 
                             <span>
-                                Audited and returned only at
-                                quarter end.
+                                Audited and returned only
+                                at quarter end.
                             </span>
 
                         </div>
@@ -743,9 +864,10 @@ function Reports() {
                 </div>
 
 
-                {/* ==================================================
+
+                {/* =================================
                     FOOTER
-                ================================================== */}
+                ================================= */}
 
                 <div className="report-footer">
 
@@ -760,7 +882,10 @@ function Reports() {
             </div>
 
         </Layout>
+
     );
+
 }
+
 
 export default Reports;

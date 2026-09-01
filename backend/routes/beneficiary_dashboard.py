@@ -11,7 +11,7 @@ beneficiary_dashboard_bp = Blueprint(
 
 # ==================================================
 # Helper:
-# Calculate Correct Monthly Entitlement
+# Calculate Correct Entitlement
 # ==================================================
 
 def calculate_entitlement(
@@ -34,21 +34,25 @@ def calculate_entitlement(
         return {
             "monthly_quantity": None,
             "entitlement_type": "AVAILABILITY",
+            "entitlement_period": "MONTHLY",
             "base_quantity": None
         }
 
     # ---------------------------------
     # Get rule for this exact category
-    # AND exact item
+    # and exact item
     # ---------------------------------
 
     cursor.execute("""
         SELECT
             monthly_quantity,
-            entitlement_type
+            entitlement_type,
+            entitlement_period
         FROM entitlement_rules
         WHERE category_id = %s
         AND item_id = %s
+        ORDER BY entitlement_id DESC
+        LIMIT 1
     """, (
         category_id,
         item_id
@@ -56,11 +60,16 @@ def calculate_entitlement(
 
     rule = cursor.fetchone()
 
+    # ---------------------------------
+    # No rule found
+    # ---------------------------------
+
     if not rule:
 
         return {
             "monthly_quantity": 0.0,
             "entitlement_type": "NONE",
+            "entitlement_period": "MONTHLY",
             "base_quantity": 0.0
         }
 
@@ -70,6 +79,11 @@ def calculate_entitlement(
 
     entitlement_type = (
         rule["entitlement_type"] or ""
+    ).upper()
+
+    entitlement_period = (
+        rule["entitlement_period"] or
+        "MONTHLY"
     ).upper()
 
     # ---------------------------------
@@ -96,15 +110,29 @@ def calculate_entitlement(
         monthly_quantity = base_quantity
 
     return {
-        "monthly_quantity": monthly_quantity,
-        "entitlement_type": entitlement_type,
-        "base_quantity": base_quantity
+        "monthly_quantity":
+            monthly_quantity,
+
+        "entitlement_type":
+            entitlement_type,
+
+        "entitlement_period":
+            entitlement_period,
+
+        "base_quantity":
+            base_quantity
     }
 
 
 # ==================================================
 # Helper:
-# Get Rice / Wheat Item Information
+# Get Ration Items
+#
+# Includes:
+# Rice
+# Wheat
+# Sugar
+# Kerosene
 # ==================================================
 
 def get_ration_items(cursor):
@@ -112,16 +140,34 @@ def get_ration_items(cursor):
     cursor.execute("""
         SELECT
             item_id,
-            item_name
+            item_name,
+            unit
         FROM ration_items
-        WHERE LOWER(item_name) IN ('rice', 'wheat')
+
+        WHERE LOWER(TRIM(item_name)) IN (
+            'rice',
+            'wheat',
+            'sugar',
+            'kerosene'
+        )
+
         ORDER BY
             CASE
-                WHEN LOWER(item_name) = 'rice'
-                THEN 1
-                WHEN LOWER(item_name) = 'wheat'
-                THEN 2
-                ELSE 3
+
+                WHEN LOWER(TRIM(item_name)) = 'rice'
+                    THEN 1
+
+                WHEN LOWER(TRIM(item_name)) = 'wheat'
+                    THEN 2
+
+                WHEN LOWER(TRIM(item_name)) = 'sugar'
+                    THEN 3
+
+                WHEN LOWER(TRIM(item_name)) = 'kerosene'
+                    THEN 4
+
+                ELSE 5
+
             END
     """)
 
@@ -268,60 +314,99 @@ def beneficiary_dashboard():
         # ==================================================
         # LIVE STOCK
         #
-        # Rice and Wheat only
+        # Includes all four supported items:
         #
-        # Includes:
-        # - Available quantity
-        # - Minimum stock
-        # - Stock status
+        # 1. Rice
+        # 2. Wheat
+        # 3. Sugar
+        # 4. Kerosene
         #
-        # Uses the SAME stock-status rule
-        # as the Admin Inventory module.
+        # LEFT JOIN is used so that an item still appears
+        # even if an inventory record has not been created.
+        # In that case it is treated as 0 / Out of Stock.
         # ==================================================
 
         cursor.execute("""
             SELECT
                 ri.item_id,
                 ri.item_name,
-                i.available_quantity,
-                i.minimum_stock,
+                ri.unit,
+
+                COALESCE(
+                    i.available_quantity,
+                    0
+                ) AS available_quantity,
+
+                COALESCE(
+                    i.minimum_stock,
+                    0
+                ) AS minimum_stock,
 
                 CASE
 
-                    WHEN i.available_quantity = 0
+                    WHEN COALESCE(
+                        i.available_quantity,
+                        0
+                    ) = 0
+
                         THEN 'Out of Stock'
 
-                    WHEN i.available_quantity <= i.minimum_stock
+                    WHEN COALESCE(
+                        i.available_quantity,
+                        0
+                    ) <= COALESCE(
+                        i.minimum_stock,
+                        0
+                    )
+
                         THEN 'Low Stock'
 
                     ELSE 'Available'
 
                 END AS stock_status
 
-            FROM inventory i
+            FROM ration_items ri
 
-            JOIN ration_items ri
+            LEFT JOIN inventory i
                 ON i.item_id = ri.item_id
 
-            WHERE LOWER(ri.item_name)
-                IN ('rice', 'wheat')
+            WHERE LOWER(TRIM(ri.item_name))
+                IN (
+                    'rice',
+                    'wheat',
+                    'sugar',
+                    'kerosene'
+                )
 
             ORDER BY
                 CASE
-                    WHEN LOWER(ri.item_name) = 'rice'
-                    THEN 1
 
-                    WHEN LOWER(ri.item_name) = 'wheat'
-                    THEN 2
+                    WHEN LOWER(TRIM(ri.item_name)) = 'rice'
+                        THEN 1
 
-                    ELSE 3
+                    WHEN LOWER(TRIM(ri.item_name)) = 'wheat'
+                        THEN 2
+
+                    WHEN LOWER(TRIM(ri.item_name)) = 'sugar'
+                        THEN 3
+
+                    WHEN LOWER(TRIM(ri.item_name)) = 'kerosene'
+                        THEN 4
+
+                    ELSE 5
+
                 END
         """)
 
         stock = cursor.fetchall()
 
         # ==================================================
-        # Get Rice & Wheat
+        # Get All Supported Ration Items
+        #
+        # Rice
+        # Wheat
+        # Sugar
+        # Kerosene
         # ==================================================
 
         ration_items = get_ration_items(cursor)
@@ -329,13 +414,18 @@ def beneficiary_dashboard():
         monthly_history = []
 
         # ==================================================
-        # PROCESS EACH ITEM SEPARATELY
+        # PROCESS EACH ITEM
         # ==================================================
 
         for item in ration_items:
 
             item_id = item["item_id"]
+
             item_name = item["item_name"]
+
+            item_unit = (
+                item["unit"] or "kg"
+            )
 
             # ==================================================
             # Correct Entitlement
@@ -350,23 +440,34 @@ def beneficiary_dashboard():
             )
 
             monthly_quantity = (
-                entitlement["monthly_quantity"]
+                entitlement[
+                    "monthly_quantity"
+                ]
             )
 
             entitlement_type = (
-                entitlement["entitlement_type"]
+                entitlement[
+                    "entitlement_type"
+                ]
+            )
+
+            entitlement_period = (
+                entitlement[
+                    "entitlement_period"
+                ]
             )
 
             base_quantity = (
-                entitlement["base_quantity"]
+                entitlement[
+                    "base_quantity"
+                ]
             )
 
             # ==================================================
             # Actual Claimed Quantity
             #
-            # IMPORTANT:
-            # Use distributions instead of trusting
-            # old audit entitled/claimed values.
+            # Use distributions instead of old audit
+            # claimed values.
             # ==================================================
 
             cursor.execute("""
@@ -375,11 +476,14 @@ def beneficiary_dashboard():
                         SUM(quantity_given),
                         0
                     ) AS claimed_quantity
+
                 FROM distributions
+
                 WHERE beneficiary_id = %s
                 AND item_id = %s
                 AND MONTH(distribution_date) = %s
                 AND YEAR(distribution_date) = %s
+
             """, (
                 beneficiary_id,
                 item_id,
@@ -390,7 +494,9 @@ def beneficiary_dashboard():
             claimed_result = cursor.fetchone()
 
             claimed = float(
-                claimed_result["claimed_quantity"] or 0
+                claimed_result[
+                    "claimed_quantity"
+                ] or 0
             )
 
             # ==================================================
@@ -403,13 +509,18 @@ def beneficiary_dashboard():
                     warehouse_returned_quantity,
                     returned_to_warehouse,
                     audit_status
+
                 FROM unclaimed_audit
+
                 WHERE beneficiary_id = %s
                 AND item_id = %s
                 AND month = %s
                 AND year = %s
+
                 ORDER BY audit_id DESC
+
                 LIMIT 1
+
             """, (
                 beneficiary_id,
                 item_id,
@@ -442,8 +553,11 @@ def beneficiary_dashboard():
             else:
 
                 audit_id = None
+
                 returned = 0.0
+
                 returned_to_warehouse = False
+
                 stored_audit_status = None
 
             # ==================================================
@@ -452,9 +566,8 @@ def beneficiary_dashboard():
 
             if entitlement_type == "AVAILABILITY":
 
-                # NPNS has no fixed entitlement.
-
                 entitled = 0.0
+
                 unclaimed = 0.0
 
             else:
@@ -464,7 +577,8 @@ def beneficiary_dashboard():
                 )
 
                 unclaimed = (
-                    entitled - claimed
+                    entitled -
+                    claimed
                 )
 
                 if unclaimed < 0:
@@ -534,6 +648,9 @@ def beneficiary_dashboard():
                 "item_name":
                     item_name,
 
+                "unit":
+                    item_unit,
+
                 "month":
                     month,
 
@@ -569,6 +686,9 @@ def beneficiary_dashboard():
 
                 "entitlement_type":
                     entitlement_type,
+
+                "entitlement_period":
+                    entitlement_period,
 
                 "base_entitlement":
                     base_quantity
@@ -679,6 +799,8 @@ def beneficiary_history():
 
     # ==================================================
     # Selected Month / Year
+    #
+    # Defaults to current business month/year.
     # ==================================================
 
     business_date = get_business_date()
@@ -723,10 +845,14 @@ def beneficiary_history():
                 b.category_id,
                 b.family_members,
                 c.category_name
+
             FROM beneficiaries b
+
             JOIN card_categories c
                 ON b.category_id = c.category_id
+
             WHERE b.beneficiary_id = %s
+
         """, (
             beneficiary_id,
         ))
@@ -760,9 +886,12 @@ def beneficiary_history():
             SELECT
                 closure_id,
                 verified
+
             FROM monthly_closure
+
             WHERE month = %s
             AND year = %s
+
         """, (
             month,
             year
@@ -781,7 +910,12 @@ def beneficiary_history():
             )
 
         # ==================================================
-        # Get Rice & Wheat
+        # Get All Supported Ration Items
+        #
+        # Rice
+        # Wheat
+        # Sugar
+        # Kerosene
         # ==================================================
 
         ration_items = get_ration_items(cursor)
@@ -789,13 +923,18 @@ def beneficiary_history():
         history = []
 
         # ==================================================
-        # PROCESS RICE AND WHEAT SEPARATELY
+        # PROCESS ALL ITEMS SEPARATELY
         # ==================================================
 
         for item in ration_items:
 
             item_id = item["item_id"]
+
             item_name = item["item_name"]
+
+            item_unit = (
+                item["unit"] or "kg"
+            )
 
             # ==================================================
             # Correct Entitlement
@@ -810,15 +949,27 @@ def beneficiary_history():
             )
 
             monthly_quantity = (
-                entitlement["monthly_quantity"]
+                entitlement[
+                    "monthly_quantity"
+                ]
             )
 
             entitlement_type = (
-                entitlement["entitlement_type"]
+                entitlement[
+                    "entitlement_type"
+                ]
+            )
+
+            entitlement_period = (
+                entitlement[
+                    "entitlement_period"
+                ]
             )
 
             base_quantity = (
-                entitlement["base_quantity"]
+                entitlement[
+                    "base_quantity"
+                ]
             )
 
             # ==================================================
@@ -831,11 +982,14 @@ def beneficiary_history():
                         SUM(quantity_given),
                         0
                     ) AS claimed_quantity
+
                 FROM distributions
+
                 WHERE beneficiary_id = %s
                 AND item_id = %s
                 AND MONTH(distribution_date) = %s
                 AND YEAR(distribution_date) = %s
+
             """, (
                 beneficiary_id,
                 item_id,
@@ -846,7 +1000,9 @@ def beneficiary_history():
             claimed_result = cursor.fetchone()
 
             claimed = float(
-                claimed_result["claimed_quantity"] or 0
+                claimed_result[
+                    "claimed_quantity"
+                ] or 0
             )
 
             # ==================================================
@@ -859,13 +1015,18 @@ def beneficiary_history():
                     warehouse_returned_quantity,
                     returned_to_warehouse,
                     audit_status
+
                 FROM unclaimed_audit
+
                 WHERE beneficiary_id = %s
                 AND item_id = %s
                 AND month = %s
                 AND year = %s
+
                 ORDER BY audit_id DESC
+
                 LIMIT 1
+
             """, (
                 beneficiary_id,
                 item_id,
@@ -898,8 +1059,11 @@ def beneficiary_history():
             else:
 
                 audit_id = None
+
                 returned = 0.0
+
                 returned_to_warehouse = False
+
                 stored_audit_status = None
 
             # ==================================================
@@ -909,6 +1073,7 @@ def beneficiary_history():
             if entitlement_type == "AVAILABILITY":
 
                 entitled = 0.0
+
                 unclaimed = 0.0
 
             else:
@@ -918,7 +1083,8 @@ def beneficiary_history():
                 )
 
                 unclaimed = (
-                    entitled - claimed
+                    entitled -
+                    claimed
                 )
 
                 if unclaimed < 0:
@@ -980,6 +1146,9 @@ def beneficiary_history():
                 "item_name":
                     item_name,
 
+                "unit":
+                    item_unit,
+
                 "entitled_quantity":
                     entitled,
 
@@ -1009,6 +1178,9 @@ def beneficiary_history():
 
                 "entitlement_type":
                     entitlement_type,
+
+                "entitlement_period":
+                    entitlement_period,
 
                 "base_entitlement":
                     base_quantity

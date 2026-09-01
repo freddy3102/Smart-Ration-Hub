@@ -152,9 +152,9 @@ def get_inventory():
 # ==================================================
 # Add Stock
 #
-# Used by Warehouse Manager
+# Used when NEW stock is physically added.
 #
-# This increases the existing available quantity.
+# This increases available_quantity.
 # It does NOT change minimum_stock.
 # ==================================================
 
@@ -323,7 +323,21 @@ def add_stock():
 
 
 # ==================================================
-# Update Inventory
+# Update Inventory Settings
+#
+# IMPORTANT:
+#
+# This endpoint ONLY updates minimum_stock.
+#
+# available_quantity MUST NOT be changed here.
+#
+# available_quantity is controlled by:
+#
+# 1. Distribution
+# 2. Stock addition
+# 3. Verified warehouse returns
+#
+# This prevents manual modification of actual stock.
 # ==================================================
 
 @inventory_bp.route(
@@ -334,36 +348,128 @@ def update_inventory(id):
 
     data = request.get_json()
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    # ---------------------------------
+    # Validate minimum stock
+    # ---------------------------------
+
+    if "minimum_stock" not in data:
+
+        return jsonify({
+            "message":
+                "Minimum stock value is required."
+        }), 400
 
     try:
 
-        query = """
-            UPDATE inventory
-            SET
-                available_quantity = %s,
-                minimum_stock = %s
-            WHERE inventory_id = %s
-        """
-
-        values = (
-            data["available_quantity"],
-            data["minimum_stock"],
-            id
+        minimum_stock = float(
+            data["minimum_stock"]
         )
 
+    except (TypeError, ValueError):
+
+        return jsonify({
+            "message":
+                "Invalid minimum stock value."
+        }), 400
+
+    if minimum_stock < 0:
+
+        return jsonify({
+            "message":
+                "Minimum stock cannot be negative."
+        }), 400
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+
+        # ---------------------------------
+        # Check inventory record
+        # ---------------------------------
+
         cursor.execute(
-            query,
-            values
+            """
+            SELECT
+                inventory_id,
+                item_id,
+                available_quantity,
+                minimum_stock
+            FROM inventory
+            WHERE inventory_id = %s
+            """,
+            (id,)
+        )
+
+        inventory = cursor.fetchone()
+
+        if not inventory:
+
+            return jsonify({
+                "message":
+                    "Inventory record not found."
+            }), 404
+
+        # ---------------------------------
+        # Update ONLY minimum_stock
+        # ---------------------------------
+
+        cursor.execute(
+            """
+            UPDATE inventory
+            SET minimum_stock = %s
+            WHERE inventory_id = %s
+            """,
+            (
+                minimum_stock,
+                id
+            )
         )
 
         conn.commit()
 
+        # ---------------------------------
+        # Determine current stock status
+        # ---------------------------------
+
+        available_quantity = float(
+            inventory["available_quantity"] or 0
+        )
+
+        if available_quantity == 0:
+
+            stock_status = "Out of Stock"
+
+        elif available_quantity <= minimum_stock:
+
+            stock_status = "Low Stock"
+
+        else:
+
+            stock_status = "Available"
+
         return jsonify({
+
             "message":
-                "Inventory updated successfully"
-        })
+                "Minimum stock updated successfully.",
+
+            "inventory_id":
+                inventory["inventory_id"],
+
+            "item_id":
+                inventory["item_id"],
+
+            # Actual stock remains unchanged
+            "available_quantity":
+                available_quantity,
+
+            "minimum_stock":
+                minimum_stock,
+
+            "stock_status":
+                stock_status
+
+        }), 200
 
     except Exception as e:
 
@@ -371,7 +477,7 @@ def update_inventory(id):
 
         return jsonify({
             "message":
-                "Unable to update inventory.",
+                "Unable to update minimum stock.",
             "error":
                 str(e)
         }), 500

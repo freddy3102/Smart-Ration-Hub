@@ -9,7 +9,56 @@ warehouse_verification_bp = Blueprint(
 
 
 # ==================================================
+# Helpers
+# ==================================================
+
+def get_quarter(month):
+
+    if month in (1, 2, 3):
+        return 1
+
+    if month in (4, 5, 6):
+        return 2
+
+    if month in (7, 8, 9):
+        return 3
+
+    return 4
+
+
+def get_quarter_start(month):
+
+    quarter = get_quarter(month)
+
+    return ((quarter - 1) * 3) + 1
+
+
+def get_quarter_end(month):
+
+    return get_quarter_start(month) + 2
+
+
+def is_quarter_end(month):
+
+    return month in (3, 6, 9, 12)
+
+
+# ==================================================
 # Warehouse Verification Summary
+#
+# Rules:
+#
+# Rice / Wheat
+#     -> Monthly verification
+#
+# Sugar / Kerosene
+#     -> Quarterly verification
+#     -> March / June / September / December
+#
+# IMPORTANT:
+#
+# This endpoint reports ONLY the stock that is actually
+# eligible for verification for the selected period.
 # ==================================================
 
 @warehouse_verification_bp.route(
@@ -52,6 +101,18 @@ def warehouse_verification():
             }), 400
 
         # ==================================================
+        # QUARTER
+        # ==================================================
+
+        quarter = get_quarter(month)
+
+        quarter_start = get_quarter_start(month)
+
+        quarter_end = get_quarter_end(month)
+
+        quarter_is_closed = is_quarter_end(month)
+
+        # ==================================================
         # DATABASE
         # ==================================================
 
@@ -62,85 +123,6 @@ def warehouse_verification():
         )
 
         # ==================================================
-        # TOTAL UNCLAIMED
-        #
-        # IMPORTANT:
-        #
-        # We use unclaimed_quantity, which remains unchanged
-        # even after the employee records the return.
-        #
-        # Therefore:
-        #
-        # Unclaimed = 10
-        # Returned  = 10
-        #
-        # Difference = 0
-        #
-        # This allows the manager to verify successfully.
-        # ==================================================
-
-        cursor.execute("""
-            SELECT
-
-                IFNULL(
-                    SUM(unclaimed_quantity),
-                    0
-                ) AS total_unclaimed
-
-            FROM unclaimed_audit
-
-            WHERE month = %s
-            AND year = %s
-
-        """, (
-            month,
-            year
-        ))
-
-        total_unclaimed = float(
-            cursor.fetchone()[
-                "total_unclaimed"
-            ] or 0
-        )
-
-        # ==================================================
-        # TOTAL RETURNED
-        # ==================================================
-
-        cursor.execute("""
-            SELECT
-
-                IFNULL(
-                    SUM(warehouse_returned_quantity),
-                    0
-                ) AS total_returned
-
-            FROM unclaimed_audit
-
-            WHERE month = %s
-            AND year = %s
-
-        """, (
-            month,
-            year
-        ))
-
-        total_returned = float(
-            cursor.fetchone()[
-                "total_returned"
-            ] or 0
-        )
-
-        # ==================================================
-        # DIFFERENCE
-        # ==================================================
-
-        difference = (
-            total_unclaimed -
-            total_returned
-        )
-
-        # ==================================================
         # MONTHLY CLOSURE
         # ==================================================
 
@@ -148,7 +130,9 @@ def warehouse_verification():
             SELECT
 
                 closure_id,
-                verified
+                verified,
+                verified_by,
+                verified_at
 
             FROM monthly_closure
 
@@ -163,6 +147,110 @@ def warehouse_verification():
         closure = cursor.fetchone()
 
         # ==================================================
+        # DETERMINE WHICH AUDIT PERIODS ARE ELIGIBLE
+        #
+        # Rice / Wheat:
+        #     selected month
+        #
+        # Sugar / Kerosene:
+        #     only quarter-end month
+        # ==================================================
+
+        # ==================================================
+        # TOTALS
+        # ==================================================
+
+        total_unclaimed = 0.0
+        total_returned = 0.0
+
+        # ==================================================
+        # GET ELIGIBLE AUDIT RECORDS
+        #
+        # We determine item type from ration_items.
+        # ==================================================
+
+        cursor.execute("""
+            SELECT
+
+                ua.audit_id,
+                ua.item_id,
+                ua.month,
+                ua.year,
+
+                ua.unclaimed_quantity,
+                ua.warehouse_returned_quantity,
+
+                ua.returned_to_warehouse,
+                ua.audit_status,
+
+                ri.item_name
+
+            FROM unclaimed_audit ua
+
+            JOIN ration_items ri
+                ON ua.item_id = ri.item_id
+
+            WHERE ua.year = %s
+
+            AND (
+                (
+                    LOWER(ri.item_name)
+                    IN ('rice', 'wheat')
+
+                    AND ua.month = %s
+                )
+
+                OR
+
+                (
+                    LOWER(ri.item_name)
+                    IN ('sugar', 'kerosene')
+
+                    AND ua.month = %s
+
+                    AND %s = TRUE
+                )
+            )
+
+            FOR UPDATE
+
+        """, (
+            year,
+            month,
+            quarter_end,
+            quarter_is_closed
+        ))
+
+        audit_rows = cursor.fetchall()
+
+        # ==================================================
+        # CALCULATE ELIGIBLE TOTALS
+        # ==================================================
+
+        for row in audit_rows:
+
+            unclaimed = float(
+                row["unclaimed_quantity"] or 0
+            )
+
+            returned = float(
+                row["warehouse_returned_quantity"] or 0
+            )
+
+            total_unclaimed += unclaimed
+
+            total_returned += returned
+
+        # ==================================================
+        # DIFFERENCE
+        # ==================================================
+
+        difference = (
+            total_unclaimed -
+            total_returned
+        )
+
+        # ==================================================
         # DETERMINE STATUS
         # ==================================================
 
@@ -174,17 +262,21 @@ def warehouse_verification():
 
             status = "VERIFIED"
 
-        elif total_unclaimed == 0:
+        elif total_unclaimed <= 0:
 
             status = "NO UNCLAIMED STOCK"
 
-        elif abs(difference) > 0.000001:
+        elif abs(difference) > 0.0001:
 
             status = "MISMATCH"
 
         else:
 
             status = "READY FOR VERIFICATION"
+
+        # ==================================================
+        # RETURN RESPONSE
+        # ==================================================
 
         return jsonify({
 
@@ -193,6 +285,18 @@ def warehouse_verification():
 
             "year":
                 year,
+
+            "quarter":
+                f"Q{quarter}",
+
+            "quarter_start_month":
+                quarter_start,
+
+            "quarter_end_month":
+                quarter_end,
+
+            "is_quarter_end":
+                quarter_is_closed,
 
             "total_unclaimed":
                 total_unclaimed,
@@ -204,7 +308,10 @@ def warehouse_verification():
                 difference,
 
             "status":
-                status
+                status,
+
+            "eligible_records":
+                len(audit_rows)
 
         }), 200
 
@@ -238,7 +345,15 @@ def warehouse_verification():
 # ==================================================
 # Warehouse Verification
 #
-# THIS is where inventory is updated.
+# IMPORTANT:
+#
+# Inventory is updated ONLY here.
+#
+# Warehouse Return:
+#     Does NOT update inventory.
+#
+# Warehouse Verification:
+#     Adds verified returned quantity back to inventory.
 # ==================================================
 
 @warehouse_verification_bp.route(
@@ -306,6 +421,18 @@ def verify_warehouse():
         )
 
         # ==================================================
+        # QUARTER
+        # ==================================================
+
+        quarter = get_quarter(month)
+
+        quarter_start = get_quarter_start(month)
+
+        quarter_end = get_quarter_end(month)
+
+        quarter_is_closed = is_quarter_end(month)
+
+        # ==================================================
         # LOCK MONTHLY CLOSURE
         # ==================================================
 
@@ -351,65 +478,189 @@ def verify_warehouse():
             return jsonify({
 
                 "message":
-                    "This month has already been verified."
+                    "This period has already been verified."
 
             }), 400
 
         # ==================================================
-        # TOTAL UNCLAIMED
+        # GET ELIGIBLE RETURNED RECORDS
+        #
+        # Rice / Wheat:
+        #     selected month
+        #
+        # Sugar / Kerosene:
+        #     quarter-end only
+        #
+        # IMPORTANT:
+        #
+        # Only records that have actually been returned
+        # by the ration shop are selected.
         # ==================================================
 
         cursor.execute("""
             SELECT
 
-                IFNULL(
-                    SUM(unclaimed_quantity),
-                    0
-                ) AS total_unclaimed
+                ua.audit_id,
+                ua.beneficiary_id,
+                ua.item_id,
 
-            FROM unclaimed_audit
+                ua.month,
+                ua.year,
 
-            WHERE month = %s
-            AND year = %s
+                ua.unclaimed_quantity,
+                ua.warehouse_returned_quantity,
+
+                ua.returned_to_warehouse,
+                ua.audit_status,
+
+                ri.item_name,
+                ri.unit
+
+            FROM unclaimed_audit ua
+
+            JOIN ration_items ri
+                ON ua.item_id = ri.item_id
+
+            WHERE ua.year = %s
+
+            AND (
+                (
+                    LOWER(ri.item_name)
+                    IN ('rice', 'wheat')
+
+                    AND ua.month = %s
+                )
+
+                OR
+
+                (
+                    LOWER(ri.item_name)
+                    IN ('sugar', 'kerosene')
+
+                    AND ua.month = %s
+
+                    AND %s = TRUE
+                )
+            )
+
+            AND ua.returned_to_warehouse = TRUE
+
+            AND ua.audit_status = 'Returned'
+
+            AND ua.warehouse_returned_quantity > 0
+
+            FOR UPDATE
 
         """, (
+            year,
             month,
-            year
+            quarter_end,
+            quarter_is_closed
         ))
 
-        total_unclaimed = float(
-            cursor.fetchone()[
-                "total_unclaimed"
-            ] or 0
-        )
+        returned_items = cursor.fetchall()
 
         # ==================================================
-        # TOTAL RETURNED
+        # CHECK FOR RETURNED STOCK
+        # ==================================================
+
+        if not returned_items:
+
+            return jsonify({
+
+                "message":
+                    "No returned stock is available "
+                    "for verification for this period."
+
+            }), 400
+
+        # ==================================================
+        # CALCULATE ELIGIBLE UNCLAIMED / RETURNED TOTALS
+        #
+        # This is done using the SAME records that will
+        # actually be verified.
+        # ==================================================
+
+        total_unclaimed = 0.0
+        total_returned = 0.0
+
+        # ==================================================
+        # FIRST GET ALL ELIGIBLE AUDIT RECORDS
+        #
+        # We need this because an eligible period may have
+        # some pending records and some returned records.
         # ==================================================
 
         cursor.execute("""
             SELECT
 
-                IFNULL(
-                    SUM(warehouse_returned_quantity),
-                    0
-                ) AS total_returned
+                ua.audit_id,
+                ua.item_id,
 
-            FROM unclaimed_audit
+                ua.unclaimed_quantity,
+                ua.warehouse_returned_quantity,
 
-            WHERE month = %s
-            AND year = %s
+                ua.returned_to_warehouse,
+                ua.audit_status,
+
+                ri.item_name
+
+            FROM unclaimed_audit ua
+
+            JOIN ration_items ri
+                ON ua.item_id = ri.item_id
+
+            WHERE ua.year = %s
+
+            AND (
+                (
+                    LOWER(ri.item_name)
+                    IN ('rice', 'wheat')
+
+                    AND ua.month = %s
+                )
+
+                OR
+
+                (
+                    LOWER(ri.item_name)
+                    IN ('sugar', 'kerosene')
+
+                    AND ua.month = %s
+
+                    AND %s = TRUE
+                )
+            )
+
+            FOR UPDATE
 
         """, (
+            year,
             month,
-            year
+            quarter_end,
+            quarter_is_closed
         ))
 
-        total_returned = float(
-            cursor.fetchone()[
-                "total_returned"
-            ] or 0
-        )
+        eligible_items = cursor.fetchall()
+
+        # ==================================================
+        # VERIFY THAT ALL ELIGIBLE UNCLAIMED STOCK
+        # HAS BEEN RETURNED
+        # ==================================================
+
+        for row in eligible_items:
+
+            unclaimed = float(
+                row["unclaimed_quantity"] or 0
+            )
+
+            returned = float(
+                row["warehouse_returned_quantity"] or 0
+            )
+
+            total_unclaimed += unclaimed
+
+            total_returned += returned
 
         # ==================================================
         # NO UNCLAIMED STOCK
@@ -420,12 +671,13 @@ def verify_warehouse():
             return jsonify({
 
                 "message":
-                    "No unclaimed stock available for verification."
+                    "No unclaimed stock is available "
+                    "for verification."
 
             }), 400
 
         # ==================================================
-        # CHECK TOTALS
+        # CHECK RETURN TOTAL
         # ==================================================
 
         difference = (
@@ -433,14 +685,14 @@ def verify_warehouse():
             total_returned
         )
 
-        if abs(difference) > 0.000001:
+        if abs(difference) > 0.0001:
 
             return jsonify({
 
                 "message":
-                    "Verification failed. "
-                    "Total returned quantity does not "
-                    "match total unclaimed quantity.",
+                    "Verification cannot be completed. "
+                    "All eligible unclaimed stock must be "
+                    "returned before warehouse verification.",
 
                 "total_unclaimed":
                     total_unclaimed,
@@ -454,64 +706,61 @@ def verify_warehouse():
             }), 400
 
         # ==================================================
-        # GET ALL RETURNED AUDIT RECORDS
+        # SAFETY CHECK
         #
-        # These are the exact quantities that will now
-        # be added back to inventory.
+        # All eligible records must actually be marked
+        # Returned.
         # ==================================================
 
-        cursor.execute("""
-            SELECT
+        for row in eligible_items:
 
-                audit_id,
-                beneficiary_id,
-                item_id,
-                warehouse_returned_quantity
+            unclaimed = float(
+                row["unclaimed_quantity"] or 0
+            )
 
-            FROM unclaimed_audit
+            returned = float(
+                row["warehouse_returned_quantity"] or 0
+            )
 
-            WHERE month = %s
-            AND year = %s
+            if unclaimed > 0:
 
-            AND returned_to_warehouse = TRUE
+                if (
+                    not row["returned_to_warehouse"]
+                    or row["audit_status"] != "Returned"
+                    or abs(
+                        returned -
+                        unclaimed
+                    ) > 0.0001
+                ):
 
-            AND audit_status = 'Returned'
+                    return jsonify({
 
-            AND warehouse_returned_quantity > 0
+                        "message":
+                            "Verification cannot be completed. "
+                            "Some eligible unclaimed stock has "
+                            "not been returned yet.",
 
-            FOR UPDATE
+                        "audit_id":
+                            row["audit_id"],
 
-        """, (
-            month,
-            year
-        ))
+                        "unclaimed_quantity":
+                            unclaimed,
 
-        returned_items = (
-            cursor.fetchall()
-        )
+                        "returned_quantity":
+                            returned
 
-        # ==================================================
-        # NO RETURNED STOCK
-        # ==================================================
-
-        if not returned_items:
-
-            return jsonify({
-
-                "message":
-                    "No returned stock is available "
-                    "for verification."
-
-            }), 400
+                    }), 400
 
         # ==================================================
         # ADD RETURNED STOCK TO INVENTORY
         #
         # THIS IS THE ONLY PLACE WHERE INVENTORY
-        # IS INCREASED FOR WAREHOUSE RETURNS.
+        # IS UPDATED FOR WAREHOUSE RETURNS.
         # ==================================================
 
         inventory_added = {}
+
+        processed_count = 0
 
         for row in returned_items:
 
@@ -522,6 +771,10 @@ def verify_warehouse():
                     "warehouse_returned_quantity"
                 ] or 0
             )
+
+            if returned_quantity <= 0:
+
+                continue
 
             # ---------------------------------------------
             # Lock inventory row
@@ -581,7 +834,7 @@ def verify_warehouse():
             ))
 
             # ---------------------------------------------
-            # Track item-wise addition
+            # Track item-wise inventory addition
             # ---------------------------------------------
 
             if item_id not in inventory_added:
@@ -592,8 +845,12 @@ def verify_warehouse():
                 returned_quantity
             )
 
+            processed_count += 1
+
         # ==================================================
         # UPDATE MONTHLY CLOSURE
+        #
+        # The selected period is now verified.
         # ==================================================
 
         cursor.execute("""
@@ -617,10 +874,13 @@ def verify_warehouse():
         ))
 
         # ==================================================
-        # COMMIT EVERYTHING
+        # COMMIT
         #
-        # Inventory updates + verification status are
-        # committed together.
+        # Inventory update and verification status happen
+        # together.
+        #
+        # If anything fails:
+        #     inventory changes are rolled back.
         # ==================================================
 
         conn.commit()
@@ -641,6 +901,12 @@ def verify_warehouse():
             "year":
                 year,
 
+            "quarter":
+                f"Q{quarter}",
+
+            "quarter_end":
+                quarter_end,
+
             "total_unclaimed":
                 total_unclaimed,
 
@@ -654,7 +920,7 @@ def verify_warehouse():
                 True,
 
             "items_processed":
-                len(returned_items),
+                processed_count,
 
             "inventory_added":
                 inventory_added,
@@ -692,9 +958,7 @@ def verify_warehouse():
     finally:
 
         if cursor:
-
             cursor.close()
 
         if conn:
-
             conn.close()

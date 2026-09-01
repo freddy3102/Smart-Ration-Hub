@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from db import get_connection
 
 
@@ -22,12 +22,11 @@ def is_quarter_end(month):
 #
 # IMPORTANT:
 #
-# This endpoint ONLY records that the stock has been
-# returned by the ration shop.
+# When stock is returned by the ration shop,
+# the returned quantity is temporarily removed
+# from active warehouse inventory.
 #
-# Inventory is NOT increased here.
-#
-# Inventory is increased only after the warehouse
+# Inventory is added back only when the warehouse
 # manager verifies the returned stock.
 # ==================================================
 
@@ -141,6 +140,10 @@ def warehouse_return(audit_id):
                     "Audit record not found."
             }), 404
 
+        # ==================================================
+        # BASIC INFORMATION
+        # ==================================================
+
         audit_month = int(
             audit["month"]
         )
@@ -158,10 +161,52 @@ def warehouse_return(audit_id):
         )
 
         # ==================================================
+        # DETERMINE ITEM TYPE
+        # ==================================================
+
+        is_quarterly_item = (
+            item_name_lower in (
+                "sugar",
+                "kerosene"
+            )
+        )
+
+        is_monthly_item = (
+            item_name_lower in (
+                "rice",
+                "wheat"
+            )
+        )
+
+        # ==================================================
+        # UNKNOWN ITEM
+        # ==================================================
+
+        if not (
+            is_monthly_item
+            or is_quarterly_item
+        ):
+
+            return jsonify({
+
+                "message":
+                    "This item is not supported "
+                    "for warehouse return.",
+
+                "item":
+                    item_name
+
+            }), 400
+
+        # ==================================================
         # CHECK MONTHLY CLOSURE
         #
-        # Return is allowed only after the month has
-        # been closed.
+        # The distribution cycle must be CLOSED.
+        #
+        # CLOSED != VERIFIED
+        #
+        # Closing allows warehouse return.
+        # Verification happens later.
         # ==================================================
 
         cursor.execute("""
@@ -184,6 +229,10 @@ def warehouse_return(audit_id):
 
         closure = cursor.fetchone()
 
+        # ==================================================
+        # MONTH NOT CLOSED
+        # ==================================================
+
         if closure is None:
 
             return jsonify({
@@ -191,12 +240,15 @@ def warehouse_return(audit_id):
                 "message":
                     "Distribution cycle has not been "
                     "closed yet. Warehouse return is "
-                    "allowed only after month-end closure."
+                    "allowed only after the cycle is closed."
 
             }), 400
 
         # ==================================================
         # ALREADY VERIFIED
+        #
+        # Once warehouse verification is complete,
+        # no more returns are accepted for that period.
         # ==================================================
 
         if closure["verified"]:
@@ -204,28 +256,23 @@ def warehouse_return(audit_id):
             return jsonify({
 
                 "message":
-                    "This month has already been verified. "
+                    "This period has already been verified. "
                     "Warehouse return is no longer allowed."
 
             }), 400
 
         # ==================================================
-        # QUARTERLY ITEM CHECK
+        # QUARTERLY RETURN RULE
         #
-        # Sugar and Kerosene can only be returned at:
+        # Sugar / Kerosene:
         #
         # March
         # June
         # September
         # December
+        #
+        # ONLY these months.
         # ==================================================
-
-        is_quarterly_item = (
-            item_name_lower in (
-                "sugar",
-                "kerosene"
-            )
-        )
 
         if is_quarterly_item:
 
@@ -238,8 +285,8 @@ def warehouse_return(audit_id):
                     "message":
                         f"{item_name} is a quarterly item. "
                         "Warehouse return is allowed only "
-                        "at the end of the quarter "
-                        "(March, June, September or December).",
+                        "at quarter end: March, June, "
+                        "September or December.",
 
                     "item":
                         item_name,
@@ -254,17 +301,11 @@ def warehouse_return(audit_id):
 
         # ==================================================
         # ALREADY RETURNED
+        #
+        # Returned means:
+        #     Shop has handed stock back
+        #     Warehouse manager still needs to verify
         # ==================================================
-
-        if audit["audit_status"] == "Returned":
-
-            return jsonify({
-
-                "message":
-                    "Stock for this audit record has "
-                    "already been returned."
-
-            }), 400
 
         if audit["returned_to_warehouse"]:
 
@@ -272,7 +313,19 @@ def warehouse_return(audit_id):
 
                 "message":
                     "Stock for this audit record has "
-                    "already been returned."
+                    "already been returned and is awaiting "
+                    "warehouse verification."
+
+            }), 400
+
+        if audit["audit_status"] == "Returned":
+
+            return jsonify({
+
+                "message":
+                    "Stock for this audit record has "
+                    "already been returned and is awaiting "
+                    "warehouse verification."
 
             }), 400
 
@@ -301,7 +354,7 @@ def warehouse_return(audit_id):
         # ==================================================
         # COMPLETE RETURN REQUIRED
         #
-        # We do not allow partial return.
+        # Partial returns are not allowed.
         # ==================================================
 
         tolerance = 0.0001
@@ -326,14 +379,117 @@ def warehouse_return(audit_id):
             }), 400
 
         # ==================================================
-        # IMPORTANT
+        # GET INVENTORY
         #
-        # DO NOT UPDATE INVENTORY HERE.
+        # IMPORTANT:
         #
-        # The stock is physically being returned to the
-        # warehouse, but the system inventory is updated
-        # only after the warehouse manager verifies it.
+        # The returned quantity is temporarily removed
+        # from active warehouse inventory.
+        #
+        # Example:
+        #
+        # Inventory = 70 kg
+        # Returned  = 10 kg
+        #
+        # Inventory becomes 60 kg.
+        #
+        # After warehouse manager verification,
+        # warehouse_verification.py adds the 10 kg back.
         # ==================================================
+
+        cursor.execute("""
+            SELECT
+
+                inventory_id,
+                available_quantity
+
+            FROM inventory
+
+            WHERE item_id = %s
+
+            FOR UPDATE
+
+        """, (
+            audit["item_id"],
+        ))
+
+        inventory = cursor.fetchone()
+
+        # ==================================================
+        # INVENTORY NOT FOUND
+        # ==================================================
+
+        if inventory is None:
+
+            return jsonify({
+
+                "message":
+                    "Inventory record not found "
+                    "for this item."
+
+            }), 404
+
+        # ==================================================
+        # CURRENT INVENTORY
+        # ==================================================
+
+        available_quantity = float(
+            inventory["available_quantity"] or 0
+        )
+
+        # ==================================================
+        # CHECK INVENTORY
+        #
+        # Prevent inventory from becoming negative.
+        # ==================================================
+
+        if available_quantity < returned_qty:
+
+            return jsonify({
+
+                "message":
+                    "Insufficient inventory available "
+                    "to process this warehouse return.",
+
+                "available_quantity":
+                    available_quantity,
+
+                "returned_quantity":
+                    returned_qty
+
+            }), 400
+
+        # ==================================================
+        # DEDUCT RETURNED STOCK FROM INVENTORY
+        #
+        # Inventory is reduced when the shop records
+        # the physical return.
+        #
+        # The warehouse manager will add it back
+        # after successful verification.
+        # ==================================================
+
+        new_inventory_quantity = (
+            available_quantity -
+            returned_qty
+        )
+
+        cursor.execute("""
+            UPDATE inventory
+
+            SET
+
+                available_quantity = %s
+
+            WHERE inventory_id = %s
+
+        """, (
+
+            new_inventory_quantity,
+
+            inventory["inventory_id"]
+
+        ))
 
         # ==================================================
         # UPDATE AUDIT
@@ -369,8 +525,12 @@ def warehouse_return(audit_id):
         # ==================================================
         # COMMIT
         #
-        # Only the audit record changes.
-        # Inventory remains unchanged.
+        # Both operations happen together:
+        #
+        # 1. Inventory is reduced by returned quantity.
+        # 2. Audit is marked as Returned.
+        #
+        # If either fails, both are rolled back.
         # ==================================================
 
         conn.commit()
@@ -383,7 +543,8 @@ def warehouse_return(audit_id):
 
             "message":
                 "Stock return recorded successfully. "
-                "The returned stock is awaiting "
+                "Returned stock has been deducted from "
+                "active inventory and is now awaiting "
                 "warehouse manager verification.",
 
             "audit_id":
@@ -407,6 +568,11 @@ def warehouse_return(audit_id):
             "year":
                 audit_year,
 
+            "return_type":
+                "QUARTERLY"
+                if is_quarterly_item
+                else "MONTHLY",
+
             "quarterly_item":
                 is_quarterly_item,
 
@@ -416,8 +582,14 @@ def warehouse_return(audit_id):
             "returned_quantity":
                 returned_qty,
 
+            "inventory_before_return":
+                available_quantity,
+
+            "inventory_after_return":
+                new_inventory_quantity,
+
             "inventory_updated":
-                False,
+                True,
 
             "verification_required":
                 True,
@@ -451,7 +623,9 @@ def warehouse_return(audit_id):
     finally:
 
         if cursor:
+
             cursor.close()
 
         if conn:
+
             conn.close()

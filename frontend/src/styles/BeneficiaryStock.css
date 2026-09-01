@@ -1,73 +1,474 @@
+/* =====================================
+   Beneficiary Live Stock Page
+===================================== */
+
 .beneficiary-stock-page {
-    padding: 40px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 10px 0 40px;
+    box-sizing: border-box;
 }
 
 
-.beneficiary-stock-page h1 {
-    color: #1e3a5f;
-    margin-bottom: 8px;
+/* =====================================
+   Page Header
+===================================== */
+
+.stock-page-header {
+    margin-bottom: 28px;
 }
 
+.stock-page-label {
+    margin: 0 0 8px;
+
+    color: #2563eb;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stock-page-header h1 {
+    margin: 0 0 8px;
+
+    color: #172554;
+
+    font-size: 38px;
+    line-height: 1.2;
+
+    font-weight: 700;
+}
 
 .stock-subtitle {
+    margin: 0;
+
     color: #64748b;
-    margin-bottom: 30px;
+
+    font-size: 16px;
+    line-height: 1.5;
 }
 
+
+/* =====================================
+   Stock Table Container
+===================================== */
+
+.stock-table-container {
+    width: 100%;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 6px 24px rgba(15, 23, 42, 0.07);
+}
+
+
+/* =====================================
+   Table
+===================================== */
 
 .beneficiary-stock-table {
     width: 100%;
+
     border-collapse: collapse;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+
+    table-layout: fixed;
 }
 
+
+/* =====================================
+   Table Header
+===================================== */
+
+.beneficiary-stock-table thead {
+    background: #172554;
+
+    color: #ffffff;
+}
 
 .beneficiary-stock-table th {
-    background: #1e3a5f;
-    color: white;
-    padding: 16px;
+    padding: 16px 28px;
+
     text-align: left;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    letter-spacing: 0.2px;
 }
 
+.beneficiary-stock-table th:nth-child(1) {
+    width: 42%;
+}
+
+.beneficiary-stock-table th:nth-child(2) {
+    width: 38%;
+}
+
+.beneficiary-stock-table th:nth-child(3) {
+    width: 20%;
+}
+
+
+/* =====================================
+   Table Body
+===================================== */
 
 .beneficiary-stock-table td {
-    padding: 16px;
+    padding: 22px 28px;
+
     border-bottom: 1px solid #e5e7eb;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 14px;
+
+    vertical-align: middle;
 }
 
-
-.beneficiary-stock-table tr:last-child td {
+.beneficiary-stock-table tbody tr:last-child td {
     border-bottom: none;
 }
 
+.beneficiary-stock-table tbody tr {
+    transition: background 0.2s ease;
+}
 
-/* =================================
-   STOCK STATUS
-================================= */
-
-.stock-available {
-    color: #16a34a;
-    font-weight: bold;
+.beneficiary-stock-table tbody tr:hover td {
+    background: #f8fafc;
 }
 
 
-.stock-low {
-    color: #d97706;
-    font-weight: bold;
+/* =====================================
+   Item
+===================================== */
+
+.stock-item {
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+}
+
+.stock-item-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background: #eff6ff;
+
+    border-radius: 50%;
+
+    font-size: 23px;
+}
+
+.stock-item strong {
+    color: #172554;
+
+    font-size: 16px;
+    font-weight: 700;
 }
 
 
-.stock-unavailable {
+/* =====================================
+   Quantity
+===================================== */
+
+.stock-quantity {
+    color: #334155;
+
+    font-size: 15px;
+    font-weight: 500;
+}
+
+
+/* =====================================
+   Status
+===================================== */
+
+.stock-status {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 92px;
+
+    padding: 7px 13px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* =====================================
+   Available
+===================================== */
+
+.stock-status-available {
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+/* =====================================
+   Low Stock
+===================================== */
+
+.stock-status-low {
+    background: #fef3c7;
+
+    color: #b45309;
+}
+
+
+/* =====================================
+   Out of Stock
+===================================== */
+
+.stock-status-unavailable {
+    background: #fee2e2;
+
     color: #dc2626;
-    font-weight: bold;
 }
 
+
+/* =====================================
+   Information Banner
+===================================== */
+
+.stock-information {
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    margin-top: 20px;
+
+    padding: 17px 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eff6ff,
+            #f8fbff
+        );
+
+    border: 1px solid #dbeafe;
+
+    border-radius: 15px;
+}
+
+.stock-information-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.stock-information strong {
+    display: block;
+
+    color: #172554;
+
+    font-size: 14px;
+}
+
+.stock-information p {
+    margin: 4px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+/* =====================================
+   Loading
+===================================== */
+
+.stock-loading {
+    min-height: 250px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 18px;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    box-shadow:
+        0 6px 24px rgba(15, 23, 42, 0.05);
+}
+
+.stock-loading-spinner {
+    width: 30px;
+    height: 30px;
+
+    border: 3px solid #dbeafe;
+
+    border-top-color: #2563eb;
+
+    border-radius: 50%;
+
+    animation:
+        stock-spin 0.8s linear infinite;
+}
+
+@keyframes stock-spin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* =====================================
+   No Stock
+===================================== */
 
 .no-stock {
-    text-align: center;
-    padding: 30px !important;
-    color: #64748b;
+    padding: 55px 20px !important;
+
+    text-align: center !important;
+}
+
+.no-stock-content {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 6px;
+}
+
+.no-stock-icon {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 6px;
+
+    background: #f1f5f9;
+
+    border-radius: 50%;
+
+    font-size: 24px;
+}
+
+.no-stock-content strong {
+    color: #334155;
+
+    font-size: 15px;
+}
+
+.no-stock-content span {
+    color: #94a3b8;
+
+    font-size: 13px;
+}
+
+
+/* =====================================
+   Responsive
+===================================== */
+
+@media (max-width: 900px) {
+
+    .beneficiary-stock-page {
+        padding: 5px 0 30px;
+    }
+
+    .stock-page-header h1 {
+        font-size: 32px;
+    }
+
+    .beneficiary-stock-table th,
+    .beneficiary-stock-table td {
+        padding: 16px 18px;
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .beneficiary-stock-page {
+        padding: 5px 0 25px;
+    }
+
+    .stock-page-header h1 {
+        font-size: 28px;
+    }
+
+    .stock-subtitle {
+        font-size: 14px;
+    }
+
+    .stock-table-container {
+        overflow-x: auto;
+    }
+
+    .beneficiary-stock-table {
+        min-width: 650px;
+    }
+
+    .stock-information {
+        align-items: flex-start;
+    }
+
 }

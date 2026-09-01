@@ -33,13 +33,18 @@ function BeneficiaryHistory() {
     ];
 
 
-    // Default: August 2026
+    // ---------------------------------
+    // Automatically use current month
+    // and current year
+    // ---------------------------------
+
+    const today = new Date();
 
     const [selectedMonth, setSelectedMonth] =
-        useState(8);
+        useState(today.getMonth() + 1);
 
     const [selectedYear, setSelectedYear] =
-        useState(2026);
+        useState(today.getFullYear());
 
 
     // ---------------------------------
@@ -114,9 +119,9 @@ function BeneficiaryHistory() {
 
                 <p className="page-subtitle">
 
-                    View your Rice and Wheat
-                    entitlement and distribution
-                    history.
+                    View your Rice, Wheat, Sugar
+                    and Kerosene entitlement and
+                    distribution history.
 
                 </p>
 
@@ -317,7 +322,7 @@ function BeneficiaryHistory() {
 
                                                     {
                                                         Number(
-                                                            row.entitled_quantity
+                                                            row.entitled_quantity || 0
                                                         ).toFixed(2)
                                                     } kg
 
@@ -330,7 +335,7 @@ function BeneficiaryHistory() {
 
                                                     {
                                                         Number(
-                                                            row.claimed_quantity
+                                                            row.claimed_quantity || 0
                                                         ).toFixed(2)
                                                     } kg
 
@@ -343,7 +348,7 @@ function BeneficiaryHistory() {
 
                                                     {
                                                         Number(
-                                                            row.unclaimed_quantity
+                                                            row.unclaimed_quantity || 0
                                                         ).toFixed(2)
                                                     } kg
 
@@ -356,7 +361,7 @@ function BeneficiaryHistory() {
 
                                                     {
                                                         Number(
-                                                            row.warehouse_returned_quantity
+                                                            row.warehouse_returned_quantity || 0
                                                         ).toFixed(2)
                                                     } kg
 
@@ -383,7 +388,8 @@ function BeneficiaryHistory() {
                                                     >
 
                                                         {
-                                                            row.verification_status
+                                                            row.verification_status ||
+                                                            "NOT VERIFIED"
                                                         }
 
                                                     </span>
