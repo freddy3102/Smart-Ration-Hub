@@ -152,7 +152,7 @@ def distribute():
         # ==================================================
         # GET RATION ITEM
         #
-        # All four items are now supported:
+        # Supported items:
         #
         # Rice
         # Wheat
@@ -187,10 +187,15 @@ def distribute():
         # ==================================================
         # GET ENTITLEMENT RULE
         #
-        # IMPORTANT:
+        # The entitlement_rules table is the single source
+        # of truth for item eligibility.
         #
-        # entitlement_period determines whether the item
-        # is MONTHLY or QUARTERLY.
+        # If there is NO rule for this category + item,
+        # distribution is NOT allowed.
+        #
+        # This means future entitlement changes can be made
+        # directly through the database without changing
+        # the distribution code.
         # ==================================================
 
         cursor.execute("""
@@ -211,103 +216,98 @@ def distribute():
         entitlement = cursor.fetchone()
 
         # ==================================================
-        # NPNS SPECIAL CASE
+        # ENTITLEMENT RULE MUST EXIST
         #
-        # NPNS is availability based.
-        #
-        # Therefore there is no fixed entitlement.
-        # The beneficiary can receive the item only when
-        # stock is available.
+        # No entitlement rule = item not allowed for
+        # this card category.
         # ==================================================
 
-        if category_name.upper() == "NPNS":
+        if entitlement is None:
 
-            entitlement_type = "AVAILABILITY"
-            entitlement_period = "MONTHLY"
+            return jsonify({
+                "message":
+                    f"{item_name} is not entitled for "
+                    f"{category_name} card.",
+                "category":
+                    category_name,
+                "item":
+                    item_name
+            }), 400
 
-            base_quantity = 0.0
-            allowed_quantity = None
+        # ==================================================
+        # READ ENTITLEMENT CONFIGURATION
+        # ==================================================
+
+        base_quantity = float(
+            entitlement["monthly_quantity"] or 0
+        )
+
+        entitlement_type = (
+            entitlement["entitlement_type"] or
+            "HOUSEHOLD"
+        )
+
+        entitlement_period = (
+            entitlement["entitlement_period"] or
+            "MONTHLY"
+        )
+
+        entitlement_period = (
+            entitlement_period.upper()
+        )
+
+        entitlement_type = (
+            entitlement_type.upper()
+        )
+
+        # ==================================================
+        # CALCULATE BASE ENTITLEMENT
+        #
+        # PERSON:
+        # quantity × number of family members
+        #
+        # HOUSEHOLD:
+        # fixed quantity per household
+        # ==================================================
+
+        if entitlement_type == "PERSON":
+
+            base_entitlement = (
+                base_quantity *
+                family_members
+            )
+
+        elif entitlement_type == "HOUSEHOLD":
+
+            base_entitlement = base_quantity
 
         else:
 
-            # ==================================================
-            # ENTITLEMENT RULE MUST EXIST
-            # ==================================================
+            return jsonify({
+                "message":
+                    "Invalid entitlement type configured "
+                    "for this category and item."
+            }), 400
 
-            if entitlement is None:
+        # ==================================================
+        # DETERMINE ALLOWED PERIOD
+        # ==================================================
 
-                return jsonify({
-                    "message":
-                        "No entitlement rule found for "
-                        "this category and item."
-                }), 400
+        if entitlement_period == "QUARTERLY":
 
-            base_quantity = float(
-                entitlement["monthly_quantity"] or 0
-            )
+            allowed_quantity = base_entitlement
 
-            entitlement_type = (
-                entitlement["entitlement_type"] or
-                "HOUSEHOLD"
-            )
+        elif entitlement_period == "MONTHLY":
 
-            entitlement_period = (
-                entitlement["entitlement_period"] or
-                "MONTHLY"
-            )
+            allowed_quantity = base_entitlement
 
-            entitlement_period = (
-                entitlement_period.upper()
-            )
+        else:
 
-            # ==================================================
-            # CALCULATE BASE ENTITLEMENT
-            #
-            # PERSON:
-            # quantity × number of family members
-            #
-            # HOUSEHOLD:
-            # fixed quantity per household
-            # ==================================================
-
-            if entitlement_type == "PERSON":
-
-                base_entitlement = (
-                    base_quantity *
-                    family_members
-                )
-
-            elif entitlement_type == "HOUSEHOLD":
-
-                base_entitlement = base_quantity
-
-            else:
-
-                return jsonify({
-                    "message":
-                        "Invalid entitlement type configured "
-                        "for this category and item."
-                }), 400
-
-            # ==================================================
-            # DETERMINE ALLOWED PERIOD
-            # ==================================================
-
-            if entitlement_period == "QUARTERLY":
-
-                allowed_quantity = base_entitlement
-
-            elif entitlement_period == "MONTHLY":
-
-                allowed_quantity = base_entitlement
-
-            else:
-
-                return jsonify({
-                    "message":
-                        "Invalid entitlement period configured "
-                        "for this category and item."
-                }), 400
+            return jsonify({
+                "message":
+                    "Invalid entitlement period configured "
+                    "for this category and item."
+            }), 400
 
         # ==================================================
         # CALCULATE CLAIMED QUANTITY
@@ -318,15 +318,9 @@ def distribute():
         # QUARTERLY ITEM:
         # All three months of the current quarter
         # are considered.
-        #
-        # This is the important change.
         # ==================================================
 
-        if entitlement_type == "AVAILABILITY":
-
-            claimed = 0.0
-
-        elif entitlement_period == "QUARTERLY":
+        if entitlement_period == "QUARTERLY":
 
             # ---------------------------------------------
             # Calculate current quarter
@@ -409,67 +403,58 @@ def distribute():
         # CALCULATE REMAINING ENTITLEMENT
         # ==================================================
 
-        if entitlement_type == "AVAILABILITY":
+        remaining = (
+            allowed_quantity -
+            claimed
+        )
 
-            remaining = None
+        if remaining < 0:
 
-        else:
+            remaining = 0.0
 
-            remaining = (
-                allowed_quantity -
-                claimed
-            )
+        # ==================================================
+        # PREVENT OVER CLAIM
+        # ==================================================
 
-            if remaining < 0:
-                remaining = 0.0
+        if quantity > remaining:
 
-            # ==================================================
-            # PREVENT OVER CLAIM
-            # ==================================================
+            if entitlement_period == "QUARTERLY":
 
-            if quantity > remaining:
+                period_message = "quarter"
 
-                if entitlement_period == "QUARTERLY":
+            else:
 
-                    period_message = (
-                        "quarter"
-                    )
+                period_message = "month"
 
-                else:
+            return jsonify({
 
-                    period_message = (
-                        "month"
-                    )
+                "message":
+                    f"Only {remaining:.2f} "
+                    f"{unit.lower()} remains for "
+                    f"this {period_message}.",
 
-                return jsonify({
+                "category":
+                    category_name,
 
-                    "message":
-                        f"Only {remaining:.2f} "
-                        f"{unit.lower()} remains for "
-                        f"this {period_message}.",
+                "item":
+                    item_name,
 
-                    "category":
-                        category_name,
+                "entitlement_period":
+                    entitlement_period,
 
-                    "item":
-                        item_name,
+                "entitlement_type":
+                    entitlement_type,
 
-                    "entitlement_period":
-                        entitlement_period,
+                "entitlement":
+                    allowed_quantity,
 
-                    "entitlement_type":
-                        entitlement_type,
+                "already_claimed":
+                    claimed,
 
-                    "entitlement":
-                        allowed_quantity,
+                "remaining":
+                    remaining
 
-                    "already_claimed":
-                        claimed,
-
-                    "remaining":
-                        remaining
-
-                }), 400
+            }), 400
 
         # ==================================================
         # INVENTORY CHECK
@@ -577,51 +562,43 @@ def distribute():
 
         new_claimed = claimed + quantity
 
-        if entitlement_type == "AVAILABILITY":
+        if entitlement_period == "QUARTERLY":
 
-            audit_entitled = new_claimed
-            new_unclaimed = 0.0
+            # ---------------------------------------------
+            # For a quarterly item:
+            #
+            # The audit record records the quarterly
+            # entitlement and the amount claimed so far
+            # in the quarter.
+            # ---------------------------------------------
+
+            audit_entitled = allowed_quantity
+
+            new_unclaimed = (
+                allowed_quantity -
+                new_claimed
+            )
+
+            if new_unclaimed < 0:
+
+                new_unclaimed = 0.0
 
         else:
 
-            if entitlement_period == "QUARTERLY":
+            # ---------------------------------------------
+            # Monthly item
+            # ---------------------------------------------
 
-                # -----------------------------------------
-                # For a quarterly item:
-                #
-                # The audit record records the quarterly
-                # entitlement and the amount claimed so far
-                # in the quarter.
-                #
-                # It does NOT create a fresh entitlement
-                # every month.
-                # -----------------------------------------
+            audit_entitled = allowed_quantity
 
-                audit_entitled = allowed_quantity
+            new_unclaimed = (
+                allowed_quantity -
+                new_claimed
+            )
 
-                new_unclaimed = (
-                    allowed_quantity -
-                    new_claimed
-                )
+            if new_unclaimed < 0:
 
-                if new_unclaimed < 0:
-                    new_unclaimed = 0.0
-
-            else:
-
-                # -----------------------------------------
-                # Monthly item
-                # -----------------------------------------
-
-                audit_entitled = allowed_quantity
-
-                new_unclaimed = (
-                    allowed_quantity -
-                    new_claimed
-                )
-
-                if new_unclaimed < 0:
-                    new_unclaimed = 0.0
+                new_unclaimed = 0.0
 
         # ==================================================
         # CHECK EXISTING MONTHLY AUDIT RECORD
@@ -715,20 +692,14 @@ def distribute():
         # CALCULATE RESPONSE REMAINING
         # ==================================================
 
-        if entitlement_type == "AVAILABILITY":
+        remaining_after_distribution = (
+            allowed_quantity -
+            new_claimed
+        )
 
-            remaining_after_distribution = None
+        if remaining_after_distribution < 0:
 
-        else:
-
-            remaining_after_distribution = (
-                allowed_quantity -
-                new_claimed
-            )
-
-            if remaining_after_distribution < 0:
-
-                remaining_after_distribution = 0.0
+            remaining_after_distribution = 0.0
 
         # ==================================================
         # SUCCESS RESPONSE
