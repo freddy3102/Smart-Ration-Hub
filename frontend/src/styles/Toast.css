@@ -1,0 +1,336 @@
+/* =========================================
+   TOAST CONTAINER
+========================================= */
+
+.toast-container {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    z-index: 99999;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 12px;
+
+    width: 520px;
+    max-width: calc(100vw - 30px);
+}
+
+
+/* =========================================
+   TOAST
+========================================= */
+
+.toast {
+    width: 100%;
+    min-height: 90px;
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 16px;
+
+    padding: 20px 22px;
+
+    background: #ffffff;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.18);
+
+    border-left: 6px solid #dc2626;
+
+    color: #1e293b;
+
+    font-size: 20px;
+    font-weight: 600;
+
+    animation: toast-slide-in 0.3s ease;
+}
+
+
+/* =========================================
+   TOAST ICON
+========================================= */
+
+.toast-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    font-size: 21px;
+    font-weight: 800;
+
+    margin-top: 2px;
+}
+
+
+/* =========================================
+   TOAST MESSAGE
+========================================= */
+
+.toast-message {
+    flex: 1;
+
+    font-size: 20px;
+
+    line-height: 1.5;
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   NORMAL MESSAGE
+========================================= */
+
+.toast-normal-message {
+    font-size: 20px;
+
+    line-height: 1.5;
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   DISTRIBUTION MESSAGE
+========================================= */
+
+.toast-distribution {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+
+    width: 100%;
+}
+
+
+/* Each line */
+
+.toast-line {
+    display: flex;
+    align-items: baseline;
+
+    gap: 7px;
+
+    line-height: 1.45;
+}
+
+
+/* First line */
+
+.toast-line-title {
+    margin-bottom: 4px;
+
+    font-size: 21px;
+    font-weight: 700;
+}
+
+
+/* Labels */
+
+.toast-label {
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* Values */
+
+.toast-value {
+    font-weight: 600;
+}
+
+
+/* =========================================
+   CLOSE BUTTON
+========================================= */
+
+.toast-close {
+    width: 32px;
+    height: 32px;
+
+    min-width: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+
+    background: transparent;
+
+    color: #64748b;
+
+    font-size: 28px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    border-radius: 6px;
+}
+
+.toast-close:hover {
+    background: #f1f5f9;
+
+    color: #1e293b;
+}
+
+
+/* =========================================
+   SUCCESS - GREEN
+========================================= */
+
+.toast-success {
+    border-left-color: #16a34a;
+}
+
+.toast-success .toast-icon {
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+/* =========================================
+   ERROR - RED
+========================================= */
+
+.toast-error {
+    border-left-color: #dc2626;
+}
+
+.toast-error .toast-icon {
+    background: #fee2e2;
+
+    color: #b91c1c;
+}
+
+
+/* =========================================
+   WARNING - ORANGE
+========================================= */
+
+.toast-warning {
+    border-left-color: #f59e0b;
+}
+
+.toast-warning .toast-icon {
+    background: #fef3c7;
+
+    color: #b45309;
+}
+
+
+/* =========================================
+   INFO - RED
+========================================= */
+
+.toast-info {
+    border-left-color: #dc2626;
+}
+
+.toast-info .toast-icon {
+    background: #fee2e2;
+
+    color: #b91c1c;
+}
+
+
+/* =========================================
+   ANIMATION
+========================================= */
+
+@keyframes toast-slide-in {
+
+    from {
+        opacity: 0;
+
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .toast-container {
+        top: 15px;
+
+        left: 15px;
+        right: 15px;
+
+        width: auto;
+
+        max-width: none;
+
+        transform: none;
+    }
+
+
+    .toast {
+        width: 100%;
+
+        min-height: 80px;
+
+        padding: 16px 18px;
+
+        gap: 12px;
+    }
+
+
+    .toast-message,
+    .toast-normal-message {
+        font-size: 17px;
+    }
+
+
+    .toast-line-title {
+        font-size: 18px;
+    }
+
+
+    .toast-icon {
+        width: 36px;
+        height: 36px;
+
+        min-width: 36px;
+
+        font-size: 18px;
+    }
+
+
+    .toast-close {
+        width: 28px;
+        height: 28px;
+
+        min-width: 28px;
+
+        font-size: 24px;
+    }
+}
