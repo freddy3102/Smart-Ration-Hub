@@ -79,9 +79,6 @@ def distribute():
         # ==================================================
         # CHECK 1
         # MONTH CLOSED?
-        #
-        # Distribution is not allowed after the current
-        # month's closure.
         # ==================================================
 
         cursor.execute("""
@@ -151,13 +148,6 @@ def distribute():
 
         # ==================================================
         # GET RATION ITEM
-        #
-        # Supported items:
-        #
-        # Rice
-        # Wheat
-        # Sugar
-        # Kerosene
         # ==================================================
 
         cursor.execute("""
@@ -187,22 +177,21 @@ def distribute():
         # ==================================================
         # GET ENTITLEMENT RULE
         #
-        # The entitlement_rules table is the single source
-        # of truth for item eligibility.
+        # entitlement_rules is the source of truth for:
         #
-        # If there is NO rule for this category + item,
-        # distribution is NOT allowed.
-        #
-        # This means future entitlement changes can be made
-        # directly through the database without changing
-        # the distribution code.
+        # - Item eligibility
+        # - Quantity
+        # - Entitlement type
+        # - Entitlement period
+        # - Category-specific price
         # ==================================================
 
         cursor.execute("""
             SELECT
                 monthly_quantity,
                 entitlement_type,
-                entitlement_period
+                entitlement_period,
+                unit_price
             FROM entitlement_rules
             WHERE category_id = %s
             AND item_id = %s
@@ -218,7 +207,7 @@ def distribute():
         # ==================================================
         # ENTITLEMENT RULE MUST EXIST
         #
-        # No entitlement rule = item not allowed for
+        # No rule means the item is not allowed for
         # this card category.
         # ==================================================
 
@@ -252,12 +241,19 @@ def distribute():
             "MONTHLY"
         )
 
-        entitlement_period = (
-            entitlement_period.upper()
-        )
+        entitlement_type = entitlement_type.upper()
+        entitlement_period = entitlement_period.upper()
 
-        entitlement_type = (
-            entitlement_type.upper()
+        # ==================================================
+        # CATEGORY-SPECIFIC UNIT PRICE
+        #
+        # Existing AAY/PHH/NPS rules were configured as
+        # 0.00, while White Card rules have their own
+        # configured prices.
+        # ==================================================
+
+        unit_price = float(
+            entitlement["unit_price"] or 0
         )
 
         # ==================================================
@@ -312,12 +308,11 @@ def distribute():
         # ==================================================
         # CALCULATE CLAIMED QUANTITY
         #
-        # MONTHLY ITEM:
-        # Only current month is considered.
+        # MONTHLY:
+        # Current month only.
         #
-        # QUARTERLY ITEM:
-        # All three months of the current quarter
-        # are considered.
+        # QUARTERLY:
+        # Entire current quarter.
         # ==================================================
 
         if entitlement_period == "QUARTERLY":
@@ -507,6 +502,23 @@ def distribute():
             }), 400
 
         # ==================================================
+        # CALCULATE TOTAL CHARGE
+        #
+        # Example:
+        #
+        # White Card Wheat:
+        # 2 kg × ₹12 = ₹24
+        #
+        # AAY/PHH/NPS:
+        # configured price = ₹0
+        # ==================================================
+
+        total_charge = round(
+            quantity * unit_price,
+            2
+        )
+
+        # ==================================================
         # REDUCE INVENTORY
         # ==================================================
 
@@ -554,10 +566,8 @@ def distribute():
         #
         # The audit remains MONTHLY.
         #
-        # For a quarterly item, this record represents
-        # what happened during THIS MONTH.
-        #
-        # The entitlement check itself remains quarterly.
+        # For quarterly items, the entitlement check
+        # remains quarterly.
         # ==================================================
 
         new_claimed = claimed + quantity
@@ -565,11 +575,7 @@ def distribute():
         if entitlement_period == "QUARTERLY":
 
             # ---------------------------------------------
-            # For a quarterly item:
-            #
-            # The audit record records the quarterly
-            # entitlement and the amount claimed so far
-            # in the quarter.
+            # Quarterly entitlement
             # ---------------------------------------------
 
             audit_entitled = allowed_quantity
@@ -586,7 +592,7 @@ def distribute():
         else:
 
             # ---------------------------------------------
-            # Monthly item
+            # Monthly entitlement
             # ---------------------------------------------
 
             audit_entitled = allowed_quantity
@@ -689,7 +695,7 @@ def distribute():
         conn.commit()
 
         # ==================================================
-        # CALCULATE RESPONSE REMAINING
+        # CALCULATE REMAINING AFTER DISTRIBUTION
         # ==================================================
 
         remaining_after_distribution = (
@@ -745,6 +751,12 @@ def distribute():
 
             "quantity_given":
                 quantity,
+
+            "unit_price":
+                unit_price,
+
+            "total_charge":
+                total_charge,
 
             "remaining_after_distribution":
                 remaining_after_distribution

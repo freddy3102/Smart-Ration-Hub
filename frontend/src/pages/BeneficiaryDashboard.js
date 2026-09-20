@@ -3,18 +3,12 @@ import axios from "axios";
 import "../styles/BeneficiaryDashboard.css";
 import BeneficiaryLayout from "../components/BeneficiaryLayout";
 
-
 function BeneficiaryDashboard() {
 
     const [data, setData] = useState(null);
 
     const beneficiary_id =
         localStorage.getItem("beneficiary_id");
-
-
-    // =====================================
-    // Month Names
-    // =====================================
 
     const months = [
         { value: 1, name: "January" },
@@ -31,11 +25,6 @@ function BeneficiaryDashboard() {
         { value: 12, name: "December" }
     ];
 
-
-    // =====================================
-    // Automatically use current month/year
-    // =====================================
-
     const today = new Date();
 
     const [selectedMonth, setSelectedMonth] =
@@ -43,11 +32,6 @@ function BeneficiaryDashboard() {
 
     const [selectedYear, setSelectedYear] =
         useState(today.getFullYear());
-
-
-    // =====================================
-    // Load Dashboard
-    // =====================================
 
     const loadDashboard = () => {
 
@@ -67,78 +51,41 @@ function BeneficiaryDashboard() {
             }
         )
         .then((res) => {
-
             setData(res.data);
-
         })
         .catch((err) => {
-
             console.log(
                 "Unable to load beneficiary dashboard:",
                 err
             );
-
         });
-
     };
 
-
-    // =====================================
-    // Load Dashboard On Page Load
-    // And When Period Changes
-    // =====================================
-
     useEffect(() => {
-
         loadDashboard();
-
     }, [
         beneficiary_id,
         selectedMonth,
         selectedYear
     ]);
 
-
-    // =====================================
-    // Loading
-    // =====================================
-
     if (!data) {
 
         return (
-
             <BeneficiaryLayout>
-
                 <div className="loading">
                     Loading...
                 </div>
-
             </BeneficiaryLayout>
-
         );
 
     }
-
-
-    // =====================================
-    // Selected Month Name
-    // =====================================
 
     const selectedMonthName =
         months.find(
             (month) =>
                 month.value === selectedMonth
         )?.name;
-
-
-    // =====================================
-    // Category Ribbon
-    //
-    // PHH = Pink
-    // AAY = Yellow
-    // NPS = Blue
-    // NP  = White
-    // =====================================
 
     const categoryName =
         (
@@ -147,39 +94,25 @@ function BeneficiaryDashboard() {
         .trim()
         .toUpperCase();
 
-
     let categoryRibbonClass =
         "category-ribbon-default";
 
-
     if (categoryName === "PHH") {
-
         categoryRibbonClass =
             "category-ribbon-phh";
-
     }
-
     else if (categoryName === "AAY") {
-
         categoryRibbonClass =
             "category-ribbon-aay";
-
     }
-
     else if (categoryName === "NPS") {
-
         categoryRibbonClass =
             "category-ribbon-nps";
-
     }
-
     else if (categoryName === "NP") {
-
         categoryRibbonClass =
             "category-ribbon-np";
-
     }
-
 
     return (
 
@@ -187,46 +120,36 @@ function BeneficiaryDashboard() {
 
             <div className="beneficiary-dashboard">
 
-
-                {/* =================================
-                    HERO / WELCOME
-                ================================= */}
+                {/* =====================================
+                    HERO
+                ===================================== */}
 
                 <div className="beneficiary-hero">
 
                     <div className="hero-content">
 
                         <p className="hero-small-text">
-                            Beneficiary Portal
+                            BENEFICIARY PORTAL
                         </p>
 
                         <h1 className="dashboard-title">
-
                             Welcome back,
-
                             <span>
                                 {data.beneficiary.full_name}
                             </span>
-
-                            <span className="wave">
-                                👋
-                            </span>
-
                         </h1>
 
+                        <span className="wave">
+                            👋
+                        </span>
+
                         <p className="hero-description">
-
-                            Here's an overview of your
-                            ration information.
-
+                            Here's an overview of your ration information.
                         </p>
 
                     </div>
 
-
-                    {/* =================================
-                        CURRENT PERIOD
-                    ================================= */}
+                    {/* Current Period */}
 
                     <div className="hero-date">
 
@@ -251,9 +174,9 @@ function BeneficiaryDashboard() {
                 </div>
 
 
-                {/* =================================
+                {/* =====================================
                     CATEGORY CARD
-                ================================= */}
+                ===================================== */}
 
                 <div
                     className={
@@ -261,21 +184,11 @@ function BeneficiaryDashboard() {
                     }
                 >
 
-                    {/* Colored category ribbon */}
-
                     <div className="category-ribbon"></div>
 
-
-                    {/* Category Icon */}
-
                     <div className="category-icon">
-
                         🪪
-
                     </div>
-
-
-                    {/* Category Details */}
 
                     <div className="category-details">
 
@@ -289,9 +202,6 @@ function BeneficiaryDashboard() {
 
                     </div>
 
-
-                    {/* Active Status */}
-
                     <div className="category-badge">
                         Active
                     </div>
@@ -299,23 +209,18 @@ function BeneficiaryDashboard() {
                 </div>
 
 
-                {/* =================================
-                    QUICK STATUS
-                ================================= */}
+                {/* =====================================
+                    STATUS CARDS
+                ===================================== */}
 
                 <div className="beneficiary-status-grid">
 
-
-                    {/* =================================
-                        FAMILY MEMBERS
-                    ================================= */}
+                    {/* Family Members */}
 
                     <div className="beneficiary-status-card">
 
                         <div className="status-card-icon blue">
-
                             👨‍👩‍👧
-
                         </div>
 
                         <div>
@@ -333,16 +238,12 @@ function BeneficiaryDashboard() {
                     </div>
 
 
-                    {/* =================================
-                        DISTRIBUTION CYCLE
-                    ================================= */}
+                    {/* Distribution Cycle */}
 
                     <div className="beneficiary-status-card">
 
                         <div className="status-card-icon green">
-
                             📅
-
                         </div>
 
                         <div>
@@ -366,16 +267,12 @@ function BeneficiaryDashboard() {
                     </div>
 
 
-                    {/* =================================
-                        SELECTED PERIOD
-                    ================================= */}
+                    {/* Selected Period */}
 
                     <div className="beneficiary-status-card">
 
                         <div className="status-card-icon yellow">
-
                             🗓️
-
                         </div>
 
                         <div>
@@ -395,14 +292,14 @@ function BeneficiaryDashboard() {
                 </div>
 
 
-                {/* =================================
-                    INFORMATION BANNER
-                ================================= */}
+                {/* =====================================
+                    INFORMATION
+                ===================================== */}
 
                 <div className="beneficiary-info-banner">
 
                     <div className="info-banner-icon">
-                        ℹ
+                        i
                     </div>
 
                     <div>
@@ -422,14 +319,10 @@ function BeneficiaryDashboard() {
 
                 </div>
 
-
             </div>
 
         </BeneficiaryLayout>
-
     );
-
 }
-
 
 export default BeneficiaryDashboard;

@@ -62,7 +62,15 @@ function DistributionForm() {
                 formData
             );
 
-            alert(response.data.message);
+            const data = response.data;
+
+            alert(
+                `${data.message}\n\n` +
+                `Item: ${data.item_name}\n` +
+                `Quantity: ${data.quantity_given} ${data.unit}\n` +
+                `Price: ₹${Number(data.unit_price).toFixed(2)} per ${data.unit}\n` +
+                `Total Charge: ₹${Number(data.total_charge).toFixed(2)}`
+            );
 
             setFormData({
                 beneficiary_id: "",
@@ -73,10 +81,15 @@ function DistributionForm() {
 
         } catch (error) {
 
-            if (error.response)
+            if (error.response) {
+
                 alert(error.response.data.message);
-            else
+
+            } else {
+
                 alert("Server Error");
+
+            }
 
         }
 

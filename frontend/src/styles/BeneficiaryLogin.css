@@ -1,115 +1,976 @@
-body{
-    margin:0;
-    font-family:Arial, Helvetica, sans-serif;
-    background:#f4f7fc;
+* {
+    box-sizing: border-box;
 }
 
-.beneficiary-login-page{
-
-    min-height:100vh;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    background:linear-gradient(
-        135deg,
-        #1f4e79,
-        #5fa8ff
-    );
-
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-.beneficiary-login-card{
 
-    width:420px;
+/* =========================================================
+   MAIN PAGE
+   ========================================================= */
 
-    background:white;
+.beneficiary-login-page {
 
-    padding:40px;
+    min-height: 100vh;
 
-    border-radius:18px;
+    position: relative;
 
-    box-shadow:0 10px 30px rgba(0,0,0,.18);
+    overflow: hidden;
 
+    display: flex;
+
+    justify-content: center;
+
+    align-items: flex-start;
+
+    background:
+        linear-gradient(
+            135deg,
+            #075a3c 0%,
+            #168f5b 48%,
+            #63c98a 100%
+        );
+
+    color: white;
 }
 
-.beneficiary-login-card h1{
 
-    text-align:center;
+/* =========================================================
+   BACKGROUND CIRCLES
+   ========================================================= */
 
-    margin-bottom:30px;
+.beneficiary-login-circle {
 
-    color:#1f4e79;
+    position: absolute;
 
-    font-size:34px;
+    border-radius: 50%;
 
+    pointer-events: none;
 }
 
-.beneficiary-login-card input{
 
-    width:100%;
+.beneficiary-login-circle-one {
 
-    padding:14px;
+    width: 500px;
+    height: 500px;
 
-    margin-bottom:20px;
+    top: -320px;
+    left: -120px;
 
-    border:1px solid #ccc;
-
-    border-radius:10px;
-
-    font-size:16px;
-
-    box-sizing:border-box;
-
+    background:
+        rgba(255,255,255,0.08);
 }
 
-.beneficiary-login-card input:focus{
 
-    outline:none;
+.beneficiary-login-circle-two {
 
-    border-color:#1f4e79;
+    width: 350px;
+    height: 350px;
 
+    bottom: -230px;
+    left: -100px;
+
+    background:
+        rgba(0,70,45,0.14);
 }
 
-.beneficiary-login-btn{
 
-    width:100%;
+.beneficiary-login-circle-three {
 
-    padding:14px;
+    width: 450px;
+    height: 450px;
 
-    border:none;
+    right: -250px;
+    bottom: -190px;
 
-    border-radius:10px;
-
-    background:#1f4e79;
-
-    color:white;
-
-    font-size:18px;
-
-    cursor:pointer;
-
-    transition:.3s;
-
+    background:
+        rgba(255,255,255,0.08);
 }
 
-.beneficiary-login-btn:hover{
 
-    background:#173b5c;
+.beneficiary-login-circle-four {
 
+    width: 260px;
+    height: 260px;
+
+    right: -130px;
+    top: 300px;
+
+    background:
+        rgba(0,90,55,0.10);
 }
 
-.login-footer{
 
-    margin-top:20px;
+/* =========================================================
+   TOP BAR
+   ========================================================= */
 
-    text-align:center;
+.beneficiary-login-topbar {
 
-    color:#777;
+    position: absolute;
 
-    font-size:14px;
+    top: 22px;
 
+    left: 45px;
+    right: 45px;
+
+    height: 70px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    z-index: 10;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+   ========================================================= */
+
+.beneficiary-login-home-btn {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 10px 20px;
+
+    border: 1.5px solid
+        rgba(255,255,255,0.85);
+
+    border-radius: 30px;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+}
+
+
+.beneficiary-login-home-btn:hover {
+
+    background: white;
+
+    color: #075a3c;
+
+    transform: translateX(-2px);
+}
+
+
+.beneficiary-login-home-arrow {
+
+    font-size: 23px;
+
+    line-height: 15px;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+/*
+   IMPORTANT:
+   These classes are UNIQUE to the login page.
+   They do NOT use .beneficiary-brand.
+   This prevents BeneficiaryLayout.css from affecting
+   this page.
+*/
+
+.beneficiary-login-brand {
+
+    position: absolute;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    white-space: nowrap;
+}
+
+
+.beneficiary-login-brand-icon {
+
+    font-size: 42px;
+
+    line-height: 1;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+}
+
+
+.beneficiary-login-brand-text {
+
+    display: block;
+
+    text-align: left;
+}
+
+
+.beneficiary-login-brand-text h2 {
+
+    margin: 0;
+
+    color: white;
+
+    font-size: 28px;
+
+    font-weight: 800;
+
+    line-height: 1.1;
+}
+
+
+.beneficiary-login-brand-text p {
+
+    margin: 3px 0 0;
+
+    color:
+        rgba(255,255,255,0.86);
+
+    font-size: 13px;
+
+    line-height: 1.2;
+}
+
+
+/* =========================================================
+   TOP RIGHT
+   ========================================================= */
+
+.beneficiary-login-top-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color:
+        rgba(255,255,255,0.95);
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+.beneficiary-login-leaf {
+
+    margin-left: 5px;
+
+    font-size: 20px;
+}
+
+
+/* =========================================================
+   LEFT MESSAGE
+   ========================================================= */
+
+.beneficiary-login-message {
+
+    position: absolute;
+
+    left: 7%;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    z-index: 3;
+
+    width: 245px;
+}
+
+
+.beneficiary-login-message-icon {
+
+    margin-bottom: 4px;
+
+    font-size: 32px;
+}
+
+
+.beneficiary-login-message h3 {
+
+    margin: 0 0 13px;
+
+    color: white;
+
+    font-size: 28px;
+
+    line-height: 1.15;
+
+    font-weight: 800;
+}
+
+
+.beneficiary-login-message p {
+
+    margin: 0;
+
+    color:
+        rgba(255,255,255,0.88);
+
+    font-size: 16px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   RICE VISUAL
+   ========================================================= */
+
+.beneficiary-login-rice-visual {
+
+    position: absolute;
+
+    right: -15px;
+
+    bottom: 30px;
+
+    width: 330px;
+
+    height: 300px;
+
+    z-index: 1;
+
+    opacity: 0.18;
+
+    overflow: hidden;
+}
+
+
+.beneficiary-login-rice-glow {
+
+    position: absolute;
+
+    width: 300px;
+
+    height: 300px;
+
+    right: -20px;
+
+    bottom: -30px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.55),
+            rgba(255,255,255,0) 68%
+        );
+}
+
+
+.beneficiary-login-rice-sack {
+
+    position: absolute;
+
+    right: -20px;
+
+    bottom: -50px;
+
+    width: 290px;
+
+    height: 260px;
+
+    border-radius:
+        48% 48% 35% 35%;
+
+    transform: rotate(-7deg);
+
+    background:
+        linear-gradient(
+            135deg,
+            #e9e8df,
+            #aaa99c
+        );
+}
+
+
+.beneficiary-login-rice-grains {
+
+    position: absolute;
+
+    inset: 40px 30px;
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+}
+
+
+.beneficiary-login-rice-grains span {
+
+    width: 12px;
+
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: #f8f5e8;
+
+    transform: rotate(25deg);
+}
+
+
+.beneficiary-login-rice-message {
+
+    position: absolute;
+
+    right: 35px;
+
+    bottom: 95px;
+
+    z-index: 4;
+
+    color: white;
+
+    font-family: Georgia, serif;
+
+    font-size: 26px;
+
+    font-style: italic;
+
+    line-height: 1.05;
+
+    text-align: center;
+}
+
+
+.beneficiary-login-underline {
+
+    display: block;
+
+    width: 80px;
+
+    height: 2px;
+
+    margin: 10px auto 0;
+
+    background: white;
+
+    border-radius: 5px;
+}
+
+
+/* =========================================================
+   LOGIN CARD
+   ========================================================= */
+
+.beneficiary-login-card {
+
+    position: relative;
+
+    z-index: 5;
+
+    width: 610px;
+
+    margin-top: 155px;
+
+    margin-bottom: 95px;
+
+    padding: 30px 48px 25px;
+
+    background:
+        rgba(255,255,255,0.98);
+
+    border-radius: 23px;
+
+    box-shadow:
+        0 22px 55px
+        rgba(0,55,35,0.18),
+
+        0 6px 18px
+        rgba(0,0,0,0.07);
+
+    text-align: center;
+
+    color: #163c30;
+}
+
+
+/* =========================================================
+   USER ICON
+   ========================================================= */
+
+.beneficiary-login-user-icon {
+
+    width: 76px;
+
+    height: 76px;
+
+    margin: 0 auto 13px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e7f7ef;
+
+    border: 2px solid #c7ead8;
+
+    box-shadow:
+        0 4px 14px
+        rgba(30,140,90,0.10);
+
+    font-size: 36px;
+}
+
+
+/* =========================================================
+   HEADING
+   ========================================================= */
+
+.beneficiary-login-card h1 {
+
+    margin: 0;
+
+    color: #075a3c;
+
+    font-size: 36px;
+
+    font-weight: 800;
+
+    letter-spacing: -0.8px;
+}
+
+
+.beneficiary-login-subtitle {
+
+    margin: 7px 0 23px;
+
+    color: #748393;
+
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
+.beneficiary-login-input-wrapper {
+
+    position: relative;
+
+    width: 100%;
+
+    margin-bottom: 14px;
+}
+
+
+.beneficiary-login-input-wrapper input {
+
+    width: 100%;
+
+    height: 57px;
+
+    padding:
+        0 55px 0 58px;
+
+    border: 1.7px solid #d7e0e5;
+
+    border-radius: 12px;
+
+    outline: none;
+
+    background: white;
+
+    color: #263746;
+
+    font-size: 15px;
+
+    transition: 0.2s ease;
+}
+
+
+.beneficiary-login-input-wrapper input::placeholder {
+
+    color: #8794a0;
+}
+
+
+.beneficiary-login-input-wrapper input:focus {
+
+    border-color: #168f5b;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,143,91,0.10);
+}
+
+
+.beneficiary-login-input-icon {
+
+    position: absolute;
+
+    left: 19px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #637585;
+
+    font-size: 19px;
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   PASSWORD TOGGLE
+   ========================================================= */
+
+.beneficiary-login-password-toggle {
+
+    position: absolute;
+
+    right: 0;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 52px;
+
+    height: 32px;
+
+    border: none;
+
+    border-left:
+        1px solid #dce3e7;
+
+    background: transparent;
+
+    color: #657584;
+
+    font-size: 18px;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   LOGIN BUTTON
+   ========================================================= */
+
+.beneficiary-login-btn {
+
+    width: 100%;
+
+    height: 58px;
+
+    margin-top: 2px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            100deg,
+            #249f68,
+            #075b3b
+        );
+
+    color: white;
+
+    font-size: 19px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 7px 18px
+        rgba(20,110,70,0.22);
+
+    transition: 0.25s ease;
+}
+
+
+.beneficiary-login-btn:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 22px
+        rgba(20,110,70,0.28);
+}
+
+
+.beneficiary-login-arrow {
+
+    display: inline-block;
+
+    margin-right: 8px;
+
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.beneficiary-login-footer {
+
+    margin-top: 20px;
+
+    padding-top: 17px;
+
+    border-top:
+        1px solid #e4e8eb;
+
+    color: #7c8792;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   BOTTOM FEATURES
+   ========================================================= */
+
+.beneficiary-login-bottom {
+
+    position: absolute;
+
+    bottom: 24px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    z-index: 8;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 18px;
+
+    color:
+        rgba(255,255,255,0.94);
+
+    font-size: 13px;
+
+    white-space: nowrap;
+}
+
+
+.beneficiary-login-bottom-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.beneficiary-login-bottom-icon {
+
+    font-size: 18px;
+}
+
+
+.beneficiary-login-bottom-divider {
+
+    color:
+        rgba(255,255,255,0.5);
+
+    font-size: 18px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1150px) {
+
+    .beneficiary-login-message {
+
+        left: 4%;
+    }
+
+    .beneficiary-login-rice-visual {
+
+        opacity: 0.10;
+    }
+
+    .beneficiary-login-card {
+
+        width: 570px;
+    }
+}
+
+
+@media (max-width: 900px) {
+
+    .beneficiary-login-message {
+
+        display: none;
+    }
+
+    .beneficiary-login-rice-visual {
+
+        display: none;
+    }
+
+    .beneficiary-login-top-right {
+
+        display: none;
+    }
+
+    .beneficiary-login-brand {
+
+        position: static;
+
+        transform: none;
+
+        margin: auto;
+    }
+
+    .beneficiary-login-card {
+
+        width: 570px;
+
+        margin-top: 145px;
+    }
+}
+
+
+@media (max-width: 650px) {
+
+    .beneficiary-login-topbar {
+
+        top: 15px;
+
+        left: 15px;
+
+        right: 15px;
+    }
+
+    .beneficiary-login-home-btn {
+
+        padding: 9px 14px;
+
+        font-size: 13px;
+    }
+
+    .beneficiary-login-brand {
+
+        display: none;
+    }
+
+    .beneficiary-login-card {
+
+        width:
+            calc(100vw - 30px);
+
+        margin-top: 120px;
+
+        margin-bottom: 80px;
+
+        padding:
+            28px 22px 22px;
+
+        border-radius: 19px;
+    }
+
+    .beneficiary-login-user-icon {
+
+        width: 68px;
+
+        height: 68px;
+    }
+
+    .beneficiary-login-card h1 {
+
+        font-size: 29px;
+    }
+
+    .beneficiary-login-subtitle {
+
+        font-size: 13px;
+    }
+
+    .beneficiary-login-input-wrapper input {
+
+        height: 54px;
+    }
+
+    .beneficiary-login-btn {
+
+        height: 55px;
+    }
+
+    .beneficiary-login-bottom {
+
+        width: 100%;
+
+        gap: 7px;
+
+        font-size: 10px;
+    }
+
+    .beneficiary-login-bottom-icon {
+
+        font-size: 14px;
+    }
+
+    .beneficiary-login-bottom-divider {
+
+        font-size: 15px;
+    }
 }

@@ -1,81 +1,839 @@
-.warehouse-login-page{
+* {
+    box-sizing: border-box;
+}
 
-    min-height:100vh;
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
 
-    display:flex;
 
-    justify-content:center;
+/* =========================================================
+   MAIN PAGE
+   ========================================================= */
 
-    align-items:center;
+.warehouse-login-page {
 
-    background:linear-gradient(135deg,#0f4c81,#6db8e6);
+    min-height: 100vh;
+
+    width: 100%;
+
+    position: relative;
+
+    overflow: hidden;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: flex-start;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f08a00 0%,
+            #f89a08 48%,
+            #ffb51b 100%
+        );
+
+    color: white;
+}
+
+
+/* =========================================================
+   BACKGROUND CIRCLES
+   ========================================================= */
+
+.warehouse-circle {
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    pointer-events: none;
 
 }
 
-.warehouse-login-card{
 
-    width:420px;
+.warehouse-circle-one {
 
-    background:white;
+    width: 500px;
 
-    padding:40px;
+    height: 500px;
 
-    border-radius:16px;
+    top: -320px;
 
-    box-shadow:0 10px 25px rgba(0,0,0,.2);
+    left: -120px;
 
-    text-align:center;
-
-}
-
-.warehouse-login-card h1{
-
-    margin-bottom:30px;
-
-    color:#1f2d3d;
+    background:
+        rgba(255,255,255,0.08);
 
 }
 
-.warehouse-login-card input{
 
-    width:100%;
+.warehouse-circle-two {
 
-    padding:15px;
+    width: 450px;
 
-    margin-bottom:20px;
+    height: 450px;
 
-    border:1px solid #ccc;
+    right: -250px;
 
-    border-radius:8px;
+    bottom: -190px;
 
-    font-size:16px;
-
-    box-sizing:border-box;
+    background:
+        rgba(255,255,255,0.09);
 
 }
 
-.warehouse-login-card button{
 
-    width:100%;
+/* =========================================================
+   TOP BAR
+   ========================================================= */
 
-    padding:15px;
+.warehouse-topbar {
 
-    background:#f39c12;
+    position: absolute;
 
-    color:white;
+    top: 22px;
 
-    border:none;
+    left: 45px;
 
-    border-radius:8px;
+    right: 45px;
 
-    font-size:18px;
+    height: 70px;
 
-    cursor:pointer;
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    z-index: 10;
 
 }
 
-.warehouse-login-card button:hover{
 
-    background:#d68910;
+/* =========================================================
+   BACK BUTTON
+   ========================================================= */
+
+.warehouse-home-btn {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 10px 20px;
+
+    border: 1.5px solid
+        rgba(255,255,255,0.9);
+
+    border-radius: 30px;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+
+}
+
+
+.warehouse-home-btn:hover {
+
+    background: white;
+
+    color: #e77e00;
+
+    transform: translateX(-2px);
+
+}
+
+
+.warehouse-home-arrow {
+
+    font-size: 23px;
+
+    line-height: 15px;
+
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.warehouse-brand {
+
+    position: absolute;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    white-space: nowrap;
+
+}
+
+
+.warehouse-brand-icon {
+
+    font-size: 42px;
+
+}
+
+
+.warehouse-brand h2 {
+
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 28px;
+
+    font-weight: 800;
+
+}
+
+
+.warehouse-brand p {
+
+    margin: 3px 0 0;
+
+    color: white;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   TOP RIGHT
+   ========================================================= */
+
+.warehouse-top-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+.warehouse-leaf {
+
+    margin-left: 5px;
+
+    font-size: 20px;
+
+}
+
+
+/* =========================================================
+   LEFT MESSAGE
+   ========================================================= */
+
+.warehouse-message {
+
+    position: absolute;
+
+    left: 7%;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    z-index: 3;
+
+    width: 300px;
+
+}
+
+
+.warehouse-message-icon {
+
+    margin-bottom: 7px;
+
+    font-size: 38px;
+
+}
+
+
+.warehouse-message h3 {
+
+    margin: 0 0 15px;
+
+    color: #172033;
+
+    font-size: 44px;
+
+    line-height: 1.08;
+
+    font-weight: 800;
+
+}
+
+
+.warehouse-message p {
+
+    margin: 0;
+
+    max-width: 350px;
+
+    color: white;
+
+    font-size: 17px;
+
+    line-height: 1.55;
+
+}
+
+
+/* =========================================================
+   LOGIN CARD
+   ========================================================= */
+
+.warehouse-login-card {
+
+    position: relative;
+
+    z-index: 5;
+
+    width: 610px;
+
+    min-height: 515px;
+
+    margin-top: 155px;
+
+    margin-bottom: 95px;
+
+    padding: 30px 48px 25px;
+
+    background:
+        rgba(255,255,255,0.98);
+
+    border-radius: 23px;
+
+    box-shadow:
+        0 22px 55px
+        rgba(150,80,0,0.18),
+
+        0 6px 18px
+        rgba(0,0,0,0.07);
+
+    text-align: center;
+
+    color: #61300f;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+}
+
+
+/* =========================================================
+   WAREHOUSE ICON
+   ========================================================= */
+
+.warehouse-icon {
+
+    width: 76px;
+
+    height: 76px;
+
+    margin: 0 auto 13px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #fff8ed;
+
+    border: 2px solid #ffd28b;
+
+    box-shadow:
+        0 4px 14px
+        rgba(243,154,10,0.10);
+
+    font-size: 36px;
+
+}
+
+
+/* =========================================================
+   HEADING
+   ========================================================= */
+
+.warehouse-login-card h1 {
+
+    margin: 0;
+
+    color: #a24d0f;
+
+    font-size: 36px;
+
+    font-weight: 800;
+
+    letter-spacing: -0.8px;
+
+}
+
+
+.warehouse-login-subtitle {
+
+    margin: 7px 0 23px;
+
+    color: #748393;
+
+    font-size: 15px;
+
+}
+
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
+.warehouse-input-wrapper {
+
+    position: relative;
+
+    width: 100%;
+
+    margin-bottom: 14px;
+
+}
+
+
+.warehouse-input-wrapper input {
+
+    width: 100%;
+
+    height: 57px;
+
+    padding:
+        0 55px 0 58px;
+
+    border: 1.7px solid #d7e0e5;
+
+    border-radius: 12px;
+
+    outline: none;
+
+    background: white;
+
+    color: #263746;
+
+    font-size: 15px;
+
+    transition: 0.2s ease;
+
+}
+
+
+.warehouse-input-wrapper input::placeholder {
+
+    color: #8794a0;
+
+}
+
+
+.warehouse-input-wrapper input:focus {
+
+    border-color: #f39a0a;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(243,154,10,0.10);
+
+}
+
+
+.warehouse-input-icon {
+
+    position: absolute;
+
+    left: 19px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #637585;
+
+    font-size: 19px;
+
+    z-index: 2;
+
+}
+
+
+/* =========================================================
+   PASSWORD TOGGLE
+   ========================================================= */
+
+.warehouse-password-toggle {
+
+    position: absolute;
+
+    right: 0;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 52px;
+
+    height: 32px;
+
+    border: none;
+
+    border-left:
+        1px solid #dce3e7;
+
+    background: transparent;
+
+    color: #657584;
+
+    font-size: 18px;
+
+    cursor: pointer;
+
+}
+
+
+/* =========================================================
+   LOGIN BUTTON
+   ========================================================= */
+
+.warehouse-login-btn {
+
+    width: 100%;
+
+    height: 58px;
+
+    margin-top: 2px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            100deg,
+            #f6a00b,
+            #e77e00
+        );
+
+    color: white;
+
+    font-size: 19px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 7px 18px
+        rgba(230,126,0,0.22);
+
+    transition: 0.25s ease;
+
+}
+
+
+.warehouse-login-btn:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 22px
+        rgba(230,126,0,0.28);
+
+}
+
+
+.warehouse-login-arrow {
+
+    display: inline-block;
+
+    margin-right: 8px;
+
+    font-size: 22px;
+
+}
+
+
+/* =========================================================
+   FOOTER INSIDE CARD
+   ========================================================= */
+
+.warehouse-login-footer {
+
+    margin-top: 20px;
+
+    padding-top: 17px;
+
+    border-top:
+        1px solid #e4e8eb;
+
+    color: #7c8792;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   BOTTOM FEATURES
+   ========================================================= */
+
+.warehouse-bottom {
+
+    position: absolute;
+
+    bottom: 24px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    z-index: 8;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 18px;
+
+    color:
+        rgba(255,255,255,0.95);
+
+    font-size: 13px;
+
+    white-space: nowrap;
+
+}
+
+
+.warehouse-bottom-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+}
+
+
+.warehouse-bottom-icon {
+
+    font-size: 18px;
+
+}
+
+
+.warehouse-bottom-divider {
+
+    color:
+        rgba(255,255,255,0.55);
+
+    font-size: 18px;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1150px) {
+
+    .warehouse-message {
+
+        left: 4%;
+
+    }
+
+    .warehouse-login-card {
+
+        width: 570px;
+
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .warehouse-message {
+
+        display: none;
+
+    }
+
+    .warehouse-top-right {
+
+        display: none;
+
+    }
+
+    .warehouse-brand {
+
+        position: static;
+
+        transform: none;
+
+        margin: auto;
+
+    }
+
+    .warehouse-login-card {
+
+        width: 570px;
+
+        margin-top: 145px;
+
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .warehouse-topbar {
+
+        top: 15px;
+
+        left: 15px;
+
+        right: 15px;
+
+    }
+
+    .warehouse-home-btn {
+
+        padding: 9px 14px;
+
+        font-size: 13px;
+
+    }
+
+    .warehouse-brand {
+
+        display: none;
+
+    }
+
+    .warehouse-login-card {
+
+        width:
+            calc(100vw - 30px);
+
+        min-height: auto;
+
+        margin-top: 120px;
+
+        margin-bottom: 80px;
+
+        padding:
+            28px 22px 22px;
+
+        border-radius: 19px;
+
+    }
+
+    .warehouse-icon {
+
+        width: 68px;
+
+        height: 68px;
+
+    }
+
+    .warehouse-login-card h1 {
+
+        font-size: 29px;
+
+    }
+
+    .warehouse-login-subtitle {
+
+        font-size: 13px;
+
+    }
+
+    .warehouse-input-wrapper input {
+
+        height: 54px;
+
+    }
+
+    .warehouse-login-btn {
+
+        height: 55px;
+
+    }
+
+    .warehouse-bottom {
+
+        width: 100%;
+
+        gap: 7px;
+
+        font-size: 10px;
+
+    }
+
+    .warehouse-bottom-icon {
+
+        font-size: 14px;
+
+    }
+
+    .warehouse-bottom-divider {
+
+        font-size: 15px;
+
+    }
 
 }
