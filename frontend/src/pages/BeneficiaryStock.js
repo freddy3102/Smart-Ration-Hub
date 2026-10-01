@@ -3,7 +3,6 @@ import axios from "axios";
 import BeneficiaryLayout from "../components/BeneficiaryLayout";
 import "../styles/BeneficiaryStock.css";
 
-
 function BeneficiaryStock() {
 
     const [stock, setStock] = useState([]);
@@ -11,7 +10,6 @@ function BeneficiaryStock() {
 
     const beneficiary_id =
         localStorage.getItem("beneficiary_id");
-
 
     // =================================
     // Load Live Stock
@@ -25,8 +23,7 @@ function BeneficiaryStock() {
             "http://localhost:5000/beneficiary-dashboard",
             {
                 params: {
-                    beneficiary_id:
-                        beneficiary_id
+                    beneficiary_id: beneficiary_id
                 }
             }
         )
@@ -51,7 +48,6 @@ function BeneficiaryStock() {
         });
 
     }, [beneficiary_id]);
-
 
     // =================================
     // Loading
@@ -82,7 +78,6 @@ function BeneficiaryStock() {
 
                     </div>
 
-
                     <div className="stock-loading">
 
                         <div className="stock-loading-spinner">
@@ -102,13 +97,11 @@ function BeneficiaryStock() {
 
     }
 
-
     return (
 
         <BeneficiaryLayout>
 
             <div className="beneficiary-stock-page">
-
 
                 {/* =================================
                     PAGE HEADER
@@ -131,7 +124,6 @@ function BeneficiaryStock() {
 
                 </div>
 
-
                 {/* =================================
                     STOCK TABLE
                 ================================= */}
@@ -149,17 +141,12 @@ function BeneficiaryStock() {
                                 </th>
 
                                 <th>
-                                    Available Quantity
-                                </th>
-
-                                <th>
                                     Status
                                 </th>
 
                             </tr>
 
                         </thead>
-
 
                         <tbody>
 
@@ -171,14 +158,12 @@ function BeneficiaryStock() {
                                         item.stock_status ||
                                         "Available";
 
-
                                     // -----------------------------
                                     // Status class
                                     // -----------------------------
 
                                     let statusClass =
                                         "stock-status-available";
-
 
                                     if (
                                         status ===
@@ -200,7 +185,6 @@ function BeneficiaryStock() {
 
                                     }
 
-
                                     // -----------------------------
                                     // Item icon
                                     // -----------------------------
@@ -212,7 +196,6 @@ function BeneficiaryStock() {
                                             item.item_name ||
                                             ""
                                         ).trim().toLowerCase();
-
 
                                     if (
                                         itemName === "rice"
@@ -245,16 +228,6 @@ function BeneficiaryStock() {
                                         itemIcon = "🛢️";
 
                                     }
-
-
-                                    // -----------------------------
-                                    // Unit
-                                    // -----------------------------
-
-                                    const unit =
-                                        item.unit ||
-                                        "kg";
-
 
                                     return (
 
@@ -289,31 +262,6 @@ function BeneficiaryStock() {
 
                                             </td>
 
-
-                                            {/* =====================
-                                                QUANTITY
-                                            ===================== */}
-
-                                            <td>
-
-                                                <span className="stock-quantity">
-
-                                                    {
-                                                        Number(
-                                                            item.available_quantity ||
-                                                            0
-                                                        ).toFixed(2)
-                                                    }
-
-                                                    {" "}
-
-                                                    {unit}
-
-                                                </span>
-
-                                            </td>
-
-
                                             {/* =====================
                                                 STATUS
                                             ===================== */}
@@ -343,7 +291,7 @@ function BeneficiaryStock() {
                                 <tr>
 
                                     <td
-                                        colSpan="3"
+                                        colSpan="2"
                                         className="no-stock"
                                     >
 
@@ -376,7 +324,6 @@ function BeneficiaryStock() {
 
                 </div>
 
-
                 {/* =================================
                     FOOTER INFORMATION
                 ================================= */}
@@ -403,7 +350,6 @@ function BeneficiaryStock() {
 
                 </div>
 
-
             </div>
 
         </BeneficiaryLayout>
@@ -411,6 +357,5 @@ function BeneficiaryStock() {
     );
 
 }
-
 
 export default BeneficiaryStock;
